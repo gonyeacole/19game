@@ -89,13 +89,6 @@ export class EspnScoreProvider implements ScoreProvider {
     const res = await fetch(url.toString(), {
       // Scores change during game days; never let Next.js cache this.
       cache: "no-store",
-      headers: {
-        // Some server-side/datacenter requests get silently filtered
-        // (200 with an empty payload, no error) without a browser-like UA.
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        Accept: "application/json",
-      },
     });
 
     if (!res.ok) {
