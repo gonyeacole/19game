@@ -8,7 +8,11 @@ there's a tie, rolls over if nobody hits it).
 ## Stack
 
 - **Next.js** (App Router, TypeScript, Tailwind CSS)
-- **SQLite** via **Prisma** — a real shared backend, not local state
+- **SQLite** via **Prisma**, using the libSQL driver adapter — a real
+  shared backend, not local state. Talks to a local file in dev and to
+  [Turso](https://turso.tech) (hosted, serverless-friendly SQLite) once
+  `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` are set, so the same code runs
+  locally and on Vercel
 - Live scores from **ESPN's public scoreboard API**, behind a small
   provider abstraction (`src/lib/scores/`) so a paid provider can be
   swapped in later without touching sync or UI code
@@ -69,6 +73,32 @@ SportsData.io), implement the same interface and swap the export in
 `src/lib/scores/index.ts` — `sync.ts` and every API route are written
 against the interface, not ESPN specifically.
 
+## Deploying (Vercel + Turso)
+
+Vercel's servers don't have a persistent filesystem, so a plain SQLite
+file won't survive between requests there — that's what the libSQL
+adapter above solves. To deploy:
+
+1. **Create a Turso database** — [turso.tech](https://turso.tech), free
+   tier is plenty for a friend-group pool. Via their CLI:
+   ```bash
+   turso db create exactly19-pool
+   turso db show exactly19-pool --url        # -> TURSO_DATABASE_URL
+   turso db tokens create exactly19-pool     # -> TURSO_AUTH_TOKEN
+   ```
+2. **Apply the schema to it** — the migration SQL is already checked
+   into `prisma/migrations/`, so either pipe it through the Turso CLI:
+   ```bash
+   turso db shell exactly19-pool < prisma/migrations/20260904143425_init/migration.sql
+   ```
+   or run `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx prisma db push`
+   locally, which applies the current schema directly.
+3. **Seed it**: `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npm run db:seed`
+4. **Import the repo into Vercel** (vercel.com → Add New → Project →
+   pick this repo/branch) and add `TURSO_DATABASE_URL` and
+   `TURSO_AUTH_TOKEN` as environment variables in the Vercel project
+   settings. No other config needed — Next.js deploys itself.
+
 ## Notes
 
 - The `/api/scores` route re-syncs from ESPN on every request (using
@@ -78,6 +108,5 @@ against the interface, not ESPN specifically.
   false` so the UI can show a "couldn't refresh" notice instead of
   going blank.
 - `prisma/dev.db` is gitignored — each environment gets its own local
-  SQLite file. For a real deployment behind a single shared URL, point
-  `DATABASE_URL` at a persisted volume (or swap the Prisma datasource
-  for a hosted SQLite-compatible service like Turso/LibSQL).
+  SQLite file, used automatically whenever `TURSO_DATABASE_URL` isn't
+  set.
