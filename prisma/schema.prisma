@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id           String   @id @default(cuid())
+  name         String // e.g. "Kansas City Chiefs"
+  abbreviation String   @unique // e.g. "KC"
+  logoUrl      String?
+  espnId       String?  @unique // ESPN team id, used to match scoreboard data
+
+  player Player?
+
+  homeGames Game[] @relation("HomeTeam")
+  awayGames Game[] @relation("AwayTeam")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id             String  @id @default(cuid())
+  name           String
+  venmoUsername  String?
+  teamId         String  @unique
+  team           Team    @relation(fields: [teamId], references: [id])
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Week {
+  id         String @id @default(cuid())
+  seasonYear Int
+  weekNumber Int
+
+  games    Game[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([seasonYear, weekNumber])
+}
+
+model Payment {
+  id       String   @id @default(cuid())
+  playerId String
+  player   Player   @relation(fields: [playerId], references: [id])
+  weekId   String
+  week     Week     @relation(fields: [weekId], references: [id])
+  amount   Float    @default(10)
+  paid     Boolean  @default(false)
+  paidDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerId, weekId])
+}
+
+// SQLite has no native enum support in Prisma, so GameStatus is stored as a
+// String constrained in application code to: "SCHEDULED" | "IN_PROGRESS" | "FINAL"
+model Game {
+  id         String     @id @default(cuid())
+  weekId     String
+  week       Week       @relation(fields: [weekId], references: [id])
+  espnGameId String?    @unique
+
+  homeTeamId String
+  homeTeam   Team   @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId String
+  awayTeam   Team   @relation("AwayTeam", fields: [awayTeamId], references: [id])
+
+  homeScore Int     @default(0)
+  awayScore Int     @default(0)
+  status    String  @default("SCHEDULED")
+  statusDetail String? // e.g. "Final", "Final/OT", "Q3 4:12"
+  startTime DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weekId])
+}
