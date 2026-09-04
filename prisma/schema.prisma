@@ -45,6 +45,11 @@ model Week {
   games    Game[]
   payments Payment[]
 
+  // Last time we actually hit the score provider for this week (as opposed
+  // to serving cached DB data) — used to throttle calls against the free
+  // API-Sports tier's daily request cap.
+  lastSyncedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
