@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const WINNING_SCORE = 19;
+const WATCH_SCORES = [12, 16];
 const POLL_MS = 30_000;
 
 interface PlayerDTO {
@@ -38,25 +39,31 @@ interface ScoresResponse {
   synced: boolean;
 }
 
+function rowHighlight(score: number, status: GameDTO["status"]): "win" | "hit-live" | "watch" | null {
+  if (score === WINNING_SCORE) return status === "FINAL" ? "win" : "hit-live";
+  if (status === "IN_PROGRESS" && WATCH_SCORES.includes(score)) return "watch";
+  return null;
+}
+
+const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
+  win: "text-win",
+  "hit-live": "text-led",
+  watch: "text-live",
+};
+
 function TeamLine({
   team,
   score,
   status,
-  isWinningSide,
 }: {
   team: TeamDTO;
   score: number;
   status: GameDTO["status"];
-  isWinningSide: boolean;
 }) {
+  const highlight = rowHighlight(score, status);
+
   return (
-    <div
-      className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 ${
-        isWinningSide
-          ? "bg-emerald-100 ring-2 ring-emerald-500 dark:bg-emerald-950"
-          : ""
-      }`}
-    >
+    <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
       <div className="flex min-w-0 items-center gap-2">
         {team.logoUrl ? (
           <Image
@@ -68,31 +75,24 @@ function TeamLine({
             unoptimized
           />
         ) : (
-          <div className="h-7 w-7 shrink-0 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+          <div className="h-7 w-7 shrink-0 rounded-full bg-panel-3" />
         )}
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">
+          <div
+            className={`truncate text-sm font-semibold ${highlight ? TEXT_COLOR[highlight] : "text-chalk"}`}
+          >
             {team.name}
           </div>
-          <div className="truncate text-xs text-neutral-500">
+          <div className="truncate text-xs text-chalk-faint">
             {team.player ? team.player.name : "Unassigned"}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {isWinningSide && (
-          <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-            {status === "FINAL" ? "Winner \u{1F3C6}" : "At 19!"}
-          </span>
-        )}
-        <span
-          className={`text-lg font-bold tabular-nums ${
-            isWinningSide ? "text-emerald-700 dark:text-emerald-400" : ""
-          }`}
-        >
-          {score}
-        </span>
-      </div>
+      <span
+        className={`shrink-0 text-lg font-bold tabular-nums ${highlight ? TEXT_COLOR[highlight] : "text-chalk"}`}
+      >
+        {score}
+      </span>
     </div>
   );
 }
@@ -109,34 +109,19 @@ function statusLabel(game: GameDTO): string {
 }
 
 function GameCard({ game }: { game: GameDTO }) {
-  const homeAt19 = game.homeScore === WINNING_SCORE;
-  const awayAt19 = game.awayScore === WINNING_SCORE;
-
   return (
-    <div className="rounded-xl border border-black/10 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-neutral-900">
-      <div className="mb-2 flex items-center justify-between text-xs font-medium text-neutral-500">
-        <span
-          className={
-            game.status === "IN_PROGRESS" ? "text-red-600 dark:text-red-400" : ""
-          }
-        >
-          {game.status === "IN_PROGRESS" && "\u{1F534} "}
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-chalk-faint">
+        {game.status === "IN_PROGRESS" && (
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />
+        )}
+        <span className={game.status === "IN_PROGRESS" ? "text-live" : ""}>
           {statusLabel(game)}
         </span>
       </div>
       <div className="flex flex-col gap-1.5">
-        <TeamLine
-          team={game.awayTeam}
-          score={game.awayScore}
-          status={game.status}
-          isWinningSide={awayAt19}
-        />
-        <TeamLine
-          team={game.homeTeam}
-          score={game.homeScore}
-          status={game.status}
-          isWinningSide={homeAt19}
-        />
+        <TeamLine team={game.awayTeam} score={game.awayScore} status={game.status} />
+        <TeamLine team={game.homeTeam} score={game.homeScore} status={game.status} />
       </div>
     </div>
   );
@@ -210,11 +195,11 @@ export default function ScoresPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 flex items-center justify-between gap-2">
+      <div className="mb-3 flex items-center justify-between gap-2">
         <button
           onClick={() => changeWeek(-1)}
           disabled={weekNumber == null || weekNumber <= 1}
-          className="rounded-full border border-black/10 px-3 py-2 text-sm font-medium disabled:opacity-30 dark:border-white/10"
+          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
           aria-label="Previous week"
         >
           ←
@@ -222,7 +207,7 @@ export default function ScoresPage() {
         <select
           value={weekNumber ?? ""}
           onChange={(e) => selectWeek(Number(e.target.value))}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold dark:border-white/10 dark:bg-neutral-900"
+          className="rounded-full border border-line bg-panel-3 px-4 py-2 text-sm font-semibold text-chalk"
         >
           {Array.from({ length: 18 }, (_, i) => i + 1).map((w) => (
             <option key={w} value={w}>
@@ -234,25 +219,36 @@ export default function ScoresPage() {
         <button
           onClick={() => changeWeek(1)}
           disabled={weekNumber == null || weekNumber >= 18}
-          className="rounded-full border border-black/10 px-3 py-2 text-sm font-medium disabled:opacity-30 dark:border-white/10"
+          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
           aria-label="Next week"
         >
           →
         </button>
       </div>
 
+      <div className="mb-3 flex items-center justify-center gap-4 text-[11px] font-semibold uppercase tracking-wide text-chalk-dim">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-led shadow-[0_0_6px_var(--color-led)]" />
+          On it
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-live shadow-[0_0_6px_var(--color-live)]" />
+          On track
+        </span>
+      </div>
+
       {error && (
-        <div className="mb-3 rounded-lg bg-amber-100 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <div className="mb-3 rounded-lg bg-caution-bg px-3 py-2 text-xs text-caution">
           {error}
         </div>
       )}
 
       {loading && !games ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           Loading scores...
         </div>
       ) : games && games.length === 0 ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           No games found for this week yet.
         </div>
       ) : (
@@ -264,7 +260,7 @@ export default function ScoresPage() {
       )}
 
       {lastUpdated && (
-        <div className="mt-4 text-center text-[11px] text-neutral-400">
+        <div className="mt-4 text-center text-[11px] text-chalk-faint">
           Updated {lastUpdated.toLocaleTimeString()}
         </div>
       )}

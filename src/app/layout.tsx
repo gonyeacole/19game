@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import TabNav from "@/components/TabNav";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Exactly 19 Pool",
@@ -26,14 +15,27 @@ export const viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
-        <header className="sticky top-0 z-10 border-b border-black/10 bg-white/95 backdrop-blur px-4 py-3 dark:border-white/10 dark:bg-black/90">
-          <h1 className="text-center text-lg font-bold tracking-tight">
-            🎯 Exactly 19 Pool
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-field text-chalk">
+        <header className="sticky top-0 z-10 border-b border-line bg-field/95 backdrop-blur px-4 py-3">
+          <h1 className="flex items-center justify-center gap-2 text-base font-bold uppercase tracking-wide">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              className="shrink-0"
+            >
+              <circle cx="10" cy="10" r="8" />
+              <circle cx="10" cy="10" r="4.2" />
+              <line x1="10" y1="0.6" x2="10" y2="4" />
+              <line x1="10" y1="16" x2="10" y2="19.4" />
+              <line x1="0.6" y1="10" x2="4" y2="10" />
+              <line x1="16" y1="10" x2="19.4" y2="10" />
+            </svg>
+            Exactly 19 Pool
           </h1>
         </header>
         <main className="flex-1 pb-20">{children}</main>

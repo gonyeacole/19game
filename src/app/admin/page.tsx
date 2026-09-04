@@ -92,16 +92,18 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4">
-        <h2 className="text-base font-bold">Player Setup</h2>
-        <p className="text-sm text-neutral-500">
+      <div className="mb-4 text-center">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-chalk">
+          Player Setup
+        </h2>
+        <p className="mt-1 text-sm text-chalk-dim">
           Assign a player, name, and Venmo username to each of the 32 teams.{" "}
-          <span className="font-medium">{assignedCount}/32 assigned.</span>
+          <span className="font-semibold text-chalk">{assignedCount}/32 assigned.</span>
         </p>
       </div>
 
       {!teams ? (
-        <div className="py-10 text-center text-sm text-neutral-500">Loading...</div>
+        <div className="py-10 text-center text-sm text-chalk-faint">Loading...</div>
       ) : (
         <div className="flex flex-col gap-2">
           {teams.map((team) => {
@@ -112,7 +114,7 @@ export default function AdminPage() {
             return (
               <div
                 key={team.id}
-                className="rounded-xl border border-black/10 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-neutral-900"
+                className="rounded-xl border border-line bg-panel p-3"
               >
                 <div className="mb-2 flex items-center gap-2">
                   {team.logoUrl ? (
@@ -124,10 +126,10 @@ export default function AdminPage() {
                       unoptimized
                     />
                   ) : (
-                    <div className="h-6 w-6 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+                    <div className="h-6 w-6 rounded-full bg-panel-3" />
                   )}
-                  <span className="text-sm font-semibold">{team.name}</span>
-                  <span className="text-xs text-neutral-400">
+                  <span className="text-sm font-semibold text-chalk">{team.name}</span>
+                  <span className="text-xs text-chalk-faint">
                     {team.abbreviation}
                   </span>
                 </div>
@@ -136,7 +138,7 @@ export default function AdminPage() {
                     value={draft.name}
                     onChange={(e) => updateDraft(team.id, "name", e.target.value)}
                     placeholder="Player name"
-                    className="flex-1 rounded-lg border border-black/10 bg-transparent px-2 py-1.5 text-sm dark:border-white/10"
+                    className="flex-1 rounded-lg border border-line bg-panel-2 px-2 py-1.5 text-sm text-chalk placeholder:text-chalk-faint"
                   />
                   <input
                     value={draft.venmoUsername}
@@ -144,14 +146,14 @@ export default function AdminPage() {
                       updateDraft(team.id, "venmoUsername", e.target.value)
                     }
                     placeholder="Venmo username"
-                    className="flex-1 rounded-lg border border-black/10 bg-transparent px-2 py-1.5 text-sm dark:border-white/10"
+                    className="flex-1 rounded-lg border border-line bg-panel-2 px-2 py-1.5 text-sm text-chalk placeholder:text-chalk-faint"
                   />
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <button
                     onClick={() => save(team.id)}
                     disabled={!dirty || !draft.name.trim() || savingId === team.id}
-                    className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+                    className="rounded-full bg-win px-3 py-1.5 text-xs font-bold text-[#08150e] disabled:opacity-40"
                   >
                     {savingId === team.id ? "Saving..." : "Save"}
                   </button>
@@ -159,13 +161,13 @@ export default function AdminPage() {
                     <button
                       onClick={() => clear(team.id)}
                       disabled={savingId === team.id}
-                      className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium text-neutral-500 dark:border-white/10"
+                      className="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-chalk-dim"
                     >
                       Clear
                     </button>
                   )}
                   {savedId === team.id && (
-                    <span className="text-xs font-medium text-emerald-600">
+                    <span className="text-xs font-medium text-win">
                       Saved ✓
                     </span>
                   )}

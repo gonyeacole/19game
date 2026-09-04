@@ -95,11 +95,11 @@ export default function PayPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 flex items-center justify-between gap-2">
+      <div className="mb-3 flex items-center justify-between gap-2">
         <button
           onClick={() => changeWeek(-1)}
           disabled={weekNumber == null || weekNumber <= 1}
-          className="rounded-full border border-black/10 px-3 py-2 text-sm font-medium disabled:opacity-30 dark:border-white/10"
+          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
           aria-label="Previous week"
         >
           ←
@@ -107,7 +107,7 @@ export default function PayPage() {
         <select
           value={weekNumber ?? ""}
           onChange={(e) => selectWeek(Number(e.target.value))}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold dark:border-white/10 dark:bg-neutral-900"
+          className="rounded-full border border-line bg-panel-3 px-4 py-2 text-sm font-semibold text-chalk"
         >
           {Array.from({ length: 18 }, (_, i) => i + 1).map((w) => (
             <option key={w} value={w}>
@@ -119,7 +119,7 @@ export default function PayPage() {
         <button
           onClick={() => changeWeek(1)}
           disabled={weekNumber == null || weekNumber >= 18}
-          className="rounded-full border border-black/10 px-3 py-2 text-sm font-medium disabled:opacity-30 dark:border-white/10"
+          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
           aria-label="Next week"
         >
           →
@@ -127,17 +127,17 @@ export default function PayPage() {
       </div>
 
       {payments && (
-        <div className="mb-4 text-center text-sm text-neutral-500">
+        <div className="mb-4 text-center text-sm text-chalk-dim">
           {paidCount}/{payments.length} paid this week
         </div>
       )}
 
       {loading && !payments ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           Loading players...
         </div>
       ) : payments && payments.length === 0 ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           No players set up yet. Add players in the Admin tab.
         </div>
       ) : (
@@ -145,15 +145,15 @@ export default function PayPage() {
           {payments?.map((p) => (
             <div
               key={p.id}
-              className={`flex items-center justify-between gap-2 rounded-xl border p-3 shadow-sm ${
+              className={`flex items-center justify-between gap-2 rounded-xl border p-3 ${
                 p.paid
-                  ? "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950"
-                  : "border-black/10 bg-white dark:border-white/10 dark:bg-neutral-900"
+                  ? "border-transparent bg-win-bg shadow-[inset_0_0_0_1px_rgba(78,203,140,0.25)]"
+                  : "border-line bg-panel"
               }`}
             >
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{p.player.name}</div>
-                <div className="truncate text-xs text-neutral-500">
+                <div className="truncate text-sm font-semibold text-chalk">{p.player.name}</div>
+                <div className="truncate text-xs text-chalk-faint">
                   {p.player.team.name}
                 </div>
               </div>
@@ -167,7 +167,7 @@ export default function PayPage() {
                     })}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full bg-[#3D95CE] px-3 py-1.5 text-xs font-bold text-white"
+                    className="rounded-full bg-venmo px-3 py-1.5 text-xs font-bold text-white"
                   >
                     Pay Venmo
                   </a>
@@ -177,8 +177,8 @@ export default function PayPage() {
                   disabled={busyId === p.id}
                   className={`rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
                     p.paid
-                      ? "bg-emerald-600 text-white"
-                      : "border border-black/10 text-neutral-600 dark:border-white/10 dark:text-neutral-300"
+                      ? "bg-win text-[#08150e]"
+                      : "border border-line text-chalk-dim"
                   }`}
                 >
                   {p.paid ? "Paid ✓" : "Mark paid"}

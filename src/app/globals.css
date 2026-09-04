@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+  Committed to a single dark "scoreboard" theme — this is a private tool
+  checked on phones during games, not a general-purpose site, so no
+  light-mode variant.
+*/
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-field: #0a0a0a;
+  --color-panel: #151515;
+  --color-panel-2: #1d1d1d;
+  --color-panel-3: #262626;
+  --color-line: #363636;
+  --color-chalk: #f0f0ee;
+  --color-chalk-dim: #a3a3a1;
+  --color-chalk-faint: #727270;
+  --color-led: #ffb020;
+  --color-led-bg: #332711;
+  --color-win: #4ecb8c;
+  --color-win-bg: #17281f;
+  --color-caution: #e08a3c;
+  --color-caution-bg: #2c2318;
+  --color-live: #ff5c4d;
+  --color-live-bg: #2e1a16;
+  --color-venmo: #3d95ce;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-field);
+  color: var(--color-chalk);
+  font-family: var(--font-sans);
 }

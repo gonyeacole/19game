@@ -51,22 +51,22 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
   const unpaid = week.payments.filter((p) => !p.paid);
 
   return (
-    <div className="rounded-xl border border-black/10 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-neutral-900">
+    <div className="rounded-xl border border-line bg-panel p-3">
       <div className="flex items-center justify-between">
-        <div className="font-semibold">Week {week.weekNumber}</div>
-        <div className="text-sm font-bold tabular-nums">
+        <div className="font-bold text-chalk">Week {week.weekNumber}</div>
+        <div className="text-sm font-bold tabular-nums text-chalk">
           {money(week.potBeforePayout)}
         </div>
       </div>
 
-      <div className="mt-1 text-xs text-neutral-500">
+      <div className="mt-1 text-xs text-chalk-faint">
         Collected {money(week.collected)} · Rollover in {money(week.rolloverIn)} ·{" "}
         {paidCount}/{week.payments.length} paid
       </div>
 
       <div className="mt-2">
         {!week.complete ? (
-          <span className="inline-block rounded-full bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+          <span className="inline-block rounded-full bg-panel-3 px-2.5 py-1 text-xs font-medium text-chalk-dim">
             Games in progress — pot pending
           </span>
         ) : week.winners.length > 0 ? (
@@ -74,14 +74,14 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
             {week.winners.map((w) => (
               <span
                 key={w.player.id + w.team.id}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                className="inline-flex items-center gap-1 rounded-full bg-win-bg px-2.5 py-1 text-xs font-semibold text-win"
               >
-                🏆 {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
+                {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
               </span>
             ))}
           </div>
         ) : (
-          <span className="inline-block rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          <span className="inline-block rounded-full bg-caution-bg px-2.5 py-1 text-xs font-medium text-caution">
             No 19s — rolls over to next week
           </span>
         )}
@@ -89,20 +89,18 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
 
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="mt-2 text-xs font-medium text-neutral-500 underline underline-offset-2"
+        className="mt-2 text-xs font-medium text-chalk-faint underline underline-offset-2"
       >
         {expanded ? "Hide" : "Show"} payment status
       </button>
 
       {expanded && (
-        <div className="mt-2 border-t border-black/5 pt-2 text-xs dark:border-white/10">
+        <div className="mt-2 border-t border-line pt-2 text-xs">
           {unpaid.length === 0 ? (
-            <div className="text-emerald-600 dark:text-emerald-400">
-              Everyone paid ✅
-            </div>
+            <div className="text-win">Everyone paid</div>
           ) : (
-            <div>
-              <span className="font-medium text-neutral-500">Not paid: </span>
+            <div className="text-chalk-dim">
+              <span className="font-medium text-chalk-faint">Not paid: </span>
               {unpaid.map((p) => p.playerName).join(", ")}
             </div>
           )}
@@ -125,26 +123,26 @@ export default function PotPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 rounded-xl bg-emerald-600 p-5 text-center text-white shadow-sm">
-        <div className="text-xs font-medium uppercase tracking-wide text-emerald-100">
+      <div className="mb-4 rounded-xl border border-line bg-gradient-to-br from-panel-3 to-panel p-5 text-center">
+        <div className="text-xs font-semibold uppercase tracking-widest text-chalk-dim">
           Current Pot
         </div>
-        <div className="text-4xl font-extrabold tabular-nums">
+        <div className="text-4xl font-extrabold tabular-nums text-led drop-shadow-[0_0_20px_rgba(255,176,32,0.35)]">
           {data ? money(data.summary.currentPot) : "—"}
         </div>
       </div>
 
       {data && (
         <div className="mb-4 grid grid-cols-2 gap-3 text-center">
-          <div className="rounded-xl border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-neutral-900">
-            <div className="text-xs text-neutral-500">Total Collected</div>
-            <div className="text-lg font-bold tabular-nums">
+          <div className="rounded-xl border border-line bg-panel p-3">
+            <div className="text-xs text-chalk-faint">Total Collected</div>
+            <div className="text-lg font-bold tabular-nums text-chalk">
               {money(data.summary.totalCollected)}
             </div>
           </div>
-          <div className="rounded-xl border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-neutral-900">
-            <div className="text-xs text-neutral-500">Total Paid Out</div>
-            <div className="text-lg font-bold tabular-nums">
+          <div className="rounded-xl border border-line bg-panel p-3">
+            <div className="text-xs text-chalk-faint">Total Paid Out</div>
+            <div className="text-lg font-bold tabular-nums text-chalk">
               {money(data.summary.totalPaidOut)}
             </div>
           </div>
@@ -152,11 +150,11 @@ export default function PotPage() {
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           Loading pot...
         </div>
       ) : !data || data.weeks.length === 0 ? (
-        <div className="py-10 text-center text-sm text-neutral-500">
+        <div className="py-10 text-center text-sm text-chalk-faint">
           No weeks tracked yet.
         </div>
       ) : (
