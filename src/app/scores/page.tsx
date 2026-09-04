@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import WeekScroller from "@/components/WeekScroller";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -180,13 +181,6 @@ export default function ScoresPage() {
     return () => clearInterval(id);
   }, [seasonYear, weekNumber, load]);
 
-  const changeWeek = (delta: number) => {
-    if (seasonYear == null || weekNumber == null) return;
-    const next = Math.min(Math.max(weekNumber + delta, 1), 18);
-    setLoading(true);
-    load(seasonYear, next);
-  };
-
   const selectWeek = (week: number) => {
     if (seasonYear == null) return;
     setLoading(true);
@@ -195,36 +189,7 @@ export default function ScoresPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <button
-          onClick={() => changeWeek(-1)}
-          disabled={weekNumber == null || weekNumber <= 1}
-          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
-          aria-label="Previous week"
-        >
-          ←
-        </button>
-        <select
-          value={weekNumber ?? ""}
-          onChange={(e) => selectWeek(Number(e.target.value))}
-          className="rounded-full border border-line bg-panel-3 px-4 py-2 text-sm font-semibold text-chalk"
-        >
-          {Array.from({ length: 18 }, (_, i) => i + 1).map((w) => (
-            <option key={w} value={w}>
-              Week {w}
-              {seasonYear ? ` — ${seasonYear}` : ""}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => changeWeek(1)}
-          disabled={weekNumber == null || weekNumber >= 18}
-          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
-          aria-label="Next week"
-        >
-          →
-        </button>
-      </div>
+      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
 
       <div className="mb-3 flex items-center justify-center gap-4 text-[11px] font-semibold uppercase tracking-wide text-chalk-dim">
         <span className="inline-flex items-center gap-1.5">

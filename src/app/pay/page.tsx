@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { venmoPayLink, WEEKLY_DUE } from "@/lib/pool";
+import WeekScroller from "@/components/WeekScroller";
 
 interface PaymentDTO {
   id: string;
@@ -58,13 +59,6 @@ export default function PayPage() {
     load(seasonYear, week);
   };
 
-  const changeWeek = (delta: number) => {
-    if (seasonYear == null || weekNumber == null) return;
-    const next = Math.min(Math.max(weekNumber + delta, 1), 18);
-    setLoading(true);
-    load(seasonYear, next);
-  };
-
   const togglePaid = async (payment: PaymentDTO) => {
     setBusyId(payment.id);
     const next = !payment.paid;
@@ -95,36 +89,7 @@ export default function PayPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <button
-          onClick={() => changeWeek(-1)}
-          disabled={weekNumber == null || weekNumber <= 1}
-          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
-          aria-label="Previous week"
-        >
-          ←
-        </button>
-        <select
-          value={weekNumber ?? ""}
-          onChange={(e) => selectWeek(Number(e.target.value))}
-          className="rounded-full border border-line bg-panel-3 px-4 py-2 text-sm font-semibold text-chalk"
-        >
-          {Array.from({ length: 18 }, (_, i) => i + 1).map((w) => (
-            <option key={w} value={w}>
-              Week {w}
-              {seasonYear ? ` — ${seasonYear}` : ""}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => changeWeek(1)}
-          disabled={weekNumber == null || weekNumber >= 18}
-          className="rounded-full border border-line px-3 py-2 text-sm font-medium text-chalk disabled:opacity-30"
-          aria-label="Next week"
-        >
-          →
-        </button>
-      </div>
+      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
 
       {payments && (
         <div className="mb-4 text-center text-sm text-chalk-dim">
