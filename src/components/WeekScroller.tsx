@@ -22,8 +22,16 @@ export default function WeekScroller({
   }, [weekNumber]);
 
   return (
-    <div className="no-scrollbar -mx-4 mb-3 overflow-x-auto px-4">
-      <div className="flex w-max gap-2 pb-1">
+    <div
+      className="no-scrollbar -mx-4 mb-3 overflow-x-auto px-4"
+      style={{
+        maskImage:
+          "linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent)",
+        WebkitMaskImage:
+          "linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent)",
+      }}
+    >
+      <div className="flex w-max gap-4 px-2 pb-1">
         {WEEKS.map((w) => (
           <button
             key={w}
@@ -35,7 +43,7 @@ export default function WeekScroller({
                 : "border-line bg-panel-3 text-chalk-dim"
             }`}
           >
-            Wk {w}
+            Week {w}
           </button>
         ))}
       </div>
