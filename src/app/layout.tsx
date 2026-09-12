@@ -44,23 +44,11 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
-// iOS's "Add to Home Screen" bookmark (not a real installed PWA — just
-// apple-mobile-web-app-capable) has a long history of dvh/vh not matching
-// the actual visible screen height in that specific context, leaving a
-// gap of bare system background below content sized with height:100dvh.
-// Measuring window.innerHeight directly in JS sidesteps that entirely.
-const APP_HEIGHT_SCRIPT = `
+// The (display-mode: standalone) media query should catch "launched from
+// an Add to Home Screen bookmark" too, but navigator.standalone (Safari's
+// own iOS-specific flag) is the more battle-tested check for it.
+const STANDALONE_INIT_SCRIPT = `
 (function () {
-  function setAppHeight() {
-    document.documentElement.style.setProperty("--app-height", window.innerHeight + "px");
-  }
-  setAppHeight();
-  window.addEventListener("resize", setAppHeight);
-  window.addEventListener("orientationchange", setAppHeight);
-
-  // The (display-mode: standalone) media query should catch this too, but
-  // navigator.standalone (Safari's own iOS-specific flag) is the more
-  // battle-tested check for "launched from an Add to Home Screen bookmark".
   var standalone =
     window.navigator.standalone === true ||
     matchMedia("(display-mode: standalone)").matches;
@@ -73,12 +61,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className="h-full antialiased">
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: APP_HEIGHT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
       </head>
-      <body
-        className="flex h-dvh flex-col overflow-hidden bg-field text-chalk"
-        style={{ height: "var(--app-height, 100dvh)" }}
-      >
+      <body className="flex h-full flex-col overflow-hidden bg-field text-chalk">
         <header className="safe-top z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
           <div className="justify-self-start">
             <AddToHomeScreen />
