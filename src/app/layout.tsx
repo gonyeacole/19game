@@ -64,7 +64,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AddToHomeScreen />
             <ThemeToggle />
           </div>
-          <span className={`${leagueGothic.className} justify-self-center text-3xl font-bold leading-none tracking-wide text-led`}>
+          <span
+            className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
+            style={{ fontWeight: 700 }}
+          >
             19League
           </span>
           <div className="justify-self-end">
