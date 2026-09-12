@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
+import { Silkscreen } from "next/font/google";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
+
+// Pixel/dot-matrix face — the actual font family real stadium scoreboards
+// are built from, unlike a bolded system font with a glow slapped on.
+const silkscreen = Silkscreen({ weight: "700", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Exactly 19 Pool",
@@ -35,10 +40,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3">
           <div className="w-8" />
-          <div className="rounded-md border border-line bg-panel-2 px-3 py-1">
-            <span className="font-mono text-lg font-extrabold tracking-widest text-led drop-shadow-[0_0_6px_var(--color-led)]">
-              19{" "}
-              <span className="text-sm tracking-[0.2em]">LEAGUE</span>
+          <div className="flex items-baseline gap-1.5 rounded-sm border-2 border-[#3a3a3a] bg-black px-3 py-1 shadow-[inset_0_0_8px_rgba(0,0,0,0.8)]">
+            <span
+              className={`${silkscreen.className} text-xl leading-none text-led drop-shadow-[0_0_5px_var(--color-led)] drop-shadow-[0_0_10px_var(--color-led)]`}
+            >
+              19
+            </span>
+            <span
+              className={`${silkscreen.className} text-[10px] leading-none tracking-[0.15em] text-led drop-shadow-[0_0_4px_var(--color-led)]`}
+            >
+              LEAGUE
             </span>
           </div>
           <ThemeToggle />
