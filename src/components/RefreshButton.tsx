@@ -5,7 +5,7 @@ export default function RefreshButton() {
     <button
       onClick={() => window.location.reload()}
       aria-label="Refresh page"
-      className="shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim"
+      className="shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90"
     >
       <svg
         viewBox="0 0 20 20"

@@ -150,7 +150,7 @@ export default function PotPage() {
       {data && (
         <a
           href={`venmo://paycharge?txn=pay&recipients=${encodeURIComponent(POT_VENMO_USERNAME)}`}
-          className="mb-4 block rounded-xl bg-venmo px-4 py-2.5 text-center text-sm font-bold text-white"
+          className="mb-4 block rounded-xl bg-venmo px-4 py-2.5 text-center text-sm font-bold text-white transition-transform active:scale-[0.98]"
         >
           Pay @{POT_VENMO_USERNAME}
         </a>

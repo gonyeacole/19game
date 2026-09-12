@@ -55,7 +55,10 @@ function TeamRow({ team }: { team: TeamDTO }) {
 
   return (
     <div className="rounded-xl border border-line bg-panel p-3">
-      <button onClick={toggle} className="flex w-full items-center gap-2 text-left">
+      <button
+        onClick={toggle}
+        className="flex w-full items-center gap-2 text-left transition-transform active:scale-[0.99]"
+      >
         {team.logoUrl ? (
           <Image src={team.logoUrl} alt="" width={28} height={28} unoptimized />
         ) : (

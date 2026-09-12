@@ -191,7 +191,7 @@ export default function ScoresPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
+      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} loading={loading} />
 
       {error && (
         <div className="mb-3 rounded-lg bg-caution-bg px-3 py-2 text-xs text-caution">
@@ -208,7 +208,9 @@ export default function ScoresPage() {
           No games found for this week yet.
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div
+          className={`flex flex-col gap-3 transition-opacity duration-150 ${loading ? "opacity-50" : ""}`}
+        >
           {games?.map((g) => (
             <GameCard key={g.id} game={g} />
           ))}

@@ -175,7 +175,7 @@ function PlayerSetup() {
                   <button
                     onClick={() => save(team.id)}
                     disabled={!dirty || !draft.name.trim() || savingId === team.id}
-                    className="rounded-full bg-win px-3 py-1.5 text-xs font-bold text-[#08150e] disabled:opacity-40"
+                    className="rounded-full bg-win px-3 py-1.5 text-xs font-bold text-[#08150e] transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
                   >
                     {savingId === team.id ? "Saving..." : "Save"}
                   </button>
@@ -183,7 +183,7 @@ function PlayerSetup() {
                     <button
                       onClick={() => clear(team.id)}
                       disabled={savingId === team.id}
-                      className="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-chalk-dim"
+                      className="rounded-full border border-line px-3 py-1.5 text-xs font-medium text-chalk-dim transition-transform active:scale-95"
                     >
                       Clear
                     </button>
@@ -288,7 +288,7 @@ function Payments() {
 
   return (
     <div>
-      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
+      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} loading={loading} />
 
       {payments && (
         <div className="mb-4 text-center text-sm text-chalk-dim">
@@ -310,7 +310,9 @@ function Payments() {
           No players set up yet. Add players under Player Setup.
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div
+          className={`flex flex-col gap-2 transition-opacity duration-150 ${loading ? "opacity-50" : ""}`}
+        >
           {payments?.map((p) => (
             <div
               key={p.id}
@@ -336,7 +338,7 @@ function Payments() {
                     })}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full bg-venmo px-3 py-1.5 text-xs font-bold text-white"
+                    className="rounded-full bg-venmo px-3 py-1.5 text-xs font-bold text-white transition-transform active:scale-95"
                   >
                     Pay Venmo
                   </a>
@@ -344,7 +346,7 @@ function Payments() {
                 <button
                   onClick={() => togglePaid(p)}
                   disabled={busyId === p.id}
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
                     p.paid
                       ? "bg-win text-[#08150e]"
                       : "border border-line text-chalk-dim"
@@ -355,7 +357,7 @@ function Payments() {
                 <button
                   onClick={() => toggleWon(p)}
                   disabled={busyId === p.id}
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
                     p.won
                       ? "bg-led text-[#1a1200]"
                       : "border border-line text-chalk-dim"
@@ -382,7 +384,7 @@ export default function AdminPage() {
           <button
             key={s}
             onClick={() => setSection(s)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all active:scale-95 ${
               section === s
                 ? "bg-led text-[#1a1200]"
                 : "border border-line text-chalk-dim"

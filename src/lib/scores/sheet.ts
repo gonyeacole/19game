@@ -111,39 +111,55 @@ function parseSheetDate(dateStr: string | undefined, timeStr: string | undefined
   return new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes));
 }
 
+// The sheet holds every week in one file, so switching from one week to
+// another needs the same bytes — cache them briefly at module scope so
+// clicking through several weeks in a row (on a warm server instance)
+// doesn't re-download and re-parse the whole thing each time.
+const SHEET_CACHE_TTL_MS = 60 * 1000;
+let sheetCache: { text: string; fetchedAt: number } | null = null;
+
+async function fetchSheetText(): Promise<string> {
+  if (sheetCache && Date.now() - sheetCache.fetchedAt < SHEET_CACHE_TTL_MS) {
+    return sheetCache.text;
+  }
+
+  const res = await fetch(SHEET_CSV_URL, {
+    cache: "no-store",
+    headers: {
+      // Without a browser-like User-Agent, Google serves this endpoint
+      // differently to plain server requests (observed: a 200 response
+      // whose body isn't the real CSV, unlike from an actual browser).
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+      Accept: "text/csv,*/*",
+    },
+  });
+  if (!res.ok) {
+    throw new Error(
+      `Sheet scoreboard request failed: ${res.status} ${res.statusText}`
+    );
+  }
+
+  const text = await res.text();
+  // A real export always contains plain "Week N," rows — if it doesn't, we
+  // got redirected to something else (e.g. an HTML sign-in page) instead of
+  // CSV, so fail loudly rather than silently returning zero games.
+  if (!/^Week \d+,/m.test(text)) {
+    throw new Error(
+      `Sheet response doesn't look like CSV (first 200 chars): ${text.slice(0, 200)}`
+    );
+  }
+
+  sheetCache = { text, fetchedAt: Date.now() };
+  return text;
+}
+
 export class GoogleSheetScoreProvider implements ScoreProvider {
   async getWeekScoreboard({
     seasonYear,
     week,
   }: ScoreboardParams): Promise<NormalizedGame[]> {
-    const res = await fetch(SHEET_CSV_URL, {
-      cache: "no-store",
-      headers: {
-        // Without a browser-like User-Agent, Google serves this endpoint
-        // differently to plain server requests (observed: a 200 response
-        // whose body isn't the real CSV, unlike from an actual browser).
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        Accept: "text/csv,*/*",
-      },
-    });
-    if (!res.ok) {
-      throw new Error(
-        `Sheet scoreboard request failed: ${res.status} ${res.statusText}`
-      );
-    }
-
-    const text = await res.text();
-    // A real export always contains plain "Week N," rows — if it doesn't,
-    // we got redirected to something else (e.g. an HTML sign-in page)
-    // instead of CSV, so fail loudly rather than silently returning zero
-    // games.
-    if (!/^Week \d+,/m.test(text)) {
-      throw new Error(
-        `Sheet response doesn't look like CSV (first 200 chars): ${text.slice(0, 200)}`
-      );
-    }
-
+    const text = await fetchSheetText();
     const rows = parseCsv(text);
 
     // Preseason weeks reuse the same "Week 1/2/3" labels as regular season
