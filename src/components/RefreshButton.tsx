@@ -15,7 +15,7 @@ export default function RefreshButton() {
     <button
       onClick={refresh}
       aria-label="Refresh page"
-      className="shrink-0 rounded-full border border-led/30 bg-led-bg p-1.5 text-led transition-transform active:scale-90"
+      className="flex shrink-0 items-center gap-1.5 rounded-full border border-led/30 bg-led-bg px-3 py-1.5 text-led transition-transform active:scale-90"
     >
       <svg
         viewBox="0 0 20 20"
@@ -29,6 +29,7 @@ export default function RefreshButton() {
         <path d="M16.5 10a6.5 6.5 0 1 1-1.9-4.6" />
         <polyline points="16.5 3 16.5 6.5 13 6.5" />
       </svg>
+      <span className="text-xs font-bold">Refresh</span>
     </button>
   );
 }
