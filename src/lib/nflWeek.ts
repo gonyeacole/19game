@@ -1,4 +1,20 @@
 /**
+ * Approximate regular-season kickoff (Thursday after Labor Day) for a given
+ * season year. Used both to default the week selector and to tell apart
+ * preseason vs regular-season rows in data sources that reuse "Week N"
+ * labels for both (see src/lib/scores/sheet.ts).
+ */
+export function regularSeasonKickoff(seasonYear: number): Date {
+  const sept1 = new Date(seasonYear, 8, 1);
+  const dayOfWeek = sept1.getDay(); // 0=Sun..6=Sat
+  const daysToFirstMonday = (8 - dayOfWeek) % 7;
+  const laborDay = new Date(seasonYear, 8, 1 + daysToFirstMonday);
+  const kickoff = new Date(laborDay);
+  kickoff.setDate(laborDay.getDate() + 3); // Thursday after Labor Day
+  return kickoff;
+}
+
+/**
  * Best-effort "current NFL week" for defaulting the UI. NFL regular season
  * runs ~Sept through early Jan, week 1 kicking off the Thursday after
  * Labor Day. This is an approximation for defaulting the selector only —
@@ -26,12 +42,7 @@ export function getDefaultSeasonAndWeek(now: Date = new Date()): {
   // (first Thursday after Labor Day, i.e. first Thu of Sept that is on/after
   // the first Monday).
   const seasonYear = year;
-  const sept1 = new Date(seasonYear, 8, 1);
-  const dayOfWeek = sept1.getDay(); // 0=Sun..6=Sat
-  const daysToFirstMonday = (8 - dayOfWeek) % 7;
-  const laborDay = new Date(seasonYear, 8, 1 + daysToFirstMonday);
-  const kickoff = new Date(laborDay);
-  kickoff.setDate(laborDay.getDate() + 3); // Thursday after Labor Day
+  const kickoff = regularSeasonKickoff(seasonYear);
 
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
   const diff = now.getTime() - kickoff.getTime();
