@@ -193,17 +193,6 @@ export default function ScoresPage() {
     <div className="mx-auto max-w-lg px-4 py-4">
       <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
 
-      <div className="mb-3 flex items-center justify-center gap-4 text-[11px] font-semibold uppercase tracking-wide text-chalk-dim">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-led shadow-[0_0_6px_var(--color-led)]" />
-          On it
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-live shadow-[0_0_6px_var(--color-live)]" />
-          On track
-        </span>
-      </div>
-
       {error && (
         <div className="mb-3 rounded-lg bg-caution-bg px-3 py-2 text-xs text-caution">
           {error}
