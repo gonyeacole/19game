@@ -1,9 +1,19 @@
 "use client";
 
 export default function RefreshButton() {
+  const refresh = () => {
+    // Pages fetch their data client-side, so right after reload the page is
+    // briefly just the loading skeleton — much shorter than the scrolled-down
+    // content you were just looking at. The browser's own scroll-restoration
+    // then leaves the viewport parked in that now-empty space until you
+    // scroll it yourself. Reset to the top before reloading so it doesn't.
+    window.scrollTo(0, 0);
+    window.location.reload();
+  };
+
   return (
     <button
-      onClick={() => window.location.reload()}
+      onClick={refresh}
       aria-label="Refresh page"
       className="shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90"
     >
