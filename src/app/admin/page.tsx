@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
+import Skeleton from "@/components/Skeleton";
 import { venmoPayLink, WEEKLY_DUE } from "@/lib/pool";
+
+const TEAM_COUNT = 32;
 
 interface TeamDTO {
   id: string;
@@ -39,6 +42,22 @@ interface PaymentsResponse {
   weekNumber: number;
   week: { id: string };
   payments: PaymentDTO[];
+}
+
+function PlayerCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-3.5 w-32" />
+      </div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Skeleton className="h-8 flex-1 rounded-lg" />
+        <Skeleton className="h-8 flex-1 rounded-lg" />
+      </div>
+      <Skeleton className="mt-2 h-7 w-16 rounded-full" />
+    </div>
+  );
 }
 
 function PlayerSetup() {
@@ -125,7 +144,11 @@ function PlayerSetup() {
       </div>
 
       {!teams ? (
-        <div className="py-10 text-center text-sm text-chalk-faint">Loading...</div>
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: TEAM_COUNT }).map((_, i) => (
+            <PlayerCardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
           {teams.map((team) => {
@@ -199,6 +222,21 @@ function PlayerSetup() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function PaymentRowSkeleton() {
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-panel p-3">
+      <div className="min-w-0 flex-1">
+        <Skeleton className="h-3.5 w-28" />
+        <Skeleton className="mt-1.5 h-3 w-20" />
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <Skeleton className="h-7 w-20 rounded-full" />
+        <Skeleton className="h-7 w-9 rounded-full" />
+      </div>
     </div>
   );
 }
@@ -302,8 +340,10 @@ function Payments() {
       )}
 
       {loading && !payments ? (
-        <div className="py-10 text-center text-sm text-chalk-faint">
-          Loading players...
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: TEAM_COUNT }).map((_, i) => (
+            <PaymentRowSkeleton key={i} />
+          ))}
         </div>
       ) : payments && payments.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">

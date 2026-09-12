@@ -55,6 +55,7 @@ function WeekCardSkeleton() {
       </div>
       <Skeleton className="mt-2 h-3 w-40" />
       <Skeleton className="mt-3 h-6 w-28 rounded-full" />
+      <Skeleton className="mt-3 h-3 w-24" />
     </div>
   );
 }
@@ -182,7 +183,7 @@ export default function PotPage() {
 
       {loading ? (
         <div className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 18 }).map((_, i) => (
             <WeekCardSkeleton key={i} />
           ))}
         </div>

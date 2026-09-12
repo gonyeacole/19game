@@ -170,7 +170,7 @@ export default function TeamsPage() {
 
       {!teams ? (
         <div className="flex flex-col gap-2">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 32 }).map((_, i) => (
             <TeamRowSkeleton key={i} />
           ))}
         </div>
