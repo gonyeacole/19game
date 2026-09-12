@@ -25,7 +25,7 @@ interface TeamResult {
 }
 
 function resultLabel(r: TeamResult): string {
-  if (r.status === "SCHEDULED") return "—";
+  if (r.status === "SCHEDULED") return "";
   return `${r.teamScore}-${r.oppScore}`;
 }
 
@@ -95,10 +95,10 @@ function TeamRow({ team }: { team: TeamDTO }) {
                           r.hitNineteen ? "font-bold text-led" : "text-chalk-dim"
                         }`}
                       >
-                        {r.isHome ? "vs" : "@"} {r.opponent.abbreviation} {resultLabel(r)}
+                        {`${r.isHome ? "vs" : "@"} ${r.opponent.abbreviation} ${resultLabel(r)}`.trim()}
                       </span>
                     ) : (
-                      <span className="flex-1 text-right text-chalk-faint">—</span>
+                      <span className="flex-1 text-right text-chalk-faint">BYE</span>
                     )}
                   </div>
                 );
@@ -113,6 +113,7 @@ function TeamRow({ team }: { team: TeamDTO }) {
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<TeamDTO[] | null>(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     fetch("/api/teams", { cache: "no-store" })
@@ -120,17 +121,39 @@ export default function TeamsPage() {
       .then((data: { teams: TeamDTO[] }) => setTeams(data.teams));
   }, []);
 
+  const q = query.trim().toLowerCase();
+  const filtered = teams?.filter((t) => {
+    if (!q) return true;
+    return (
+      t.name.toLowerCase().includes(q) ||
+      t.abbreviation.toLowerCase().includes(q) ||
+      (t.player?.name.toLowerCase().includes(q) ?? false)
+    );
+  });
+
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 text-center text-sm text-chalk-dim">
+      <div className="mb-3 text-center text-sm text-chalk-dim">
         Tap a team to see their results by week.
       </div>
 
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search by team or owner..."
+        className="mb-4 w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm text-chalk placeholder:text-chalk-faint"
+      />
+
       {!teams ? (
         <div className="py-10 text-center text-sm text-chalk-faint">Loading...</div>
+      ) : filtered && filtered.length === 0 ? (
+        <div className="py-10 text-center text-sm text-chalk-faint">
+          No teams match &ldquo;{query}&rdquo;.
+        </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {teams.map((t) => (
+          {filtered?.map((t) => (
             <TeamRow key={t.id} team={t} />
           ))}
         </div>
