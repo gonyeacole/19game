@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
-import SearchBar from "@/components/SearchBar";
+import BottomSearchBar from "@/components/BottomSearchBar";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -224,14 +224,8 @@ export default function ScoresPage() {
   );
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 pt-4 pb-24">
       <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} loading={loading} />
-
-      <SearchBar
-        value={query}
-        onChange={setQuery}
-        placeholder="Search for games or teams"
-      />
 
       {error && (
         <div className="mb-3 rounded-lg bg-caution-bg px-3 py-2 text-xs text-caution">
@@ -266,6 +260,12 @@ export default function ScoresPage() {
           Updated {lastUpdated.toLocaleTimeString()}
         </div>
       )}
+
+      <BottomSearchBar
+        value={query}
+        onChange={setQuery}
+        placeholder="Search for games or teams"
+      />
     </div>
   );
 }
