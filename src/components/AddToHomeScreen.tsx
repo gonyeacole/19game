@@ -57,8 +57,9 @@ export default function AddToHomeScreen() {
         }`}
       >
         <svg viewBox="0 0 20 20" className="h-4 w-4">
-          <path d="M7.5 7.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="10" cy="14.3" r="0.9" fill="currentColor" />
+          <rect x="3.5" y="3.5" width="11" height="11" rx="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
+          <circle cx="14.3" cy="14.3" r="3.4" className="fill-panel-3" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M14.3 12.6v3.4M12.6 14.3h3.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
         </svg>
       </button>
 
