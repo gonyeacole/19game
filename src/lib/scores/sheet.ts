@@ -11,7 +11,11 @@ import type {
 // servers do the actual scraping, which sidesteps the bot-filtering that
 // blocks server-originated requests straight to ESPN (see espn.ts).
 const SHEET_ID = "13I01yScA6Hg-lind-KX7ZAykk38eiSYVJxj4YZ2Afro";
-const SHEET_GID = "2012782522";
+// This is the sheet's raw unfiltered data tab (all 18 weeks, ~330+ rows) —
+// not the "Week Filter" tab, which only shows whichever single week a
+// dropdown cell is currently set to (shared state we can't control per
+// request).
+const SHEET_GID = "1227961915";
 const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
 // Column layout for a regular-season row in the sheet:
