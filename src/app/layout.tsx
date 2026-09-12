@@ -63,8 +63,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
       </head>
-      <body className="flex h-full flex-col overflow-hidden bg-field text-chalk">
-        <header className="safe-top z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
+      <body className="min-h-full flex flex-col bg-field text-chalk">
+        <header className="safe-top sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
           <div className="justify-self-start">
             <AddToHomeScreen />
           </div>
@@ -76,9 +76,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <RefreshButton />
           </div>
         </header>
-        <main id="scroll-main" className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 pb-24">{children}</main>
         <TabNav />
       </body>
     </html>

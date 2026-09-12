@@ -7,8 +7,7 @@ export default function RefreshButton() {
     // content you were just looking at. The browser's own scroll-restoration
     // then leaves the viewport parked in that now-empty space until you
     // scroll it yourself. Reset to the top before reloading so it doesn't.
-    // #scroll-main (not the window) is what actually scrolls now.
-    document.getElementById("scroll-main")?.scrollTo(0, 0);
+    window.scrollTo(0, 0);
     window.location.reload();
   };
 
