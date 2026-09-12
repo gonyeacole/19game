@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Silkscreen } from "next/font/google";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import "./globals.css";
-
-// Pixel/dot-matrix face — the actual font family real stadium scoreboards
-// are built from, unlike a bolded system font with a glow slapped on.
-const silkscreen = Silkscreen({ weight: "700", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "19 League",
@@ -48,16 +43,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3">
           <ThemeToggle />
-          <div className="flex items-baseline gap-1.5">
-            <span className={`${silkscreen.className} text-xl leading-none text-led`}>
-              19
-            </span>
-            <span
-              className={`${silkscreen.className} text-xl leading-none tracking-[0.15em] text-led`}
-            >
-              LEAGUE
-            </span>
-          </div>
+          {/* Real Helvetica Compressed is a paid, non-web font — this
+              approximates it by squeezing plain Helvetica/Arial horizontally. */}
+          <span
+            className="font-sans text-2xl font-bold leading-none text-led"
+            style={{ transform: "scaleX(0.8)", display: "inline-block" }}
+          >
+            19League
+          </span>
           <RefreshButton />
         </header>
         <main className="flex-1 pb-28">
