@@ -29,7 +29,7 @@ export default function ThemeToggle() {
       aria-label="Toggle light/dark mode"
       className="shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90"
     >
-      {theme === "light" ? (
+      {theme === "dark" ? (
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="h-4 w-4">
           <circle cx="10" cy="10" r="3.5" />
           <line x1="10" y1="1.5" x2="10" y2="3.5" />
