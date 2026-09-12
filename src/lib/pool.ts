@@ -112,9 +112,21 @@ export interface SeasonSummary {
   currentPot: number;
 }
 
+/**
+ * Only counts weeks through the current one — the first week that isn't
+ * complete yet, inclusive. Admin can mark a future week's payments paid
+ * ahead of time (nothing stops them), but that money shouldn't show up in
+ * the pot until the season actually reaches that week; any week after the
+ * current one is ignored here even if it already has data.
+ */
 export function computeSeasonSummary(weeks: WeekPotSummary[]): SeasonSummary {
-  const totalCollected = weeks.reduce((sum, w) => sum + w.collected, 0);
-  const totalPaidOut = weeks.reduce((sum, w) => sum + w.paidOut, 0);
+  let totalCollected = 0;
+  let totalPaidOut = 0;
+  for (const week of weeks) {
+    totalCollected += week.collected;
+    totalPaidOut += week.paidOut;
+    if (!week.complete) break;
+  }
   return {
     totalCollected,
     totalPaidOut,

@@ -4,11 +4,15 @@ export default function SearchBar({
   value,
   onChange,
   placeholder,
+  variant = "default",
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  variant?: "default" | "white";
 }) {
+  const isWhite = variant === "white";
+
   return (
     <div className="relative mb-4">
       <svg
@@ -17,7 +21,9 @@ export default function SearchBar({
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
-        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-chalk-faint"
+        className={`pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 ${
+          isWhite ? "text-gray-400" : "text-chalk-faint"
+        }`}
       >
         <circle cx="8.5" cy="8.5" r="5.5" />
         <line x1="16.5" y1="16.5" x2="12.8" y2="12.8" />
@@ -27,7 +33,11 @@ export default function SearchBar({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-full border border-line bg-panel-2 py-3 pl-11 pr-4 text-sm text-chalk placeholder:text-chalk-faint"
+        className={
+          isWhite
+            ? "w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 placeholder:text-gray-400"
+            : "w-full rounded-full border border-line bg-panel-2 py-3 pl-11 pr-4 text-sm text-chalk placeholder:text-chalk-faint"
+        }
       />
     </div>
   );

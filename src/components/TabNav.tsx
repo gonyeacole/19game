@@ -74,7 +74,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 bg-field pb-[env(safe-area-inset-bottom)]"
+      className="z-10 shrink-0 border-t border-line bg-field pb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4">
@@ -84,7 +84,7 @@ export default function TabNav() {
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 pb-2.5 pt-1.5 text-xs font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-1 pb-3 pt-1 text-xs font-semibold transition-colors ${
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >

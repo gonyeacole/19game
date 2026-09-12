@@ -231,6 +231,7 @@ export default function ScoresPage() {
         value={query}
         onChange={setQuery}
         placeholder="Search for games or teams"
+        variant="white"
       />
 
       {error && (
