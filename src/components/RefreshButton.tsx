@@ -15,7 +15,7 @@ export default function RefreshButton() {
     <button
       onClick={refresh}
       aria-label="Refresh page"
-      className="shrink-0 rounded-full bg-led px-3 py-1.5 text-xs font-bold text-[#08150e] transition-transform active:scale-90"
+      className="shrink-0 rounded-full bg-led px-3 py-1.5 text-xs font-bold text-pill-text transition-transform active:scale-90"
     >
       Refresh
     </button>

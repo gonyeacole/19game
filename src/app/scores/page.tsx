@@ -148,7 +148,7 @@ function GameCard({ game }: { game: GameDTO }) {
             <span className="text-live">{statusLabel(game)}</span>
           </>
         ) : (
-          <span className="rounded-full bg-led px-2 py-0.5 text-[#08150e]">
+          <span className="rounded-full bg-led px-2 py-0.5 text-pill-text">
             {statusLabel(game)}
           </span>
         )}

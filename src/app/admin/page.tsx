@@ -198,7 +198,7 @@ function PlayerSetup() {
                   <button
                     onClick={() => save(team.id)}
                     disabled={!dirty || !draft.name.trim() || savingId === team.id}
-                    className="rounded-full bg-win px-3 py-1.5 text-xs font-bold text-[#08150e] transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+                    className="rounded-full bg-win px-3 py-1.5 text-xs font-bold text-pill-text transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
                   >
                     {savingId === team.id ? "Saving..." : "Save"}
                   </button>
@@ -388,7 +388,7 @@ function Payments() {
                   disabled={busyId === p.id}
                   className={`rounded-full px-3 py-1.5 text-xs font-bold transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
                     p.paid
-                      ? "bg-win text-[#08150e]"
+                      ? "bg-win text-pill-text"
                       : "border border-line text-chalk-dim"
                   }`}
                 >
@@ -399,7 +399,7 @@ function Payments() {
                   disabled={busyId === p.id}
                   className={`rounded-full px-3 py-1.5 text-xs font-bold transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
                     p.won
-                      ? "bg-led text-[#08150e]"
+                      ? "bg-led text-pill-text"
                       : "border border-line text-chalk-dim"
                   }`}
                 >
@@ -426,7 +426,7 @@ export default function AdminPage() {
             onClick={() => setSection(s)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all active:scale-95 ${
               section === s
-                ? "bg-led text-[#08150e]"
+                ? "bg-led text-pill-text"
                 : "border border-line text-chalk-dim"
             }`}
           >
