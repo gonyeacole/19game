@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 type Platform = "ios" | "android" | "chrome";
@@ -40,23 +40,76 @@ function detectPlatform(): Platform {
   return "chrome";
 }
 
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    // iOS Safari's own flag for "already added to home screen"
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+// Chrome/Edge fire this instead of letting the browser show its own install
+// UI immediately — preventDefault() + stashing it lets us trigger that same
+// native "Install this app? Cancel / Install" dialog from our own button,
+// on our own timing. Safari (iOS and desktop) never fires this event at
+// all — there is no API for triggering its Add to Home Screen from a page,
+// so those browsers always fall back to the manual instructions below.
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 export default function AddToHomeScreen() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<Platform>("chrome");
+  const [installed, setInstalled] = useState(false);
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reads navigator.userAgent, unavailable during SSR/render
     setPlatform(detectPlatform());
+    setInstalled(isStandalone());
+
+    navigator.serviceWorker?.register("/sw.js").catch(() => {});
+
+    const onBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      deferredPrompt.current = e as BeforeInstallPromptEvent;
+    };
+    const onInstalled = () => {
+      deferredPrompt.current = null;
+      setInstalled(true);
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
 
-  if (pathname?.startsWith("/admin")) return null;
+  if (pathname?.startsWith("/admin") || installed) return null;
+
+  const handleClick = async () => {
+    const promptEvent = deferredPrompt.current;
+    if (!promptEvent) {
+      setOpen(true);
+      return;
+    }
+    // The native dialog itself is the "yes or no" — Chrome renders it, not us.
+    await promptEvent.prompt();
+    const { outcome } = await promptEvent.userChoice;
+    deferredPrompt.current = null;
+    if (outcome === "accepted") setInstalled(true);
+  };
 
   return (
     <>
       <div className="px-4 pb-4 pt-2 text-center">
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleClick}
           className="text-xs font-medium text-chalk-faint underline underline-offset-2 transition-transform active:scale-95"
         >
           Want to add 19 League to your home screen?
