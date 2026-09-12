@@ -23,8 +23,13 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
     existing.games.length > 0 &&
     existing.games.every((g) => g.status === "FINAL");
 
+  // Only throttle re-fetching when we actually have something cached to show
+  // — an empty result is never worth caching, since there's nothing to lose
+  // by retrying immediately.
   const syncedRecently =
-    existing?.lastSyncedAt != null &&
+    existing != null &&
+    existing.games.length > 0 &&
+    existing.lastSyncedAt != null &&
     Date.now() - existing.lastSyncedAt.getTime() < MIN_SYNC_INTERVAL_MS;
 
   if (existing && (allGamesFinal || syncedRecently)) {

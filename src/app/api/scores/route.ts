@@ -14,11 +14,13 @@ export async function GET(req: NextRequest) {
   }
 
   let synced = true;
+  let syncError: string | null = null;
   try {
     await syncWeekScores(seasonYear, weekNumber);
   } catch (err) {
-    console.error("ESPN sync failed:", err);
+    console.error("Score sync failed:", err);
     synced = false;
+    syncError = err instanceof Error ? err.message : String(err);
     // Fall through and serve whatever is already in the DB — the UI can
     // still show stale data with a "couldn't refresh" indicator.
   }
@@ -41,5 +43,6 @@ export async function GET(req: NextRequest) {
     weekNumber,
     week,
     synced,
+    syncError,
   });
 }
