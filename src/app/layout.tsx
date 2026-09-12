@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Silkscreen } from "next/font/google";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
+import RefreshButton from "@/components/RefreshButton";
 import "./globals.css";
 
 // Pixel/dot-matrix face — the actual font family real stadium scoreboards
@@ -39,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3">
-          <div className="w-8" />
+          <ThemeToggle />
           <div className="flex items-baseline gap-1.5 rounded-sm border-2 border-[#3a3a3a] bg-black px-3 py-1 shadow-[inset_0_0_8px_rgba(0,0,0,0.8)]">
             <span
               className={`${silkscreen.className} text-xl leading-none text-led drop-shadow-[0_0_5px_var(--color-led)] drop-shadow-[0_0_10px_var(--color-led)]`}
@@ -52,7 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               LEAGUE
             </span>
           </div>
-          <ThemeToggle />
+          <RefreshButton />
         </header>
         <main className="flex-1 pb-20">{children}</main>
         <TabNav />
