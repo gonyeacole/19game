@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import "./globals.css";
+
+const leagueGothic = localFont({
+  src: "../fonts/LeagueGothic-Regular.ttf",
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: "19 League",
@@ -43,12 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3">
           <ThemeToggle />
-          {/* Real Helvetica Compressed is a paid, non-web font — this
-              approximates it by squeezing plain Helvetica/Arial horizontally. */}
-          <span
-            className="font-sans text-2xl font-bold leading-none text-led"
-            style={{ transform: "scaleX(0.8)", display: "inline-block" }}
-          >
+          <span className={`${leagueGothic.className} text-3xl leading-none tracking-wide text-led`}>
             19League
           </span>
           <RefreshButton />
