@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Platform = "ios" | "android" | "chrome";
 
@@ -40,6 +41,7 @@ function detectPlatform(): Platform {
 }
 
 export default function AddToHomeScreen() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<Platform>("chrome");
 
@@ -47,6 +49,8 @@ export default function AddToHomeScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reads navigator.userAgent, unavailable during SSR/render
     setPlatform(detectPlatform());
   }, []);
+
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <>
