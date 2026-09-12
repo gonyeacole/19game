@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e: FormEvent) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Read the field straight from the DOM at submit time rather than a
+    // React-state mirror — mobile autofill/password-suggestion can update
+    // the input's value without firing React's onChange, which left the
+    // state (and the disabled-until-non-empty button) stuck out of sync.
+    const password = new FormData(e.currentTarget).get("password");
+    if (typeof password !== "string" || !password) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -38,8 +44,7 @@ export default function AdminLoginPage() {
       <form onSubmit={submit} className="flex flex-col gap-3">
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
           placeholder="Password"
           autoFocus
           className="rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm text-chalk placeholder:text-chalk-faint"
@@ -47,8 +52,8 @@ export default function AdminLoginPage() {
         {error && <p className="text-center text-xs text-live">{error}</p>}
         <button
           type="submit"
-          disabled={loading || !password}
-          className="rounded-full bg-led px-4 py-2 text-sm font-bold text-[#1a1200] disabled:opacity-40"
+          disabled={loading}
+          className="rounded-full bg-led px-4 py-2 text-sm font-bold text-[#1a1200] transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
         >
           {loading ? "Checking..." : "Unlock"}
         </button>
