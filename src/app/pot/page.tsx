@@ -88,13 +88,13 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
                 key={w.player.id + w.team.id}
                 className="inline-flex items-center gap-1 rounded-full bg-win-bg px-2.5 py-1 text-xs font-semibold text-win"
               >
-                🏆 {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
+                {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
               </span>
             ))}
           </div>
         ) : (
           <span className="inline-block rounded-full bg-panel-3 px-2.5 py-1 text-xs font-medium text-chalk-dim">
-            No winner yet — rolls over
+            No winner yet
           </span>
         )}
       </div>
@@ -137,9 +137,9 @@ export default function PotPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 rounded-xl border border-line bg-gradient-to-br from-panel-3 to-panel p-5 text-center">
-        <div className="text-xs font-semibold uppercase tracking-widest text-chalk-dim">
-          Current Pot
+      <div className="mb-4 rounded-xl border border-led/20 bg-gradient-to-br from-led-bg to-panel p-5 text-center">
+        <div className={`${leagueGothic.className} text-sm font-semibold uppercase tracking-[0.2em] text-chalk-dim`}>
+          Current Payout
         </div>
         <div className={`${leagueGothic.className} text-5xl leading-none tracking-wide tabular-nums text-led`}>
           {data ? (

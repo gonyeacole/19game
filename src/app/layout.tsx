@@ -63,7 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="justify-self-start">
             <AddToHomeScreen />
           </div>
-          <span className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}>
+          <span className={`${leagueGothic.className} justify-self-center text-3xl font-bold leading-none tracking-wide text-led`}>
             19League
           </span>
           <div className="flex items-center justify-self-end gap-2">
