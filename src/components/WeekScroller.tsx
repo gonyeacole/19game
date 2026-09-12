@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
-const WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
+const MIN_WEEK = 1;
+const MAX_WEEK = 18;
 
 export default function WeekScroller({
   weekNumber,
@@ -11,42 +10,56 @@ export default function WeekScroller({
   weekNumber: number | null;
   onSelect: (week: number) => void;
 }) {
-  const activeRef = useRef<HTMLButtonElement>(null);
+  const current = weekNumber ?? MIN_WEEK;
 
-  useEffect(() => {
-    activeRef.current?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [weekNumber]);
+  const goTo = (week: number) => {
+    if (week < MIN_WEEK || week > MAX_WEEK) return;
+    onSelect(week);
+  };
 
   return (
-    <div
-      className="no-scrollbar -mx-4 mb-3 overflow-x-auto px-4"
-      style={{
-        maskImage:
-          "linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent)",
-        WebkitMaskImage:
-          "linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent)",
-      }}
-    >
-      <div className="flex w-max gap-4 px-2 pb-1">
-        {WEEKS.map((w) => (
-          <button
-            key={w}
-            ref={w === weekNumber ? activeRef : undefined}
-            onClick={() => onSelect(w)}
-            className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-              w === weekNumber
-                ? "border-transparent bg-led text-[#1a1200]"
-                : "border-line bg-panel-3 text-chalk-dim"
-            }`}
-          >
-            Week {w}
-          </button>
-        ))}
+    <div className="mb-3 flex items-center gap-2">
+      <button
+        onClick={() => goTo(current - 1)}
+        disabled={current <= MIN_WEEK}
+        aria-label="Previous week"
+        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim disabled:opacity-30"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
+          <polyline points="12 4 6 10 12 16" />
+        </svg>
+      </button>
+
+      <div className="flex-1 rounded-full border border-line bg-panel-3 py-2.5 text-center text-sm font-semibold text-chalk-dim">
+        Week {current}
       </div>
+
+      <button
+        onClick={() => goTo(current + 1)}
+        disabled={current >= MAX_WEEK}
+        aria-label="Next week"
+        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim disabled:opacity-30"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
+          <polyline points="8 4 14 10 8 16" />
+        </svg>
+      </button>
     </div>
   );
 }
