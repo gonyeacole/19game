@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { POT_VENMO_USERNAME } from "@/lib/pool";
 
 interface WinnerDTO {
   player: { id: string; name: string };
@@ -144,6 +145,17 @@ export default function PotPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {data && (
+        <a
+          href={`https://venmo.com/${encodeURIComponent(POT_VENMO_USERNAME)}?txn=pay`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-4 block rounded-full bg-venmo px-4 py-2.5 text-center text-sm font-bold text-white"
+        >
+          Pay the Pot on Venmo
+        </a>
       )}
 
       {loading ? (

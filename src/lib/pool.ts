@@ -3,6 +3,10 @@ import type { Game, Payment, Player, Team } from "@prisma/client";
 export const WINNING_SCORE = 19;
 export const WEEKLY_DUE = 10;
 
+// Whoever collects/holds the pot — shown as a Venmo link on the Pot tab so
+// anyone can pay in without needing to be looked up individually.
+export const POT_VENMO_USERNAME = "Dan-woldo";
+
 export type PaymentWithPlayerTeam = Payment & {
   player: Player & { team: Team };
 };
