@@ -125,7 +125,7 @@ export default function PotPage() {
         <div className="text-xs font-semibold uppercase tracking-widest text-chalk-dim">
           Current Pot
         </div>
-        <div className="text-4xl font-extrabold tabular-nums text-win drop-shadow-[0_0_20px_var(--color-win)]">
+        <div className="text-4xl font-extrabold tabular-nums text-win">
           {data ? money(data.summary.currentPot) : "—"}
         </div>
       </div>
