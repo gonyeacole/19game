@@ -110,6 +110,9 @@ function statusLabel(game: GameDTO): string {
       timeZoneName: "short",
     });
   }
+  // The sheet's own situation text for a finished game (e.g. "Game Over")
+  // varies and isn't ours to control — show a consistent label instead.
+  if (game.status === "FINAL") return "Final";
   return game.statusDetail || game.status;
 }
 
