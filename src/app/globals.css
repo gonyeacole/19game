@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 /*
-  Committed to a single dark "scoreboard" theme — this is a private tool
-  checked on phones during games, not a general-purpose site, so no
-  light-mode variant.
+  Dark "scoreboard" theme — the default. Plain @theme (not @theme inline)
+  so utilities reference these as CSS variables rather than baking in
+  literal values — required for the light-mode override below to work at
+  runtime via the [data-theme] toggle instead of only at build time.
 */
-@theme inline {
+@theme {
   --color-field: #0a0a0a;
   --color-panel: #151515;
   --color-panel-2: #1d1d1d;
@@ -24,6 +25,27 @@
   --color-live-bg: #2e1a16;
   --color-venmo: #3d95ce;
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Light theme — same token names, overridden when the toggle picks it. */
+:root[data-theme="light"] {
+  --color-field: #f5f5f4;
+  --color-panel: #ffffff;
+  --color-panel-2: #f2f1ef;
+  --color-panel-3: #e7e5e2;
+  --color-line: #d9d7d3;
+  --color-chalk: #19181a;
+  --color-chalk-dim: #55534f;
+  --color-chalk-faint: #85827c;
+  --color-led: #c97800;
+  --color-led-bg: #fff3dc;
+  --color-win: #1f9d5c;
+  --color-win-bg: #e3f7ec;
+  --color-caution: #b4610f;
+  --color-caution-bg: #fdefdf;
+  --color-live: #d9392a;
+  --color-live-bg: #fdeceb;
+  --color-venmo: #2f83bb;
 }
 
 body {
