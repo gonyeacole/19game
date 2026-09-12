@@ -22,16 +22,11 @@ const TABS = [
     href: "/teams",
     label: "Teams",
     icon: (
-      <svg viewBox="0 0 20 20">
-        <path
-          fill="currentColor"
-          d="M2.2 11.8C2.2 6 6.4 2 10.6 2c4 0 6.8 3.2 6.8 7.1 0 1.4-.7 2.4-1.8 2.9l.1 1.3c-1.9-.2-3.5.3-4.2 1.3-1 1-2.7 1.4-4.1 1-.8 1-2.3 1.2-3.3.4-1.2-.4-1.9-2.1-1.9-4.2Z"
-        />
-        <circle cx="6.2" cy="10.9" r="1" fill="var(--color-panel-2)" />
-        <g stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11.4 14.7c.6-1.3 2.2-1.8 4.3-1.6 1.3.1 2.2.5 2 1.3l-.7 2.6c-.2.6-.9.8-1.4.4L12 15" />
-          <path d="M12.5 15.9l4.4-.3" />
-        </g>
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path d="M6.5 2.3 3 4.4 1.4 8l2.5 1.5 1.6-1.2V17a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8.3l1.6 1.2L18.6 8 17 4.4l-3.5-2.1-1.7 1.2a2.3 2.3 0 0 1-3.6 0Z" />
+        <text x="10" y="14.2" textAnchor="middle" fontSize="6.5" fontWeight="700" fill="var(--color-panel-2)">
+          7
+        </text>
       </svg>
     ),
   },
