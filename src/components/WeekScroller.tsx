@@ -25,7 +25,7 @@ export default function WeekScroller({
         onClick={() => goTo(current - 1)}
         disabled={loading || current <= MIN_WEEK}
         aria-label="Previous week"
-        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-icon transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
+        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
       >
         <svg
           viewBox="0 0 20 20"
@@ -48,7 +48,7 @@ export default function WeekScroller({
         onClick={() => goTo(current + 1)}
         disabled={loading || current >= MAX_WEEK}
         aria-label="Next week"
-        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-icon transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
+        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
       >
         <svg
           viewBox="0 0 20 20"

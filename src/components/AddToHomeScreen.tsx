@@ -52,7 +52,7 @@ export default function AddToHomeScreen() {
         aria-label="How to add to home screen"
         aria-hidden={hidden}
         tabIndex={hidden ? -1 : undefined}
-        className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-icon transition-transform active:scale-90 ${
+        className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90 ${
           hidden ? "invisible pointer-events-none" : ""
         }`}
       >
