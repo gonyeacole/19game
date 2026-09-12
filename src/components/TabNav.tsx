@@ -84,7 +84,7 @@ export default function TabNav() {
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 pb-3 pt-1 text-xs font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >
