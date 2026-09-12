@@ -3,6 +3,7 @@ import { Silkscreen } from "next/font/google";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
+import AddToHomeScreen from "@/components/AddToHomeScreen";
 import "./globals.css";
 
 // Pixel/dot-matrix face — the actual font family real stadium scoreboards
@@ -61,7 +62,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           <RefreshButton />
         </header>
-        <main className="flex-1 pb-20">{children}</main>
+        <main className="flex-1 pb-20">
+          {children}
+          <AddToHomeScreen />
+        </main>
         <TabNav />
       </body>
     </html>
