@@ -138,10 +138,10 @@ export default function PotPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
       <div className="mb-4 rounded-xl border border-led/20 bg-gradient-to-br from-led-bg to-panel p-5 text-center">
-        <div className={`${leagueGothic.className} text-sm font-semibold uppercase tracking-[0.2em] text-chalk-dim`}>
+        <div className="text-xs font-semibold uppercase tracking-widest text-led">
           Current Payout
         </div>
-        <div className={`${leagueGothic.className} text-5xl leading-none tracking-wide tabular-nums text-led`}>
+        <div className={`${leagueGothic.className} text-6xl leading-none tracking-wide tabular-nums text-led`}>
           {data ? (
             money(data.summary.currentPot)
           ) : (

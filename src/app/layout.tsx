@@ -60,14 +60,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="safe-top sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
-          <div className="justify-self-start">
+          <div className="flex items-center justify-self-start gap-2">
             <AddToHomeScreen />
+            <ThemeToggle />
           </div>
           <span className={`${leagueGothic.className} justify-self-center text-3xl font-bold leading-none tracking-wide text-led`}>
             19League
           </span>
-          <div className="flex items-center justify-self-end gap-2">
-            <ThemeToggle />
+          <div className="justify-self-end">
             <RefreshButton />
           </div>
         </header>
