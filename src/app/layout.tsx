@@ -10,8 +10,14 @@ import "./globals.css";
 const silkscreen = Silkscreen({ weight: "700", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Exactly 19 Pool",
+  title: "19 League",
   description: "NFL Exactly 19 pool — scores, pot, and payments",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "19 League",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport = {
