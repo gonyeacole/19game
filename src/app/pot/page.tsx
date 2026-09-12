@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { POT_VENMO_USERNAME } from "@/lib/pool";
+import Skeleton from "@/components/Skeleton";
 
 interface WinnerDTO {
   player: { id: string; name: string };
@@ -43,6 +44,19 @@ function money(n: number): string {
     currency: "USD",
     maximumFractionDigits: 2,
   });
+}
+
+function WeekCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-4 w-14" />
+      </div>
+      <Skeleton className="mt-2 h-3 w-40" />
+      <Skeleton className="mt-3 h-6 w-28 rounded-full" />
+    </div>
+  );
 }
 
 function WeekCard({ week }: { week: WeekSummaryDTO }) {
@@ -126,26 +140,36 @@ export default function PotPage() {
           Current Pot
         </div>
         <div className="text-4xl font-extrabold tabular-nums text-chalk">
-          {data ? money(data.summary.currentPot) : "—"}
+          {data ? (
+            money(data.summary.currentPot)
+          ) : (
+            <Skeleton className="mx-auto h-9 w-32" />
+          )}
         </div>
       </div>
 
-      {data && (
-        <div className="mb-4 grid grid-cols-2 gap-3 text-center">
-          <div className="rounded-xl border border-line bg-panel p-3">
-            <div className="text-xs text-chalk-faint">Total Collected</div>
+      <div className="mb-4 grid grid-cols-2 gap-3 text-center">
+        <div className="rounded-xl border border-line bg-panel p-3">
+          <div className="text-xs text-chalk-faint">Total Collected</div>
+          {data ? (
             <div className="text-lg font-bold tabular-nums text-chalk">
               {money(data.summary.totalCollected)}
             </div>
-          </div>
-          <div className="rounded-xl border border-line bg-panel p-3">
-            <div className="text-xs text-chalk-faint">Total Paid Out</div>
+          ) : (
+            <Skeleton className="mx-auto mt-1.5 h-5 w-16" />
+          )}
+        </div>
+        <div className="rounded-xl border border-line bg-panel p-3">
+          <div className="text-xs text-chalk-faint">Total Paid Out</div>
+          {data ? (
             <div className="text-lg font-bold tabular-nums text-chalk">
               {money(data.summary.totalPaidOut)}
             </div>
-          </div>
+          ) : (
+            <Skeleton className="mx-auto mt-1.5 h-5 w-16" />
+          )}
         </div>
-      )}
+      </div>
 
       {data && (
         <a
@@ -157,8 +181,10 @@ export default function PotPage() {
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-chalk-faint">
-          Loading pot...
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <WeekCardSkeleton key={i} />
+          ))}
         </div>
       ) : !data || data.weeks.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">

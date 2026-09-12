@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Skeleton from "@/components/Skeleton";
 
 const SEASON_WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
 
@@ -27,6 +28,21 @@ interface TeamResult {
 function resultLabel(r: TeamResult): string {
   if (r.status === "SCHEDULED") return "";
   return `${r.teamScore}-${r.oppScore}`;
+}
+
+function TeamRowSkeleton() {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <Skeleton className="h-3.5 w-32" />
+          <Skeleton className="mt-1.5 h-3 w-20" />
+        </div>
+        <Skeleton className="h-3 w-3 shrink-0" />
+      </div>
+    </div>
+  );
 }
 
 function TeamRow({ team }: { team: TeamDTO }) {
@@ -154,7 +170,11 @@ export default function TeamsPage() {
       />
 
       {!teams ? (
-        <div className="py-10 text-center text-sm text-chalk-faint">Loading...</div>
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <TeamRowSkeleton key={i} />
+          ))}
+        </div>
       ) : filtered && filtered.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">
           No teams match &ldquo;{query}&rdquo;.

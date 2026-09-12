@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
+import Skeleton from "@/components/Skeleton";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -111,6 +112,28 @@ function statusLabel(game: GameDTO): string {
   return game.statusDetail || game.status;
 }
 
+function GameCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <Skeleton className="mb-3 h-3 w-24" />
+      <div className="flex flex-col gap-1.5">
+        {[0, 1].map((i) => (
+          <div key={i} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+              <div className="flex flex-col gap-1.5">
+                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
+            <Skeleton className="h-5 w-6 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GameCard({ game }: { game: GameDTO }) {
   return (
     <div className="rounded-xl border border-line bg-panel p-3">
@@ -200,8 +223,10 @@ export default function ScoresPage() {
       )}
 
       {loading && !games ? (
-        <div className="py-10 text-center text-sm text-chalk-faint">
-          Loading scores...
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <GameCardSkeleton key={i} />
+          ))}
         </div>
       ) : games && games.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">
