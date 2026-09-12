@@ -23,10 +23,10 @@ const TABS = [
     label: "Teams",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2.5" y="2.5" width="6" height="6" rx="1" />
-        <rect x="11.5" y="2.5" width="6" height="6" rx="1" />
-        <rect x="2.5" y="11.5" width="6" height="6" rx="1" />
-        <rect x="11.5" y="11.5" width="6" height="6" rx="1" />
+        <path d="M3 10.5C3 5.8 6.1 3 10 3s7 2.8 7 7.5c0 1.6-1 2.7-2.6 3H5.6C4 13.2 3 12.1 3 10.5Z" />
+        <path d="M10 3v2.2" />
+        <path d="M6.2 13.5c0 2.6 1.7 4.2 3.8 4.2s3.8-1.6 3.8-4.2" />
+        <path d="M7 15.1c1 .7 2 1 3 1s2-.3 3-1" />
       </svg>
     ),
   },
@@ -69,7 +69,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 bg-field pb-[calc(env(safe-area-inset-bottom)+3px)]"
+      className="fixed bottom-0 left-0 right-0 z-20 bg-field pb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4">
@@ -79,7 +79,7 @@ export default function TabNav() {
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1.5 py-3.5 text-xs font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-1 py-3.5 text-xs font-semibold transition-colors ${
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >
