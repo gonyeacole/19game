@@ -151,17 +151,13 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
     const kickoff = new Date(Date.UTC(seasonYear, 8, 1));
 
     const games: NormalizedGame[] = [];
-    let weekLabelMatches = 0;
-    let datePassed = 0;
     for (const cols of rows) {
       const weekLabel = cols[COL.WEEK]?.trim();
       const match = weekLabel?.match(/^Week (\d+)$/i);
       if (!match || Number(match[1]) !== week) continue;
-      weekLabelMatches++;
 
       const gameDate = parseSheetDate(cols[COL.DATE], cols[COL.TIME]);
       if (!gameDate || gameDate < kickoff) continue;
-      datePassed++;
 
       const awayAbbr = normalizeAbbr(cols[COL.AWAY_ABBR]);
       const homeAbbr = normalizeAbbr(cols[COL.HOME_ABBR]);
@@ -179,16 +175,6 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
         statusDetail: (cols[COL.SITUATION] ?? qtr).trim(),
         startTime: gameDate.toISOString(),
       });
-    }
-
-    // TEMPORARY: surface why zero games came back instead of guessing blind —
-    // remove once the sheet is confirmed working end to end.
-    if (games.length === 0) {
-      throw new Error(
-        `Sheet parsed but produced 0 games for week ${week}: ` +
-          `textLen=${text.length} totalRows=${rows.length} weekLabelMatches=${weekLabelMatches} datePassed=${datePassed} ` +
-          `sampleRow0=${JSON.stringify(rows[0])} sampleRow2=${JSON.stringify(rows[2])}`
-      );
     }
 
     return games;
