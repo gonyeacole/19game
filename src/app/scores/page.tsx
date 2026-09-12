@@ -141,13 +141,17 @@ function GameCardSkeleton() {
 function GameCard({ game }: { game: GameDTO }) {
   return (
     <div className="rounded-xl border border-line bg-panel p-3">
-      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-chalk-faint">
-        {game.status === "IN_PROGRESS" && (
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+        {game.status === "IN_PROGRESS" ? (
+          <>
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />
+            <span className="text-live">{statusLabel(game)}</span>
+          </>
+        ) : (
+          <span className="rounded-full bg-led px-2 py-0.5 text-[#08150e]">
+            {statusLabel(game)}
+          </span>
         )}
-        <span className={game.status === "IN_PROGRESS" ? "text-live" : ""}>
-          {statusLabel(game)}
-        </span>
       </div>
       <div className="flex flex-col gap-1.5">
         <TeamLine team={game.awayTeam} score={game.awayScore} status={game.status} />
