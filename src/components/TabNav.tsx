@@ -31,17 +31,6 @@ const TABS = [
     ),
   },
   {
-    href: "/pay",
-    label: "Pay",
-    icon: (
-      <svg viewBox="0 0 20 20">
-        <text x="10" y="15.5" textAnchor="middle" fontSize="15" fontWeight="700" fill="currentColor">
-          $
-        </text>
-      </svg>
-    ),
-  },
-  {
     href: "/admin",
     label: "Admin",
     icon: (
@@ -71,7 +60,7 @@ export default function TabNav() {
       className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-panel-2 pb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-4">
+      <ul className="mx-auto grid max-w-lg grid-cols-3">
         {TABS.map((tab) => {
           const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
           return (

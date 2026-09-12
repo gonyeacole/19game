@@ -13,7 +13,10 @@ export function proxy(req: NextRequest) {
 
   if (authed) return NextResponse.next();
 
-  if (req.nextUrl.pathname.startsWith("/api/players")) {
+  if (
+    req.nextUrl.pathname.startsWith("/api/players") ||
+    req.nextUrl.pathname.startsWith("/api/payments")
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,5 +24,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/players/:path*"],
+  matcher: ["/admin/:path*", "/api/players/:path*", "/api/payments/:path*"],
 };

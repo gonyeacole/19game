@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import WeekScroller from "@/components/WeekScroller";
+import { venmoPayLink, WEEKLY_DUE } from "@/lib/pool";
 
 interface TeamDTO {
   id: string;
@@ -16,7 +18,29 @@ interface Draft {
   venmoUsername: string;
 }
 
-export default function AdminPage() {
+interface PaymentDTO {
+  id: string;
+  playerId: string;
+  weekId: string;
+  amount: number;
+  paid: boolean;
+  paidDate: string | null;
+  player: {
+    id: string;
+    name: string;
+    venmoUsername: string | null;
+    team: { id: string; name: string; abbreviation: string; logoUrl: string | null };
+  };
+}
+
+interface PaymentsResponse {
+  seasonYear: number;
+  weekNumber: number;
+  week: { id: string };
+  payments: PaymentDTO[];
+}
+
+function PlayerSetup() {
   const [teams, setTeams] = useState<TeamDTO[] | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -91,12 +115,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div>
       <div className="mb-4 text-center">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-chalk">
-          Player Setup
-        </h2>
-        <p className="mt-1 text-sm text-chalk-dim">
+        <p className="text-sm text-chalk-dim">
           Assign a player, name, and Venmo username to each of the 32 teams.{" "}
           <span className="font-semibold text-chalk">{assignedCount}/32 assigned.</span>
         </p>
@@ -177,6 +198,163 @@ export default function AdminPage() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function Payments() {
+  const [seasonYear, setSeasonYear] = useState<number | null>(null);
+  const [weekNumber, setWeekNumber] = useState<number | null>(null);
+  const [payments, setPayments] = useState<PaymentDTO[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(async (year?: number, week?: number) => {
+    const params = new URLSearchParams();
+    if (year != null) params.set("year", String(year));
+    if (week != null) params.set("week", String(week));
+    const res = await fetch(`/api/payments?${params.toString()}`, {
+      cache: "no-store",
+    });
+    const data: PaymentsResponse = await res.json();
+    setSeasonYear(data.seasonYear);
+    setWeekNumber(data.weekNumber);
+    setPayments(data.payments);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch-on-mount, setState happens after the await
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const selectWeek = (week: number) => {
+    if (seasonYear == null) return;
+    setLoading(true);
+    load(seasonYear, week);
+  };
+
+  const togglePaid = async (payment: PaymentDTO) => {
+    setBusyId(payment.id);
+    const next = !payment.paid;
+    setPayments(
+      (prev) =>
+        prev?.map((p) =>
+          p.id === payment.id
+            ? { ...p, paid: next, paidDate: next ? new Date().toISOString() : null }
+            : p
+        ) ?? null
+    );
+    try {
+      await fetch("/api/payments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerId: payment.playerId,
+          weekId: payment.weekId,
+          paid: next,
+        }),
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const paidCount = payments?.filter((p) => p.paid).length ?? 0;
+
+  return (
+    <div>
+      <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} />
+
+      {payments && (
+        <div className="mb-4 text-center text-sm text-chalk-dim">
+          {paidCount}/{payments.length} paid this week
+        </div>
+      )}
+
+      {loading && !payments ? (
+        <div className="py-10 text-center text-sm text-chalk-faint">
+          Loading players...
+        </div>
+      ) : payments && payments.length === 0 ? (
+        <div className="py-10 text-center text-sm text-chalk-faint">
+          No players set up yet. Add players under Player Setup.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {payments?.map((p) => (
+            <div
+              key={p.id}
+              className={`flex items-center justify-between gap-2 rounded-xl border p-3 ${
+                p.paid
+                  ? "border-transparent bg-win-bg shadow-[inset_0_0_0_1px_rgba(78,203,140,0.25)]"
+                  : "border-line bg-panel"
+              }`}
+            >
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-chalk">{p.player.name}</div>
+                <div className="truncate text-xs text-chalk-faint">
+                  {p.player.team.name}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {!p.paid && p.player.venmoUsername && (
+                  <a
+                    href={venmoPayLink({
+                      username: p.player.venmoUsername,
+                      amount: WEEKLY_DUE,
+                      note: `NFL Pool Week ${weekNumber}`,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full bg-venmo px-3 py-1.5 text-xs font-bold text-white"
+                  >
+                    Pay Venmo
+                  </a>
+                )}
+                <button
+                  onClick={() => togglePaid(p)}
+                  disabled={busyId === p.id}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
+                    p.paid
+                      ? "bg-win text-[#08150e]"
+                      : "border border-line text-chalk-dim"
+                  }`}
+                >
+                  {p.paid ? "Paid ✓" : "Mark paid"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AdminPage() {
+  const [section, setSection] = useState<"players" | "payments">("players");
+
+  return (
+    <div className="mx-auto max-w-lg px-4 py-4">
+      <div className="mb-4 flex justify-center gap-2">
+        {(["players", "payments"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setSection(s)}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              section === s
+                ? "bg-led text-[#1a1200]"
+                : "border border-line text-chalk-dim"
+            }`}
+          >
+            {s === "players" ? "Player Setup" : "Payments"}
+          </button>
+        ))}
+      </div>
+
+      {section === "players" ? <PlayerSetup /> : <Payments />}
     </div>
   );
 }
