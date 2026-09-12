@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-full bg-led px-4 py-2 text-sm font-bold text-[#1a1200] transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+          className="rounded-full bg-led px-4 py-2 text-sm font-bold text-[#08150e] transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
         >
           {loading ? "Checking..." : "Unlock"}
         </button>

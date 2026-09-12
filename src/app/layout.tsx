@@ -48,14 +48,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3">
           <ThemeToggle />
-          <div className="flex items-baseline gap-1.5 rounded-sm border-2 border-[#3a3a3a] bg-black px-3 py-1 shadow-[inset_0_0_8px_rgba(0,0,0,0.8)]">
-            <span
-              className={`${silkscreen.className} text-xl leading-none text-led drop-shadow-[0_0_5px_var(--color-led)] drop-shadow-[0_0_10px_var(--color-led)]`}
-            >
+          <div className="flex items-baseline gap-1.5">
+            <span className={`${silkscreen.className} text-xl leading-none text-led`}>
               19
             </span>
             <span
-              className={`${silkscreen.className} text-xl leading-none tracking-[0.15em] text-led drop-shadow-[0_0_5px_var(--color-led)] drop-shadow-[0_0_10px_var(--color-led)]`}
+              className={`${silkscreen.className} text-xl leading-none tracking-[0.15em] text-led`}
             >
               LEAGUE
             </span>
