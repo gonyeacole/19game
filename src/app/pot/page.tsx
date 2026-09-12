@@ -149,7 +149,7 @@ export default function PotPage() {
 
       {data && (
         <a
-          href={`https://venmo.com/${encodeURIComponent(POT_VENMO_USERNAME)}?txn=pay`}
+          href={`https://venmo.com/${encodeURIComponent(POT_VENMO_USERNAME)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mb-4 block rounded-full bg-venmo px-4 py-2.5 text-center text-sm font-bold text-white"
