@@ -72,6 +72,16 @@ body {
 html[data-standalone="true"] .safe-top {
   padding-top: calc(env(safe-area-inset-top) + 0.75rem);
 }
+/*
+  A static value instead of env(safe-area-inset-bottom) here on purpose —
+  env() on a `position: fixed` element is a live, re-evaluated value, and
+  there's evidence WebKit recomputes it around scroll/navigation in
+  standalone web apps, which reads as the whole bar jumping. 34px matches
+  the home-indicator inset on every current iPhone with one (the only
+  device class this even applies to, since the media/attribute gate above
+  only fires in standalone mode); a fixed number can't be recalculated
+  mid-navigation the way env() can.
+*/
 html[data-standalone="true"] .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: 34px;
 }

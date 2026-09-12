@@ -75,12 +75,6 @@ export default function TabNav() {
   return (
     <nav
       className="safe-bottom fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-field"
-      // Forces its own GPU compositing layer. iOS standalone web apps
-      // (Add to Home Screen) are known to visibly jitter/reposition
-      // fixed elements during page-content reflows — regular Safari tabs
-      // don't show this, standalone does. Isolating it onto its own
-      // layer stops the browser from recalculating its position as part
-      // of the rest of the page's layout pass.
       style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
       aria-label="Primary"
     >
