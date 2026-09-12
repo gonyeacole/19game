@@ -104,6 +104,8 @@ function statusLabel(game: GameDTO): string {
       weekday: "short",
       hour: "numeric",
       minute: "2-digit",
+      timeZone: "America/Chicago",
+      timeZoneName: "short",
     });
   }
   return game.statusDetail || game.status;
