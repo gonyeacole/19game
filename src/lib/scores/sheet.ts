@@ -1,5 +1,4 @@
 import { NFL_TEAMS } from "../../../prisma/teams";
-import { regularSeasonKickoff } from "../nflWeek";
 import type {
   NormalizedGame,
   NormalizedGameStatus,
@@ -105,7 +104,7 @@ function parseSheetDate(dateStr: string | undefined, timeStr: string | undefined
     if (t[3].toUpperCase() === "PM") hours += 12;
   }
 
-  return new Date(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes);
+  return new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes));
 }
 
 export class GoogleSheetScoreProvider implements ScoreProvider {
@@ -144,9 +143,12 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
     const rows = parseCsv(text);
 
     // Preseason weeks reuse the same "Week 1/2/3" labels as regular season
-    // weeks in this sheet, so the week number alone can't disambiguate —
-    // only rows on/after actual kickoff count as regular season.
-    const kickoff = regularSeasonKickoff(seasonYear);
+    // weeks in this sheet, so the week number alone can't disambiguate.
+    // Preseason always plays out in August and regular season always starts
+    // in September, so September 1st is a safe cutoff — no need for
+    // calendar-precise kickoff-date math here, which got the actual season
+    // opener wrong by a day when it was tried.
+    const kickoff = new Date(Date.UTC(seasonYear, 8, 1));
 
     const games: NormalizedGame[] = [];
     let weekLabelMatches = 0;
