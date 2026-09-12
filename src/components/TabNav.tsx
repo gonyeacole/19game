@@ -19,6 +19,18 @@ const TABS = [
     ),
   },
   {
+    href: "/teams",
+    label: "Teams",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2.5" y="2.5" width="6" height="6" rx="1" />
+        <rect x="11.5" y="2.5" width="6" height="6" rx="1" />
+        <rect x="2.5" y="11.5" width="6" height="6" rx="1" />
+        <rect x="11.5" y="11.5" width="6" height="6" rx="1" />
+      </svg>
+    ),
+  },
+  {
     href: "/pot",
     label: "Pot",
     icon: (
@@ -60,7 +72,7 @@ export default function TabNav() {
       className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-panel-2 pb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-3">
+      <ul className="mx-auto grid max-w-lg grid-cols-4">
         {TABS.map((tab) => {
           const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
           return (
