@@ -74,7 +74,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="z-10 shrink-0 border-t border-line bg-field pb-[env(safe-area-inset-bottom)]"
+      className="safe-bottom z-10 shrink-0 border-t border-line bg-field"
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4">

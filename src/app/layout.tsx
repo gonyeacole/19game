@@ -51,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="flex h-dvh flex-col overflow-hidden bg-field text-chalk">
-        <header className="z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
+        <header className="safe-top z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
           <div className="justify-self-start">
             <AddToHomeScreen />
           </div>

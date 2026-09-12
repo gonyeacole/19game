@@ -24,6 +24,7 @@
   --color-live: #ff5c4d;
   --color-live-bg: #2e1a16;
   --color-venmo: #3d95ce;
+  --color-search-bg: #1d1d1d;
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -46,10 +47,33 @@
   --color-live: #d9392a;
   --color-live-bg: #fdeceb;
   --color-venmo: #2f83bb;
+  --color-search-bg: #ffffff;
 }
 
 body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+}
+
+/*
+  A normal Safari tab already reserves its own space around the home
+  indicator, so env(safe-area-inset-*) padding on top of that just adds an
+  oversized gap. Only add it when actually running standalone (added to the
+  home screen), where the page truly draws edge-to-edge under the notch and
+  home indicator and needs to compensate itself.
+*/
+.safe-top {
+  padding-top: 0.75rem;
+}
+.safe-bottom {
+  padding-bottom: 0px;
+}
+@media (display-mode: standalone) {
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
