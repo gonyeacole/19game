@@ -43,19 +43,20 @@ variable set, `/admin` redirects to a login page nobody can pass.
 
 ## How the pool logic works
 
-- A team "wins" a week if its **final** score (regulation or overtime,
-  once ESPN marks the game `FINAL`) equals exactly 19.
-- A week's games must **all** be final before winners are declared —
-  otherwise an in-progress game could still land on 19 after the pot
-  page already called it.
-- If multiple teams hit 19 in the same week, the pot splits evenly
-  among their owners.
-- If nobody hits 19, that week's collected money rolls into next
-  week's pot.
+- The Scores tab highlights any team sitting on (or that finished at)
+  exactly 19, but that's informational only — winners aren't detected
+  automatically. In Admin → Payments, the admin manually clicks **Mark
+  won** for whoever's team hit 19, based on what the Scores tab shows.
+  This keeps a human confirming every payout rather than trusting the
+  live score feed with money.
+- If multiple players are marked won in the same week, the pot splits
+  evenly among them.
+- Marking a winner pays out that week's whole pot (this week's paid
+  dues plus any rollover) and resets the pot to $0 for next week.
+- Until someone is marked won, a week's collected money keeps rolling
+  into the next week's pot.
 - The pool math lives in `src/lib/pool.ts` (`computeSeasonPot`,
-  `getWeekWinners`, etc.) and is covered by manual test fixtures — see
-  git history for the seed script used to verify rollover and split-pot
-  cases end-to-end.
+  `getWeekWinners`, etc.).
 
 ## Data model (`prisma/schema.prisma`)
 
@@ -65,7 +66,8 @@ variable set, `/admin` redirects to a login page nobody can pass.
 - `Week` — `(seasonYear, weekNumber)`
 - `Game` — synced from the active score provider per week, keyed by
   `espnGameId` (the provider-agnostic game id, despite the field name)
-- `Payment` — `$10` due per player per week, `paid` boolean + timestamp
+- `Payment` — `$10` due per player per week, `paid` boolean + timestamp,
+  plus `won` (admin-confirmed pot winner for that week)
 
 SQLite has no native enum support in Prisma, so `Game.status` is a
 plain string constrained in application code to `SCHEDULED` /

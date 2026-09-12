@@ -65,6 +65,9 @@ model Payment {
   amount   Float    @default(10)
   paid     Boolean  @default(false)
   paidDate DateTime?
+  // Manually confirmed by the admin (not derived from live scores) — this
+  // player's team hit exactly 19 and won that week's pot.
+  won      Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 interface WinnerDTO {
   player: { id: string; name: string };
   team: { id: string; name: string; abbreviation: string };
-  score: number;
 }
 
 interface PaymentRowDTO {
@@ -65,24 +64,20 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
       </div>
 
       <div className="mt-2">
-        {!week.complete ? (
-          <span className="inline-block rounded-full bg-panel-3 px-2.5 py-1 text-xs font-medium text-chalk-dim">
-            Games in progress — pot pending
-          </span>
-        ) : week.winners.length > 0 ? (
+        {week.winners.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
             {week.winners.map((w) => (
               <span
                 key={w.player.id + w.team.id}
                 className="inline-flex items-center gap-1 rounded-full bg-win-bg px-2.5 py-1 text-xs font-semibold text-win"
               >
-                {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
+                🏆 {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
               </span>
             ))}
           </div>
         ) : (
-          <span className="inline-block rounded-full bg-caution-bg px-2.5 py-1 text-xs font-medium text-caution">
-            No 19s — rolls over to next week
+          <span className="inline-block rounded-full bg-panel-3 px-2.5 py-1 text-xs font-medium text-chalk-dim">
+            No winner yet — rolls over
           </span>
         )}
       </div>
@@ -96,7 +91,9 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
 
       {expanded && (
         <div className="mt-2 border-t border-line pt-2 text-xs">
-          {unpaid.length === 0 ? (
+          {week.payments.length === 0 ? (
+            <div className="text-chalk-faint">No payments tracked yet</div>
+          ) : unpaid.length === 0 ? (
             <div className="text-win">Everyone paid</div>
           ) : (
             <div className="text-chalk-dim">
@@ -159,7 +156,7 @@ export default function PotPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {[...data.weeks].reverse().map((w) => (
+          {data.weeks.map((w) => (
             <WeekCard key={w.weekId} week={w} />
           ))}
         </div>

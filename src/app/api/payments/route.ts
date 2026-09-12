@@ -46,14 +46,19 @@ export async function GET(req: NextRequest) {
 interface PatchBody {
   playerId: string;
   weekId: string;
-  paid: boolean;
+  paid?: boolean;
+  won?: boolean;
 }
 
 export async function PATCH(req: NextRequest) {
   const body = (await req.json()) as PatchBody;
-  if (!body.playerId || !body.weekId || typeof body.paid !== "boolean") {
+  if (
+    !body.playerId ||
+    !body.weekId ||
+    (typeof body.paid !== "boolean" && typeof body.won !== "boolean")
+  ) {
     return NextResponse.json(
-      { error: "playerId, weekId, and paid are required" },
+      { error: "playerId, weekId, and paid or won are required" },
       { status: 400 }
     );
   }
@@ -63,15 +68,19 @@ export async function PATCH(req: NextRequest) {
       playerId_weekId: { playerId: body.playerId, weekId: body.weekId },
     },
     update: {
-      paid: body.paid,
-      paidDate: body.paid ? new Date() : null,
+      ...(typeof body.paid === "boolean" && {
+        paid: body.paid,
+        paidDate: body.paid ? new Date() : null,
+      }),
+      ...(typeof body.won === "boolean" && { won: body.won }),
     },
     create: {
       playerId: body.playerId,
       weekId: body.weekId,
       amount: WEEKLY_DUE,
-      paid: body.paid,
+      paid: body.paid ?? false,
       paidDate: body.paid ? new Date() : null,
+      won: body.won ?? false,
     },
   });
 

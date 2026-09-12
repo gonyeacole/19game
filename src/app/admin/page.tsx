@@ -25,6 +25,7 @@ interface PaymentDTO {
   amount: number;
   paid: boolean;
   paidDate: string | null;
+  won: boolean;
   player: {
     id: string;
     name: string;
@@ -261,7 +262,29 @@ function Payments() {
     }
   };
 
+  const toggleWon = async (payment: PaymentDTO) => {
+    setBusyId(payment.id);
+    const next = !payment.won;
+    setPayments(
+      (prev) => prev?.map((p) => (p.id === payment.id ? { ...p, won: next } : p)) ?? null
+    );
+    try {
+      await fetch("/api/payments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerId: payment.playerId,
+          weekId: payment.weekId,
+          won: next,
+        }),
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const paidCount = payments?.filter((p) => p.paid).length ?? 0;
+  const winners = payments?.filter((p) => p.won) ?? [];
 
   return (
     <div>
@@ -270,6 +293,11 @@ function Payments() {
       {payments && (
         <div className="mb-4 text-center text-sm text-chalk-dim">
           {paidCount}/{payments.length} paid this week
+          {winners.length > 0 && (
+            <div className="mt-1 text-win">
+              🏆 {winners.map((w) => w.player.name).join(", ")} won this week
+            </div>
+          )}
         </div>
       )}
 
@@ -323,6 +351,17 @@ function Payments() {
                   }`}
                 >
                   {p.paid ? "Paid ✓" : "Mark paid"}
+                </button>
+                <button
+                  onClick={() => toggleWon(p)}
+                  disabled={busyId === p.id}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold disabled:opacity-50 ${
+                    p.won
+                      ? "bg-led text-[#1a1200]"
+                      : "border border-line text-chalk-dim"
+                  }`}
+                >
+                  {p.won ? "Won 🏆" : "Mark won"}
                 </button>
               </div>
             </div>

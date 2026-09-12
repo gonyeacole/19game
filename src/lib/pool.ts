@@ -3,15 +3,13 @@ import type { Game, Payment, Player, Team } from "@prisma/client";
 export const WINNING_SCORE = 19;
 export const WEEKLY_DUE = 10;
 
-export type GameWithTeams = Game & {
-  homeTeam: Team & { player: Player | null };
-  awayTeam: Team & { player: Player | null };
+export type PaymentWithPlayerTeam = Payment & {
+  player: Player & { team: Team };
 };
 
 export interface WeekWinner {
   player: Player;
   team: Team;
-  score: number;
 }
 
 /** A week is "complete" once it has at least one game and every game is final. */
@@ -20,30 +18,14 @@ export function isWeekComplete(games: Game[]): boolean {
 }
 
 /**
- * Players whose team's final score is exactly WINNING_SCORE that week.
- * Returns [] if the week isn't complete yet (undecided) or no one hit it.
+ * Players the admin has manually confirmed as this week's winner(s). This is
+ * a deliberate admin action (not derived from live scores) so payouts only
+ * happen when someone actually confirms it.
  */
-export function getWeekWinners(games: GameWithTeams[]): WeekWinner[] {
-  if (!isWeekComplete(games)) return [];
-
-  const winners: WeekWinner[] = [];
-  for (const game of games) {
-    if (game.homeScore === WINNING_SCORE && game.homeTeam.player) {
-      winners.push({
-        player: game.homeTeam.player,
-        team: game.homeTeam,
-        score: game.homeScore,
-      });
-    }
-    if (game.awayScore === WINNING_SCORE && game.awayTeam.player) {
-      winners.push({
-        player: game.awayTeam.player,
-        team: game.awayTeam,
-        score: game.awayScore,
-      });
-    }
-  }
-  return winners;
+export function getWeekWinners(payments: PaymentWithPlayerTeam[]): WeekWinner[] {
+  return payments
+    .filter((p) => p.won)
+    .map((p) => ({ player: p.player, team: p.player.team }));
 }
 
 export interface WeekPotSummary {
@@ -62,15 +44,15 @@ export interface WeekPotSummary {
 
 /**
  * Walks weeks in chronological order computing each week's pot, applying
- * rollover from prior weeks with no winner, and figuring payouts.
+ * rollover from prior weeks with no confirmed winner, and figuring payouts.
  */
 export function computeSeasonPot(
   weeks: {
     id: string;
     seasonYear: number;
     weekNumber: number;
-    payments: Payment[];
-    games: GameWithTeams[];
+    payments: PaymentWithPlayerTeam[];
+    games: Game[];
   }[]
 ): WeekPotSummary[] {
   const sorted = [...weeks].sort(
@@ -86,23 +68,18 @@ export function computeSeasonPot(
       .reduce((sum, p) => sum + p.amount, 0);
     const potBeforePayout = collected + rollover;
     const complete = isWeekComplete(week.games);
-    const winners = getWeekWinners(week.games);
+    const winners = getWeekWinners(week.payments);
 
     let paidOut = 0;
     let payoutPerWinner = 0;
     let rolloverOut = rollover;
 
-    if (complete) {
-      if (winners.length > 0) {
-        payoutPerWinner = potBeforePayout / winners.length;
-        paidOut = potBeforePayout;
-        rolloverOut = 0;
-      } else {
-        rolloverOut = potBeforePayout;
-      }
+    if (winners.length > 0) {
+      payoutPerWinner = potBeforePayout / winners.length;
+      paidOut = potBeforePayout;
+      rolloverOut = 0;
     } else {
-      // Week undecided: nothing paid out yet, pot carries as pending.
-      rolloverOut = rollover;
+      rolloverOut = potBeforePayout;
     }
 
     summaries.push({
