@@ -13,8 +13,9 @@
   --color-panel-3: #262626;
   --color-line: #363636;
   --color-chalk: #f0f0ee;
-  --color-chalk-dim: #a3a3a1;
-  --color-chalk-faint: #727270;
+  --color-chalk-dim: #f0f0ee;
+  --color-chalk-faint: #f0f0ee;
+  --color-placeholder: #727270;
   --color-led: #00dd94;
   --color-led-bg: #132420;
   --color-win: #4ecb8c;
@@ -38,6 +39,7 @@
   --color-chalk: #19181a;
   --color-chalk-dim: #55534f;
   --color-chalk-faint: #85827c;
+  --color-placeholder: #85827c;
   --color-led: #00b67a;
   --color-led-bg: #e3f9f1;
   --color-win: #1f9d5c;

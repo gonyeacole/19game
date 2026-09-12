@@ -101,7 +101,7 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
 
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="mt-2 text-xs font-medium text-chalk-faint underline underline-offset-2"
+        className="mt-2 text-xs font-medium text-placeholder underline underline-offset-2"
       >
         {expanded ? "Hide" : "Show"} payment status
       </button>
