@@ -51,12 +51,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-field/95 backdrop-blur px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
-          <AddToHomeScreen />
-          <span className={`${leagueGothic.className} text-3xl leading-none tracking-wide text-led`}>
+        <header className="sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field/95 backdrop-blur px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
+          <div className="justify-self-start">
+            <AddToHomeScreen />
+          </div>
+          <span className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}>
             19League
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-self-end gap-2">
             <ThemeToggle />
             <RefreshButton />
           </div>
