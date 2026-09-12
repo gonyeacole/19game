@@ -26,6 +26,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  // Without this, iOS never reports real env(safe-area-inset-*) values —
+  // they silently resolve to 0, so TabNav's safe-area padding does nothing
+  // once the app is added to the home screen and runs edge-to-edge.
+  viewportFit: "cover",
 };
 
 // Runs before paint so the right theme applies immediately — avoids a

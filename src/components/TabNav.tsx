@@ -69,7 +69,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 bg-field pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-20 bg-field pb-[calc(env(safe-area-inset-bottom)+8px)]"
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4">
