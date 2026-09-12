@@ -142,6 +142,19 @@ function parseSheetDate(dateStr: string | undefined, timeStr: string | undefined
   return zonedTimeToUtc(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes, GAME_TIME_ZONE);
 }
 
+// A stable calendar-date slug straight from the sheet's own Date column
+// (e.g. "2026-09-09"), used for providerGameId. Deliberately NOT derived
+// from the converted UTC instant above — an ET evening game crosses into
+// the next UTC day, so basing the id on that would shift it whenever the
+// time-zone math changes, creating a duplicate row instead of updating the
+// existing one.
+function sheetDateSlug(dateStr: string | undefined): string | null {
+  const m = dateStr?.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!m) return null;
+  const [, mm, dd, yyyy] = m;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 // The sheet holds every week in one file, so switching from one week to
 // another needs the same bytes — cache them briefly at module scope so
 // clicking through several weeks in a row (on a warm server instance)
@@ -215,9 +228,12 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
       if (!awayAbbr || !homeAbbr) continue;
 
       const qtr = cols[COL.QTR] ?? "";
+      // Non-null: gameDate above already confirmed cols[COL.DATE] matches
+      // this same date pattern.
+      const dateSlug = sheetDateSlug(cols[COL.DATE])!;
 
       games.push({
-        providerGameId: `${gameDate.toISOString().slice(0, 10)}-${awayAbbr}-${homeAbbr}`,
+        providerGameId: `${dateSlug}-${awayAbbr}-${homeAbbr}`,
         homeTeamAbbr: homeAbbr,
         awayTeamAbbr: awayAbbr,
         homeScore: Number(cols[COL.HOME_SCORE]) || 0,
