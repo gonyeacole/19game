@@ -86,10 +86,10 @@ export default function TabNav() {
               <Link
                 href={tab.href}
                 className={`flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
-                  active ? "text-led" : "text-chalk-faint"
+                  active ? "text-led" : "text-icon"
                 }`}
               >
-                <span className={`h-6 w-6 ${active ? "" : "text-icon"}`}>{tab.icon}</span>
+                <span className="h-6 w-6">{tab.icon}</span>
                 {tab.label}
               </Link>
             </li>
