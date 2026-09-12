@@ -35,8 +35,11 @@ Open [http://localhost:3000](http://localhost:3000). The app starts on the
 ### First-time setup
 
 Go to the **Admin** tab and, for each of the 32 teams, fill in the
-player's name and Venmo username. No login is required — this is meant
-for a small trusted group.
+player's name and Venmo username. The rest of the app needs no login —
+this is meant for a small trusted group — but Admin itself is gated
+behind a single shared password (`ADMIN_PASSWORD`) since it's the one
+place that can reassign teams or edit Venmo usernames. Without that
+variable set, `/admin` redirects to a login page nobody can pass.
 
 ## How the pool logic works
 
@@ -110,11 +113,11 @@ adapter above solves. To deploy:
    locally, which applies the current schema directly.
 3. **Seed it**: `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npm run db:seed`
 4. **Import the repo into Vercel** (vercel.com → Add New → Project →
-   pick this repo/branch) and add `TURSO_DATABASE_URL`,
-   `TURSO_AUTH_TOKEN`, and `API_SPORTS_KEY` (from
-   [dashboard.api-sports.io](https://dashboard.api-sports.io)) as
-   environment variables in the Vercel project settings. No other config
-   needed — Next.js deploys itself.
+   pick this repo/branch) and add `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`,
+   `API_SPORTS_KEY` (from
+   [dashboard.api-sports.io](https://dashboard.api-sports.io)), and
+   `ADMIN_PASSWORD` as environment variables in the Vercel project
+   settings. No other config needed — Next.js deploys itself.
 
 ## Notes
 
