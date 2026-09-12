@@ -76,7 +76,15 @@ function TeamRow({ team }: { team: TeamDTO }) {
       {expanded && (
         <div className="mt-3 border-t border-line pt-2">
           {loading ? (
-            <div className="py-4 text-center text-xs text-chalk-faint">Loading...</div>
+            <div className="flex items-center justify-center gap-1.5 py-4">
+              <span
+                className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.3s]"
+              />
+              <span
+                className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.15s]"
+              />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint" />
+            </div>
           ) : (
             <div className="flex flex-col">
               {SEASON_WEEKS.map((wk) => {
