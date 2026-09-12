@@ -10,6 +10,7 @@ const STEPS: Record<Platform, { label: string; steps: string[] }> = {
   ios: {
     label: "iPhone",
     steps: [
+      'Tap the "•••" in Safari.',
       'Tap the Share icon (square with an arrow) in the toolbar.',
       'Scroll down and tap "Add to Home Screen".',
       'Tap "Add" in the top right.',
