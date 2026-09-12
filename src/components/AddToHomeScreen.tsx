@@ -59,7 +59,7 @@ export default function AddToHomeScreen() {
           onClick={() => setOpen(true)}
           className="text-xs font-medium text-chalk-faint underline underline-offset-2 transition-transform active:scale-95"
         >
-          📲 Want to add 19 League to your home screen?
+          Want to add 19 League to your home screen?
         </button>
       </div>
 
