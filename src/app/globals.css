@@ -69,11 +69,9 @@ body {
 .safe-bottom {
   padding-bottom: 0px;
 }
-@media (display-mode: standalone) {
-  .safe-top {
-    padding-top: calc(env(safe-area-inset-top) + 0.75rem);
-  }
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+html[data-standalone="true"] .safe-top {
+  padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+}
+html[data-standalone="true"] .safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
