@@ -22,11 +22,16 @@ const TABS = [
     href: "/teams",
     label: "Teams",
     icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 10.5C3 5.8 6.1 3 10 3s7 2.8 7 7.5c0 1.6-1 2.7-2.6 3H5.6C4 13.2 3 12.1 3 10.5Z" />
-        <path d="M10 3v2.2" />
-        <path d="M6.2 13.5c0 2.6 1.7 4.2 3.8 4.2s3.8-1.6 3.8-4.2" />
-        <path d="M7 15.1c1 .7 2 1 3 1s2-.3 3-1" />
+      <svg viewBox="0 0 20 20">
+        <path
+          fill="currentColor"
+          d="M2.2 11.8C2.2 6 6.4 2 10.6 2c4 0 6.8 3.2 6.8 7.1 0 1.4-.7 2.4-1.8 2.9l.1 1.3c-1.9-.2-3.5.3-4.2 1.3-1 1-2.7 1.4-4.1 1-.8 1-2.3 1.2-3.3.4-1.2-.4-1.9-2.1-1.9-4.2Z"
+        />
+        <circle cx="6.2" cy="10.9" r="1" fill="var(--color-panel-2)" />
+        <g stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11.4 14.7c.6-1.3 2.2-1.8 4.3-1.6 1.3.1 2.2.5 2 1.3l-.7 2.6c-.2.6-.9.8-1.4.4L12 15" />
+          <path d="M12.5 15.9l4.4-.3" />
+        </g>
       </svg>
     ),
   },
@@ -47,17 +52,17 @@ const TABS = [
     label: "Admin",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-        <circle cx="10" cy="10" r="4.2" />
-        <circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none" />
+        <circle cx="10" cy="10" r="4.8" />
+        <circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none" />
         <g fill="currentColor" stroke="none">
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(0 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(45 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(90 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(135 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(180 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(225 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(270 10 10)" />
-          <rect x="8.7" y="4.5" width="2.6" height="2.9" rx="0.6" transform="rotate(315 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(0 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(45 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(90 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(135 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(180 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(225 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(270 10 10)" />
+          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(315 10 10)" />
         </g>
       </svg>
     ),
@@ -79,7 +84,7 @@ export default function TabNav() {
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 py-3.5 text-xs font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-1 pb-2.5 pt-1.5 text-xs font-semibold transition-colors ${
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >
