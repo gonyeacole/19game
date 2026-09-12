@@ -89,11 +89,42 @@ function mapStatus(qtr: string): NormalizedGameStatus {
   return "IN_PROGRESS";
 }
 
-// The sheet's dates/times are US game times, but we only have the wall-clock
-// numbers (no timezone). Treating them as server-local is imprecise by a few
-// hours — fine here, since only the date (for the preseason/regular-season
-// split below) and FINAL/score values drive the app's pool logic, not the
-// exact kickoff instant.
+// NFL schedules are always published in US Eastern time, which is what the
+// sheet's Time column holds — convert that wall-clock time to a real UTC
+// instant (accounting for EST/EDT) rather than treating the numbers as if
+// they were already UTC, which was off by 4-5 hours.
+const GAME_TIME_ZONE = "America/New_York";
+
+function zonedTimeToUtc(
+  year: number,
+  month: number,
+  day: number,
+  hours: number,
+  minutes: number,
+  timeZone: string
+): Date {
+  const guess = new Date(Date.UTC(year, month, day, hours, minutes));
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(guess);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+
+  const asUtcIfLocal = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour") % 24,
+    get("minute")
+  );
+  return new Date(guess.getTime() + (guess.getTime() - asUtcIfLocal));
+}
+
 function parseSheetDate(dateStr: string | undefined, timeStr: string | undefined): Date | null {
   const m = dateStr?.match(/(\d{2})\/(\d{2})\/(\d{4})/);
   if (!m) return null;
@@ -108,7 +139,7 @@ function parseSheetDate(dateStr: string | undefined, timeStr: string | undefined
     if (t[3].toUpperCase() === "PM") hours += 12;
   }
 
-  return new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes));
+  return zonedTimeToUtc(Number(yyyy), Number(mm) - 1, Number(dd), hours, minutes, GAME_TIME_ZONE);
 }
 
 // The sheet holds every week in one file, so switching from one week to

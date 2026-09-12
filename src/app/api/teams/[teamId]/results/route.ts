@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { WINNING_SCORE } from "@/lib/pool";
 import { getDefaultSeasonAndWeek } from "@/lib/nflWeek";
+import { syncWeekScores } from "@/lib/scores/sync";
 
-// A team's game history for the season, one row per already-synced game —
-// weeks nobody has opened the Scores tab for yet simply won't have a row,
-// same lazy-sync behavior as the rest of the app.
+const SEASON_WEEKS = 18;
+
+// A team's full-season game history. Syncs every week first (not just
+// whichever weeks someone happened to already open on the Scores tab) so
+// the Teams dropdown always shows the whole season — cheap in practice
+// since the sheet itself is cached for a minute at a time (see sheet.ts),
+// so only the first of these 18 calls actually hits the network.
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ teamId: string }> }
@@ -14,6 +19,15 @@ export async function GET(
   const searchParams = req.nextUrl.searchParams;
   const defaults = getDefaultSeasonAndWeek();
   const seasonYear = Number(searchParams.get("year") ?? defaults.seasonYear);
+
+  for (let week = 1; week <= SEASON_WEEKS; week++) {
+    try {
+      await syncWeekScores(seasonYear, week);
+    } catch {
+      // A single week's sync failing (e.g. not played yet) shouldn't block
+      // showing results for the rest of the season.
+    }
+  }
 
   const games = await prisma.game.findMany({
     where: {

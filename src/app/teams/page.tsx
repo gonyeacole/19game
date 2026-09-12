@@ -86,8 +86,8 @@ function TeamRow({ team }: { team: TeamDTO }) {
                     key={wk}
                     className="flex items-center justify-between px-1 py-1 text-xs"
                   >
-                    <span className="w-12 shrink-0 font-semibold text-chalk-faint">
-                      Wk {wk}
+                    <span className="w-16 shrink-0 font-semibold text-chalk-faint">
+                      Week {wk}
                     </span>
                     {r ? (
                       <span
