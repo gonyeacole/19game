@@ -89,7 +89,7 @@ export default function TabNav() {
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >
-                <span className="h-6 w-6">{tab.icon}</span>
+                <span className={`h-6 w-6 ${active ? "" : "text-icon"}`}>{tab.icon}</span>
                 {tab.label}
               </Link>
             </li>

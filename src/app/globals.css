@@ -27,6 +27,7 @@
   --color-venmo: #3d95ce;
   --color-search-bg: #1d1d1d;
   --color-pill-text: #08150e;
+  --color-icon: #727270;
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -52,6 +53,7 @@
   --color-venmo: #2f83bb;
   --color-search-bg: #ffffff;
   --color-pill-text: #ffffff;
+  --color-icon: #85827c;
 }
 
 body {

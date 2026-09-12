@@ -87,7 +87,7 @@ function TeamRow({ team }: { team: TeamDTO }) {
             {team.player ? team.player.name : "Unassigned"}
           </div>
         </div>
-        <span className="shrink-0 text-chalk-faint">{expanded ? "▲" : "▼"}</span>
+        <span className="shrink-0 text-icon">{expanded ? "▲" : "▼"}</span>
       </button>
 
       {expanded && (

@@ -52,7 +52,7 @@ export default function AddToHomeScreen() {
         aria-label="How to add to home screen"
         aria-hidden={hidden}
         tabIndex={hidden ? -1 : undefined}
-        className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90 ${
+        className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-icon transition-transform active:scale-90 ${
           hidden ? "invisible pointer-events-none" : ""
         }`}
       >
@@ -79,7 +79,7 @@ export default function AddToHomeScreen() {
                 <button
                   onClick={() => setOpen(false)}
                   aria-label="Close"
-                  className="rounded-full p-1 text-chalk-faint transition-transform active:scale-90"
+                  className="rounded-full p-1 text-icon transition-transform active:scale-90"
                 >
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="h-4 w-4">
                     <line x1="4" y1="4" x2="16" y2="16" />

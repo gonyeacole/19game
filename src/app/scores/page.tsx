@@ -147,10 +147,12 @@ function GameCard({ game }: { game: GameDTO }) {
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />
             <span className="text-live">{statusLabel(game)}</span>
           </>
-        ) : (
+        ) : game.status === "FINAL" ? (
           <span className="rounded-full bg-led px-2 py-0.5 text-pill-text">
             {statusLabel(game)}
           </span>
+        ) : (
+          <span className="text-chalk-faint">{statusLabel(game)}</span>
         )}
       </div>
       <div className="flex flex-col gap-1.5">
