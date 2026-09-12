@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Skeleton from "@/components/Skeleton";
+import SearchBar from "@/components/SearchBar";
 
 const SEASON_WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
 
@@ -161,12 +162,10 @@ export default function TeamsPage() {
         Tap a team to see their results by week.
       </div>
 
-      <input
-        type="text"
+      <SearchBar
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by team or owner..."
-        className="mb-4 w-full rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm text-chalk placeholder:text-chalk-faint"
+        onChange={setQuery}
+        placeholder="Search for teams or owners"
       />
 
       {!teams ? (

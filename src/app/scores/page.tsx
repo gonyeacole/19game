@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
+import SearchBar from "@/components/SearchBar";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -160,6 +161,7 @@ export default function ScoresPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [query, setQuery] = useState("");
   const inFlight = useRef(false);
 
   const load = useCallback(async (year?: number, week?: number) => {
@@ -212,9 +214,24 @@ export default function ScoresPage() {
     load(seasonYear, week);
   };
 
+  const q = query.trim().toLowerCase();
+  const matchesTeam = (team: TeamDTO) =>
+    team.name.toLowerCase().includes(q) ||
+    team.abbreviation.toLowerCase().includes(q) ||
+    (team.player?.name.toLowerCase().includes(q) ?? false);
+  const filteredGames = games?.filter(
+    (g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam)
+  );
+
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
       <WeekScroller weekNumber={weekNumber} onSelect={selectWeek} loading={loading} />
+
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        placeholder="Search for games or teams"
+      />
 
       {error && (
         <div className="mb-3 rounded-lg bg-caution-bg px-3 py-2 text-xs text-caution">
@@ -228,15 +245,17 @@ export default function ScoresPage() {
             <GameCardSkeleton key={i} />
           ))}
         </div>
-      ) : games && games.length === 0 ? (
+      ) : filteredGames && filteredGames.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">
-          No games found for this week yet.
+          {games && games.length > 0
+            ? `No games match "${query}".`
+            : "No games found for this week yet."}
         </div>
       ) : (
         <div
           className={`flex flex-col gap-3 transition-opacity duration-150 ${loading ? "opacity-50" : ""}`}
         >
-          {games?.map((g) => (
+          {filteredGames?.map((g) => (
             <GameCard key={g.id} game={g} />
           ))}
         </div>

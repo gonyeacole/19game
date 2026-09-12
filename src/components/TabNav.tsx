@@ -69,7 +69,7 @@ export default function TabNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-panel-2 pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-20 rounded-t-3xl border-t border-line bg-panel-2 pb-[env(safe-area-inset-bottom)]"
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-4">
@@ -79,11 +79,11 @@ export default function TabNav() {
             <li key={tab.href}>
               <Link
                 href={tab.href}
-                className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+                className={`flex flex-col items-center gap-1.5 py-3.5 text-xs font-semibold transition-colors ${
                   active ? "text-led" : "text-chalk-faint"
                 }`}
               >
-                <span className="h-[19px] w-[19px]">{tab.icon}</span>
+                <span className="h-6 w-6">{tab.icon}</span>
                 {tab.label}
               </Link>
             </li>

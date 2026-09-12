@@ -60,7 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           <RefreshButton />
         </header>
-        <main className="flex-1 pb-20">
+        <main className="flex-1 pb-28">
           {children}
           <AddToHomeScreen />
         </main>
