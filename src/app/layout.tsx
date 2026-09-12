@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               19
             </span>
             <span
-              className={`${silkscreen.className} text-sm leading-none tracking-[0.15em] text-led drop-shadow-[0_0_4px_var(--color-led)]`}
+              className={`${silkscreen.className} text-xl leading-none tracking-[0.15em] text-led drop-shadow-[0_0_5px_var(--color-led)] drop-shadow-[0_0_10px_var(--color-led)]`}
             >
               LEAGUE
             </span>
