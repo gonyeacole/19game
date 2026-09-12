@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { POT_VENMO_USERNAME } from "@/lib/pool";
 import Skeleton from "@/components/Skeleton";
+import { leagueGothic } from "@/lib/fonts";
 
 interface WinnerDTO {
   player: { id: string; name: string };
@@ -140,7 +141,7 @@ export default function PotPage() {
         <div className="text-xs font-semibold uppercase tracking-widest text-chalk-dim">
           Current Pot
         </div>
-        <div className="text-4xl font-extrabold tabular-nums text-chalk">
+        <div className={`${leagueGothic.className} text-5xl leading-none tracking-wide tabular-nums text-led`}>
           {data ? (
             money(data.summary.currentPot)
           ) : (

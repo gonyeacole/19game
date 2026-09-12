@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
+import { leagueGothic } from "@/lib/fonts";
 import "./globals.css";
-
-const leagueGothic = localFont({
-  src: "../fonts/LeagueGothic-Regular.ttf",
-  weight: "400",
-});
 
 export const metadata: Metadata = {
   title: "19 League",
