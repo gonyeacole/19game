@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Skeleton from "@/components/Skeleton";
-import BottomSearchBar from "@/components/BottomSearchBar";
+import SearchBar from "@/components/SearchBar";
 
 const SEASON_WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
 
@@ -157,10 +157,16 @@ export default function TeamsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-lg px-4 pt-4 pb-24">
+    <div className="mx-auto max-w-lg px-4 py-4">
       <div className="mb-3 text-center text-sm text-chalk-dim">
         Tap a team to see their results by week.
       </div>
+
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        placeholder="Search for teams or owners"
+      />
 
       {!teams ? (
         <div className="flex flex-col gap-2">
@@ -179,12 +185,6 @@ export default function TeamsPage() {
           ))}
         </div>
       )}
-
-      <BottomSearchBar
-        value={query}
-        onChange={setQuery}
-        placeholder="Search for teams or owners"
-      />
     </div>
   );
 }
