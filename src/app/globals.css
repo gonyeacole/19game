@@ -7,7 +7,7 @@
   runtime via the [data-theme] toggle instead of only at build time.
 */
 @theme {
-  --color-field: #0b0c10;
+  --color-field: #0a0a0a;
   --color-panel: #151515;
   --color-panel-2: #1d1d1d;
   --color-panel-3: #262626;
