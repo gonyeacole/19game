@@ -89,13 +89,20 @@ function mapStatus(qtr: string): NormalizedGameStatus {
   return "IN_PROGRESS";
 }
 
-// Short label for the quarter an in-progress game is in — shown inside the
-// Live pill instead of down/distance/field-position detail.
+const ORDINAL_QUARTERS: Record<string, string> = {
+  "1": "1st Quarter",
+  "2": "2nd Quarter",
+  "3": "3rd Quarter",
+  "4": "4th Quarter",
+};
+
+// Label for the quarter an in-progress game is in — shown inside the Live
+// pill instead of down/distance/field-position detail.
 function quarterLabel(qtr: string): string {
   const q = qtr.trim().toUpperCase();
   if (q === "H") return "Halftime";
   if (q === "OT") return "OT";
-  return /^\d+$/.test(q) ? `Q${q}` : q;
+  return ORDINAL_QUARTERS[q] ?? q;
 }
 
 // NFL schedules are always published in US Eastern time, which is what the
