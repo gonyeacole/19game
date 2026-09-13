@@ -293,7 +293,10 @@ export default function ScoresPage() {
             if (!gamesForStatus || gamesForStatus.length === 0) return null;
             return (
               <div key={status} className="flex flex-col gap-3">
-                <div className="text-[11px] font-bold uppercase tracking-wide text-chalk-faint">
+                <div
+                  className={`${leagueGothic.className} text-xs uppercase tracking-wide text-chalk-faint`}
+                  style={{ fontWeight: 700 }}
+                >
                   {STATUS_SECTION_LABEL[status]}
                 </div>
                 {gamesForStatus.map((g) => (
