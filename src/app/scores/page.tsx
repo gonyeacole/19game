@@ -294,8 +294,9 @@ export default function ScoresPage() {
             return (
               <div key={status} className="flex flex-col gap-3">
                 <div
-                  className={`${leagueGothic.className} text-xs uppercase tracking-wide text-chalk-faint`}
-                  style={{ fontWeight: 700 }}
+                  className={`text-[11px] font-bold uppercase tracking-wide text-chalk-faint ${
+                    status === "IN_PROGRESS" ? "" : "mt-2"
+                  }`}
                 >
                   {STATUS_SECTION_LABEL[status]}
                 </div>
