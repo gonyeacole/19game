@@ -46,10 +46,10 @@ interface ScoresResponse {
 }
 
 // Live games first, then upcoming, then final games pushed to the bottom.
-const STATUS_ORDER: Record<GameDTO["status"], number> = {
-  IN_PROGRESS: 0,
-  SCHEDULED: 1,
-  FINAL: 2,
+const STATUS_SECTION_LABEL: Record<GameDTO["status"], string> = {
+  IN_PROGRESS: "Live",
+  SCHEDULED: "Scheduled",
+  FINAL: "Final",
 };
 
 function rowHighlight(score: number, status: GameDTO["status"]): "win" | "hit-live" | "watch" | null {
@@ -241,10 +241,12 @@ export default function ScoresPage() {
     team.name.toLowerCase().includes(q) ||
     team.abbreviation.toLowerCase().includes(q) ||
     (team.player?.name.toLowerCase().includes(q) ?? false);
-  const filteredGames = games
-    ?.filter((g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam))
-    .slice()
-    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
+  // Grouped by status below (live, then scheduled, then final), so no
+  // separate sort is needed here — each group keeps the API's kickoff-time
+  // order.
+  const filteredGames = games?.filter(
+    (g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam)
+  );
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
@@ -278,9 +280,20 @@ export default function ScoresPage() {
         <div
           className={`flex flex-col gap-3 transition-opacity duration-150 ${loading ? "opacity-50" : ""}`}
         >
-          {filteredGames?.map((g) => (
-            <GameCard key={g.id} game={g} />
-          ))}
+          {(["IN_PROGRESS", "SCHEDULED", "FINAL"] as const).map((status) => {
+            const gamesForStatus = filteredGames?.filter((g) => g.status === status);
+            if (!gamesForStatus || gamesForStatus.length === 0) return null;
+            return (
+              <div key={status} className="flex flex-col gap-3">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-chalk-faint">
+                  {STATUS_SECTION_LABEL[status]}
+                </div>
+                {gamesForStatus.map((g) => (
+                  <GameCard key={g.id} game={g} />
+                ))}
+              </div>
+            );
+          })}
         </div>
       )}
 
