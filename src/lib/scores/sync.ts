@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { scoreProvider } from "./index";
 
-// The free API-Sports tier caps out around 100 requests/day, but the Scores
-// tab polls every 30s while open — so only actually hit the provider at most
-// this often per week, and serve cached DB data the rest of the time.
-const MIN_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+// The Scores tab polls every 30s while open — only actually hit the provider
+// at most this often per week, and serve cached DB data the rest of the
+// time. Matches the sheet's own 1-minute refresh cadence.
+const MIN_SYNC_INTERVAL_MS = 60 * 1000;
 
 /**
  * Fetches the scoreboard for a given week from the active score provider and
