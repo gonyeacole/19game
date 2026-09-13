@@ -146,12 +146,12 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
 
 function GameCardSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-line bg-panel p-3">
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
       <div className="flex flex-1 items-center gap-2">
         <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
         <Skeleton className="h-8 w-10 shrink-0" />
       </div>
-      <div className="flex w-16 shrink-0 flex-col items-center gap-1.5">
+      <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
         <Skeleton className="h-3.5 w-16" />
         <Skeleton className="h-2.5 w-20" />
       </div>
@@ -169,9 +169,9 @@ function GameCard({ game }: { game: GameDTO }) {
   const { line1, line2 } = centerLines(game);
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-line bg-panel p-3">
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
-      <div className="relative w-16 shrink-0 text-center">
+      <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
         {homeHasBall && <PossessionTriangle side="right" />}
         <div className="whitespace-nowrap text-sm font-extrabold leading-tight text-chalk">
