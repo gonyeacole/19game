@@ -75,6 +75,12 @@ model Payment {
   @@unique([playerId, weekId])
 }
 
+model Announcement {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+}
+
 // SQLite has no native enum support in Prisma, so GameStatus is stored as a
 // String constrained in application code to: "SCHEDULED" | "IN_PROGRESS" | "FINAL"
 model Game {

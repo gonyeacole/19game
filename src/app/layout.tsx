@@ -3,6 +3,7 @@ import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
+import AnnouncementBell from "@/components/AnnouncementBell";
 import { leagueGothic } from "@/lib/fonts";
 import "./globals.css";
 
@@ -70,8 +71,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           >
             19League
           </span>
-          <div className="justify-self-end">
+          <div className="flex items-center justify-self-end gap-2">
             <RefreshButton />
+            <AnnouncementBell />
           </div>
         </header>
         <main className="flex-1 pb-24">{children}</main>

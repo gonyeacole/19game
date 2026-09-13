@@ -226,6 +226,134 @@ function PlayerSetup() {
   );
 }
 
+interface AnnouncementDTO {
+  id: string;
+  message: string;
+  createdAt: string;
+}
+
+function AnnouncementRowSkeleton() {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-3">
+      <Skeleton className="h-3.5 w-full" />
+      <Skeleton className="mt-1.5 h-3 w-24" />
+    </div>
+  );
+}
+
+function Announcements() {
+  const [announcements, setAnnouncements] = useState<AnnouncementDTO[] | null>(null);
+  const [message, setMessage] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const load = () =>
+    fetch("/api/announcements", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: { announcements: AnnouncementDTO[] }) =>
+        setAnnouncements(data.announcements)
+      );
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const post = async () => {
+    if (!message.trim()) return;
+    setPosting(true);
+    try {
+      await fetch("/api/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      setMessage("");
+      await load();
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await fetch(`/api/announcements?id=${id}`, { method: "DELETE" });
+      await load();
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-col gap-2">
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Write an announcement for everyone in the pool..."
+          rows={3}
+          className="rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm text-chalk placeholder:text-chalk-faint"
+        />
+        <button
+          onClick={post}
+          disabled={!message.trim() || posting}
+          className="self-end rounded-full bg-led px-4 py-1.5 text-xs font-bold text-pill-text transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+        >
+          {posting ? "Posting..." : "Post announcement"}
+        </button>
+      </div>
+
+      {!announcements ? (
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <AnnouncementRowSkeleton key={i} />
+          ))}
+        </div>
+      ) : announcements.length === 0 ? (
+        <div className="py-10 text-center text-sm text-chalk-faint">
+          No announcements yet.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {announcements.map((a) => (
+            <div key={a.id} className="rounded-xl border border-line bg-panel p-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="whitespace-pre-wrap text-sm text-chalk">{a.message}</p>
+                <button
+                  onClick={() => remove(a.id)}
+                  disabled={deletingId === a.id}
+                  aria-label="Delete announcement"
+                  className="shrink-0 text-icon transition-transform active:scale-90"
+                >
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    className="h-4 w-4"
+                  >
+                    <line x1="4" y1="4" x2="16" y2="16" />
+                    <line x1="16" y1="4" x2="4" y2="16" />
+                  </svg>
+                </button>
+              </div>
+              <div className="mt-1.5 text-xs text-chalk-faint">
+                {new Date(a.createdAt).toLocaleString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PaymentRowSkeleton() {
   return (
     <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-panel p-3">
@@ -414,13 +542,21 @@ function Payments() {
   );
 }
 
+const SECTION_LABEL = {
+  players: "Player Setup",
+  payments: "Payments",
+  announcements: "Announcements",
+} as const;
+
 export default function AdminPage() {
-  const [section, setSection] = useState<"players" | "payments">("players");
+  const [section, setSection] = useState<"players" | "payments" | "announcements">(
+    "players"
+  );
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
-      <div className="mb-4 flex justify-center gap-2">
-        {(["players", "payments"] as const).map((s) => (
+      <div className="mb-4 flex flex-wrap justify-center gap-2">
+        {(["players", "payments", "announcements"] as const).map((s) => (
           <button
             key={s}
             onClick={() => setSection(s)}
@@ -430,12 +566,18 @@ export default function AdminPage() {
                 : "border border-line text-chalk-dim"
             }`}
           >
-            {s === "players" ? "Player Setup" : "Payments"}
+            {SECTION_LABEL[s]}
           </button>
         ))}
       </div>
 
-      {section === "players" ? <PlayerSetup /> : <Payments />}
+      {section === "players" ? (
+        <PlayerSetup />
+      ) : section === "payments" ? (
+        <Payments />
+      ) : (
+        <Announcements />
+      )}
     </div>
   );
 }
