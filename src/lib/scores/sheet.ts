@@ -85,8 +85,10 @@ function normalizeAbbr(raw: string | undefined): string | null {
 
 function mapStatus(qtr: string): NormalizedGameStatus {
   const q = qtr.trim().toUpperCase();
-  if (q === "F" || q === "F/OT" || q === "FINAL") return "FINAL";
   if (q === "" || q === "PRE") return "SCHEDULED";
+  // Covers every final variant the sheet uses: "F", "FINAL", "F/OT",
+  // "F-OT", "F/2OT", etc. — anything starting with F only ever means final.
+  if (q.startsWith("F")) return "FINAL";
   return "IN_PROGRESS";
 }
 
