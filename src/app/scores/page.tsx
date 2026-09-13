@@ -88,10 +88,10 @@ function TickerSide({
   reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
+  // Highlights (win/hit-19, watch 12/16) only call out the score — the
+  // team name always stays its normal color.
   const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  // "watch" (hit 12/16 while live) only calls out the score — the team
-  // name stays its normal color either way.
-  const nameColor = highlight && highlight !== "watch" ? TEXT_COLOR[highlight] : "text-chalk";
+  const nameColor = "text-chalk";
 
   return (
     <div
