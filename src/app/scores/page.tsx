@@ -69,8 +69,8 @@ function PossessionTriangle({ side }: { side: "left" | "right" }) {
     <span
       className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-y-transparent ${
         side === "left"
-          ? "-left-2.5 border-r-[7px] border-r-chalk"
-          : "-right-2.5 border-l-[7px] border-l-chalk"
+          ? "-left-1.5 border-r-[7px] border-r-chalk"
+          : "-right-1.5 border-l-[7px] border-l-chalk"
       }`}
     />
   );
@@ -101,10 +101,10 @@ function TickerSide({
           <div className="h-7 w-7 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-16 truncate text-center text-[10px] leading-none ${color}`}
+          className={`${leagueGothic.className} block w-16 truncate text-center text-[10px] uppercase leading-none ${color}`}
           style={{ fontWeight: 700 }}
         >
-          {team.name}
+          {team.name.split(" ").at(-1)}
         </span>
         <span className="block w-16 truncate text-center text-[9px] leading-none text-chalk-faint">
           {team.player ? team.player.name : "Unassigned"}
@@ -127,7 +127,6 @@ function statusLabel(game: GameDTO): string {
       hour: "numeric",
       minute: "2-digit",
       timeZone: "America/Chicago",
-      timeZoneName: "short",
     });
   }
   // The sheet's own situation text for a finished game (e.g. "Game Over")
@@ -138,7 +137,7 @@ function statusLabel(game: GameDTO): string {
 
 function GameCardSkeleton() {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-line bg-panel p-3">
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
       <div className="flex flex-1 items-center gap-2">
         <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
         <Skeleton className="h-8 w-10 shrink-0" />
@@ -160,7 +159,7 @@ function GameCard({ game }: { game: GameDTO }) {
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
 
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-line bg-panel p-3">
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
