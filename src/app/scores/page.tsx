@@ -88,7 +88,10 @@ function TickerSide({
   reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
-  const color = highlight ? TEXT_COLOR[highlight] : "text-chalk";
+  const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
+  // "watch" (hit 12/16 while live) only calls out the score — the team
+  // name stays its normal color either way.
+  const nameColor = highlight && highlight !== "watch" ? TEXT_COLOR[highlight] : "text-chalk";
 
   return (
     <div
@@ -101,7 +104,7 @@ function TickerSide({
           <div className="h-9 w-9 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${color}`}
+          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${nameColor}`}
           style={{ fontWeight: 700 }}
         >
           {team.name.split(" ").at(-1)}
@@ -111,7 +114,7 @@ function TickerSide({
         </span>
       </div>
       <div
-        className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${color}`}
+        className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
         style={{ fontWeight: 700 }}
       >
         {score}
