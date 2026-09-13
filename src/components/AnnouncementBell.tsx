@@ -75,7 +75,7 @@ export default function AnnouncementBell() {
           <path d="M8.3 15.5a1.7 1.7 0 0 0 3.4 0" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-live text-[10px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-led text-[10px] font-bold text-pill-text">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
