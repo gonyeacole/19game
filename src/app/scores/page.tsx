@@ -120,19 +120,28 @@ function TickerSide({
   );
 }
 
-function statusLabel(game: GameDTO): string {
+// The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
+// "at" for a middot to match the compact two-part ticker style.
+function formatSituation(situation: string): string {
+  return situation.replace(/ at /i, " · ");
+}
+
+function centerLines(game: GameDTO): { line1: string; line2: string | null } {
   if (game.status === "SCHEDULED" && game.startTime) {
-    return new Date(game.startTime).toLocaleString(undefined, {
-      weekday: "short",
-      hour: "numeric",
-      minute: "2-digit",
-      timeZone: "America/Chicago",
-    });
+    const date = new Date(game.startTime);
+    const timeZone = "America/Chicago";
+    return {
+      line1: date.toLocaleString(undefined, { weekday: "short", timeZone }),
+      line2: date.toLocaleString(undefined, { hour: "numeric", minute: "2-digit", timeZone }),
+    };
   }
   // The sheet's own situation text for a finished game (e.g. "Game Over")
   // varies and isn't ours to control — show a consistent label instead.
-  if (game.status === "FINAL") return "Final";
-  return game.statusDetail || game.status;
+  if (game.status === "FINAL") return { line1: "Final", line2: null };
+  return {
+    line1: game.statusDetail || game.status,
+    line2: game.situation ? formatSituation(game.situation) : null,
+  };
 }
 
 function GameCardSkeleton() {
@@ -157,6 +166,7 @@ function GameCardSkeleton() {
 function GameCard({ game }: { game: GameDTO }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
+  const { line1, line2 } = centerLines(game);
 
   return (
     <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
@@ -164,12 +174,8 @@ function GameCard({ game }: { game: GameDTO }) {
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
         {homeHasBall && <PossessionTriangle side="right" />}
-        <div className="whitespace-nowrap text-sm font-extrabold text-chalk">
-          {statusLabel(game)}
-        </div>
-        {game.status === "IN_PROGRESS" && game.situation && (
-          <div className="mt-0.5 truncate text-[10px] text-chalk">{game.situation}</div>
-        )}
+        <div className="whitespace-nowrap text-sm font-extrabold text-chalk">{line1}</div>
+        {line2 && <div className="mt-0.5 truncate text-[10px] text-chalk">{line2}</div>}
       </div>
       <TickerSide team={game.homeTeam} score={game.homeScore} status={game.status} reverse />
     </div>
