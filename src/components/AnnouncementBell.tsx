@@ -121,14 +121,11 @@ export default function AnnouncementBell() {
                 ) : (
                   <div className="flex flex-col gap-2">
                     {announcements.map((a) => (
-                      <div
-                        key={a.id}
-                        className="rounded-lg border border-led/20 bg-led-bg p-3"
-                      >
-                        <p className="whitespace-pre-wrap text-sm text-chalk">
+                      <div key={a.id} className="rounded-lg bg-led p-3">
+                        <p className="whitespace-pre-wrap text-sm font-semibold text-pill-text">
                           {a.message}
                         </p>
-                        <div className="mt-1.5 text-xs text-chalk-faint">
+                        <div className="mt-1.5 text-xs text-pill-text/70">
                           {new Date(a.createdAt).toLocaleString(undefined, {
                             month: "short",
                             day: "numeric",
