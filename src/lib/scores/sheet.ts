@@ -89,6 +89,15 @@ function mapStatus(qtr: string): NormalizedGameStatus {
   return "IN_PROGRESS";
 }
 
+// Short label for the quarter an in-progress game is in — shown inside the
+// Live pill instead of down/distance/field-position detail.
+function quarterLabel(qtr: string): string {
+  const q = qtr.trim().toUpperCase();
+  if (q === "H") return "Halftime";
+  if (q === "OT") return "OT";
+  return /^\d+$/.test(q) ? `Q${q}` : q;
+}
+
 // NFL schedules are always published in US Eastern time, which is what the
 // sheet's Time column holds — convert that wall-clock time to a real UTC
 // instant (accounting for EST/EDT) rather than treating the numbers as if
@@ -232,14 +241,19 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
       // this same date pattern.
       const dateSlug = sheetDateSlug(cols[COL.DATE])!;
 
+      const status = mapStatus(qtr);
+
       games.push({
         providerGameId: `${dateSlug}-${awayAbbr}-${homeAbbr}`,
         homeTeamAbbr: homeAbbr,
         awayTeamAbbr: awayAbbr,
         homeScore: Number(cols[COL.HOME_SCORE]) || 0,
         awayScore: Number(cols[COL.AWAY_SCORE]) || 0,
-        status: mapStatus(qtr),
-        statusDetail: (cols[COL.SITUATION] ?? qtr).trim(),
+        status,
+        statusDetail:
+          status === "IN_PROGRESS"
+            ? quarterLabel(qtr)
+            : (cols[COL.SITUATION] ?? qtr).trim(),
         startTime: gameDate.toISOString(),
       });
     }
