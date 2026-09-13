@@ -94,19 +94,19 @@ function TickerSide({
     <div
       className={`flex min-w-0 flex-1 items-center justify-between gap-2 ${reverse ? "flex-row-reverse" : ""}`}
     >
-      <div className="flex w-16 shrink-0 flex-col items-center gap-0.5">
+      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
         {team.logoUrl ? (
-          <Image src={team.logoUrl} alt="" width={28} height={28} unoptimized />
+          <Image src={team.logoUrl} alt="" width={36} height={36} unoptimized />
         ) : (
-          <div className="h-7 w-7 rounded-full bg-panel-3" />
+          <div className="h-9 w-9 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-16 truncate text-center text-[10px] uppercase leading-none ${color}`}
+          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${color}`}
           style={{ fontWeight: 700 }}
         >
           {team.name.split(" ").at(-1)}
         </span>
-        <span className="block w-16 truncate text-center text-[9px] leading-none text-chalk-faint">
+        <span className="block w-20 truncate text-center text-[11px] leading-none text-chalk-faint">
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
@@ -174,8 +174,10 @@ function GameCard({ game }: { game: GameDTO }) {
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
         {homeHasBall && <PossessionTriangle side="right" />}
-        <div className="whitespace-nowrap text-sm font-extrabold text-chalk">{line1}</div>
-        {line2 && <div className="mt-0.5 truncate text-[10px] text-chalk">{line2}</div>}
+        <div className="whitespace-nowrap text-sm font-extrabold leading-tight text-chalk">
+          {line1}
+        </div>
+        {line2 && <div className="truncate text-[10px] leading-tight text-chalk">{line2}</div>}
       </div>
       <TickerSide team={game.homeTeam} score={game.homeScore} status={game.status} reverse />
     </div>
