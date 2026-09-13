@@ -123,7 +123,7 @@ export default function AnnouncementBell() {
                     {announcements.map((a) => (
                       <div
                         key={a.id}
-                        className="rounded-lg border border-line bg-panel-2 p-3"
+                        className="rounded-lg border border-led/20 bg-led-bg p-3"
                       >
                         <p className="whitespace-pre-wrap text-sm text-chalk">
                           {a.message}
