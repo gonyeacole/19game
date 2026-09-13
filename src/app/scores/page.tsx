@@ -144,8 +144,14 @@ function GameCard({ game }: { game: GameDTO }) {
       <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
         {game.status === "IN_PROGRESS" ? (
           <>
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />
-            <span className="text-live">{statusLabel(game)}</span>
+            <span className="animate-pulse rounded-full bg-live px-2 py-0.5 text-white">
+              Live
+            </span>
+            {game.statusDetail && (
+              <span className="normal-case tracking-normal text-chalk-faint">
+                {game.statusDetail}
+              </span>
+            )}
           </>
         ) : game.status === "FINAL" ? (
           <span className="rounded-full bg-led px-2 py-0.5 text-pill-text">
