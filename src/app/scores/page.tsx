@@ -91,7 +91,9 @@ function TickerSide({
   const color = highlight ? TEXT_COLOR[highlight] : "text-chalk";
 
   return (
-    <div className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
+    <div
+      className={`flex min-w-0 flex-1 items-center justify-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+    >
       <div className="flex shrink-0 flex-col items-center gap-0.5">
         {team.logoUrl ? (
           <Image src={team.logoUrl} alt="" width={28} height={28} unoptimized />
@@ -109,7 +111,7 @@ function TickerSide({
         </span>
       </div>
       <div
-        className={`${leagueGothic.className} text-3xl leading-none tabular-nums ${color}`}
+        className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${color}`}
         style={{ fontWeight: 700 }}
       >
         {score}
