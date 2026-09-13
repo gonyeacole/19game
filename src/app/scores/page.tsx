@@ -42,6 +42,13 @@ interface ScoresResponse {
   synced: boolean;
 }
 
+// Live games first, then upcoming, then final games pushed to the bottom.
+const STATUS_ORDER: Record<GameDTO["status"], number> = {
+  IN_PROGRESS: 0,
+  SCHEDULED: 1,
+  FINAL: 2,
+};
+
 function rowHighlight(score: number, status: GameDTO["status"]): "win" | "hit-live" | "watch" | null {
   if (score === WINNING_SCORE) return status === "FINAL" ? "win" : "hit-live";
   if (status === "IN_PROGRESS" && WATCH_SCORES.includes(score)) return "watch";
@@ -227,9 +234,10 @@ export default function ScoresPage() {
     team.name.toLowerCase().includes(q) ||
     team.abbreviation.toLowerCase().includes(q) ||
     (team.player?.name.toLowerCase().includes(q) ?? false);
-  const filteredGames = games?.filter(
-    (g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam)
-  );
+  const filteredGames = games
+    ?.filter((g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam))
+    .slice()
+    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
