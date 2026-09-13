@@ -71,6 +71,10 @@ function toNormalizedGame(event: EspnEvent): NormalizedGame | null {
     awayScore: Number(away.score ?? 0),
     status: mapStatus(status.type.state),
     statusDetail: status.type.shortDetail ?? status.type.detail ?? "",
+    // Not wired up — this provider is a reference implementation, unused
+    // while the Google Sheet provider is primary (see index.ts).
+    situation: null,
+    possession: null,
     startTime: competition.date ?? event.date,
   };
 }

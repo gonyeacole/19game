@@ -8,6 +8,8 @@ export interface NormalizedGame {
   awayScore: number;
   status: NormalizedGameStatus;
   statusDetail: string;
+  situation: string | null;
+  possession: string | null;
   startTime: string; // ISO 8601
 }
 

@@ -33,6 +33,7 @@ const COL = {
   QTR: 9,
   CLOCK: 10,
   SITUATION: 11,
+  POS: 12,
 };
 
 const KNOWN_ABBRS = new Set<string>(NFL_TEAMS.map((t) => t.abbreviation));
@@ -253,6 +254,8 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
       const dateSlug = sheetDateSlug(cols[COL.DATE])!;
 
       const status = mapStatus(qtr);
+      const situationRaw = (cols[COL.SITUATION] ?? "").trim();
+      const posRaw = (cols[COL.POS] ?? "").trim().toUpperCase();
 
       games.push({
         providerGameId: `${dateSlug}-${awayAbbr}-${homeAbbr}`,
@@ -265,6 +268,11 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
           status === "IN_PROGRESS"
             ? quarterLabel(qtr, cols[COL.CLOCK] ?? "")
             : (cols[COL.SITUATION] ?? qtr).trim(),
+        situation:
+          status === "IN_PROGRESS" && situationRaw && situationRaw.toLowerCase() !== "waiting..."
+            ? situationRaw
+            : null,
+        possession: status === "IN_PROGRESS" && posRaw ? posRaw : null,
         startTime: gameDate.toISOString(),
       });
     }

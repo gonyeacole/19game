@@ -68,6 +68,8 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
         awayScore: game.awayScore,
         status: game.status,
         statusDetail: game.statusDetail,
+        situation: game.situation,
+        possession: game.possession,
         startTime: new Date(game.startTime),
       },
       create: {
@@ -79,6 +81,8 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
         awayScore: game.awayScore,
         status: game.status,
         statusDetail: game.statusDetail,
+        situation: game.situation,
+        possession: game.possession,
         startTime: new Date(game.startTime),
       },
     });

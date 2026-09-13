@@ -98,6 +98,8 @@ model Game {
   awayScore Int     @default(0)
   status    String  @default("SCHEDULED")
   statusDetail String? // e.g. "Final", "Final/OT", "Q3 4:12"
+  situation    String? // down & distance / field position, e.g. "3rd & 9 at MIN 26" — IN_PROGRESS only
+  possession   String? // abbreviation of the team with the ball — IN_PROGRESS only
   startTime DateTime?
 
   createdAt DateTime @default(now())

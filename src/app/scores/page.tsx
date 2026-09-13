@@ -5,6 +5,7 @@ import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
+import { leagueGothic } from "@/lib/fonts";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -32,6 +33,8 @@ interface GameDTO {
   awayScore: number;
   status: "SCHEDULED" | "IN_PROGRESS" | "FINAL";
   statusDetail: string | null;
+  situation: string | null;
+  possession: string | null;
   startTime: string | null;
 }
 
@@ -61,48 +64,56 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   watch: "text-live",
 };
 
-function TeamLine({
+function PossessionTriangle({ side }: { side: "left" | "right" }) {
+  return (
+    <span
+      className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-y-transparent ${
+        side === "left"
+          ? "-left-2.5 border-r-[7px] border-r-chalk"
+          : "-right-2.5 border-l-[7px] border-l-chalk"
+      }`}
+    />
+  );
+}
+
+function TickerSide({
   team,
   score,
   status,
+  reverse,
 }: {
   team: TeamDTO;
   score: number;
   status: GameDTO["status"];
+  reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
+  const color = highlight ? TEXT_COLOR[highlight] : "text-chalk";
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
-      <div className="flex min-w-0 items-center gap-2">
+    <div className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
+      <div className="flex shrink-0 flex-col items-center gap-0.5">
         {team.logoUrl ? (
-          <Image
-            src={team.logoUrl}
-            alt=""
-            width={28}
-            height={28}
-            className="shrink-0"
-            unoptimized
-          />
+          <Image src={team.logoUrl} alt="" width={28} height={28} unoptimized />
         ) : (
-          <div className="h-7 w-7 shrink-0 rounded-full bg-panel-3" />
+          <div className="h-7 w-7 rounded-full bg-panel-3" />
         )}
-        <div className="min-w-0">
-          <div
-            className={`truncate text-sm font-semibold ${highlight ? TEXT_COLOR[highlight] : "text-chalk"}`}
-          >
-            {team.name}
-          </div>
-          <div className="truncate text-xs text-chalk-faint">
-            {team.player ? team.player.name : "Unassigned"}
-          </div>
-        </div>
+        <span
+          className={`${leagueGothic.className} text-xs leading-none ${color}`}
+          style={{ fontWeight: 700 }}
+        >
+          {team.abbreviation}
+        </span>
+        <span className="max-w-[52px] truncate text-[9px] leading-none text-chalk-faint">
+          {team.player ? team.player.name : "Unassigned"}
+        </span>
       </div>
-      <span
-        className={`shrink-0 text-lg font-bold tabular-nums ${highlight ? TEXT_COLOR[highlight] : "text-chalk"}`}
+      <div
+        className={`${leagueGothic.className} text-3xl leading-none tabular-nums ${color}`}
+        style={{ fontWeight: 700 }}
       >
         {score}
-      </span>
+      </div>
     </div>
   );
 }
@@ -125,46 +136,41 @@ function statusLabel(game: GameDTO): string {
 
 function GameCardSkeleton() {
   return (
-    <div className="rounded-xl border border-line bg-panel p-3">
-      <Skeleton className="mb-3 h-3 w-24" />
-      <div className="flex flex-col gap-1.5">
-        {[0, 1].map((i) => (
-          <div key={i} className="flex items-center justify-between gap-3 rounded-lg px-3 py-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
-              <div className="flex flex-col gap-1.5">
-                <Skeleton className="h-3.5 w-28" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            </div>
-            <Skeleton className="h-5 w-6 shrink-0" />
-          </div>
-        ))}
+    <div className="flex items-center gap-2 rounded-xl border border-line bg-panel p-3">
+      <div className="flex flex-1 items-center gap-2">
+        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+        <Skeleton className="h-8 w-10 shrink-0" />
+      </div>
+      <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
+        <Skeleton className="h-3.5 w-16" />
+        <Skeleton className="h-2.5 w-20" />
+      </div>
+      <div className="flex flex-1 flex-row-reverse items-center gap-2">
+        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+        <Skeleton className="h-8 w-10 shrink-0" />
       </div>
     </div>
   );
 }
 
 function GameCard({ game }: { game: GameDTO }) {
+  const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
+  const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
+
   return (
-    <div className="rounded-xl border border-line bg-panel p-3">
-      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
-        {game.status === "IN_PROGRESS" ? (
-          <span className="rounded-full bg-live px-2 py-0.5 text-white">
-            Live{game.statusDetail ? ` · ${game.statusDetail}` : ""}
-          </span>
-        ) : game.status === "FINAL" ? (
-          <span className="rounded-full bg-led px-2 py-0.5 text-pill-text">
-            {statusLabel(game)}
-          </span>
-        ) : (
-          <span className="text-chalk-faint">{statusLabel(game)}</span>
+    <div className="flex items-center gap-2 rounded-xl border border-line bg-panel p-3">
+      <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
+      <div className="relative w-28 shrink-0 text-center">
+        {awayHasBall && <PossessionTriangle side="left" />}
+        {homeHasBall && <PossessionTriangle side="right" />}
+        <div className="whitespace-nowrap text-sm font-extrabold text-chalk">
+          {statusLabel(game)}
+        </div>
+        {game.status === "IN_PROGRESS" && game.situation && (
+          <div className="mt-0.5 truncate text-[10px] text-chalk">{game.situation}</div>
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
-        <TeamLine team={game.awayTeam} score={game.awayScore} status={game.status} />
-        <TeamLine team={game.homeTeam} score={game.homeScore} status={game.status} />
-      </div>
+      <TickerSide team={game.homeTeam} score={game.homeScore} status={game.status} reverse />
     </div>
   );
 }

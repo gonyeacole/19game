@@ -74,6 +74,8 @@ function toNormalizedGame(g: ApiSportsGame): NormalizedGame {
     awayScore: g.scores.away.total ?? 0,
     status: mapStatus(g.game.status.short),
     statusDetail: g.game.status.long,
+    situation: null,
+    possession: null,
     startTime: new Date(g.game.date.timestamp * 1000).toISOString(),
   };
 }
