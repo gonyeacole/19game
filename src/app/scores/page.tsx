@@ -92,7 +92,7 @@ function TickerSide({
 
   return (
     <div
-      className={`flex min-w-0 flex-1 items-center justify-between gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+      className={`flex min-w-0 flex-1 items-center justify-start gap-2 ${reverse ? "flex-row-reverse" : ""}`}
     >
       <div className="flex w-20 shrink-0 flex-col items-center gap-1">
         {team.logoUrl ? (
