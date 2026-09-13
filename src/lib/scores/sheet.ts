@@ -31,6 +31,7 @@ const COL = {
   AWAY_SCORE: 7,
   HOME_SCORE: 8,
   QTR: 9,
+  CLOCK: 10,
   SITUATION: 11,
 };
 
@@ -90,19 +91,20 @@ function mapStatus(qtr: string): NormalizedGameStatus {
 }
 
 const ORDINAL_QUARTERS: Record<string, string> = {
-  "1": "1st Quarter",
-  "2": "2nd Quarter",
-  "3": "3rd Quarter",
-  "4": "4th Quarter",
+  "1": "1st",
+  "2": "2nd",
+  "3": "3rd",
+  "4": "4th",
 };
 
 // Label for the quarter an in-progress game is in — shown inside the Live
-// pill instead of down/distance/field-position detail.
-function quarterLabel(qtr: string): string {
+// pill instead of down/distance/field-position detail, e.g. "4th 13:03".
+function quarterLabel(qtr: string, clock: string): string {
   const q = qtr.trim().toUpperCase();
   if (q === "H") return "Halftime";
-  if (q === "OT") return "OT";
-  return ORDINAL_QUARTERS[q] ?? q;
+  const ordinal = ORDINAL_QUARTERS[q] ?? q;
+  const time = clock.trim();
+  return time && time !== "0:00" ? `${ordinal} ${time}` : ordinal;
 }
 
 // NFL schedules are always published in US Eastern time, which is what the
@@ -259,7 +261,7 @@ export class GoogleSheetScoreProvider implements ScoreProvider {
         status,
         statusDetail:
           status === "IN_PROGRESS"
-            ? quarterLabel(qtr)
+            ? quarterLabel(qtr, cols[COL.CLOCK] ?? "")
             : (cols[COL.SITUATION] ?? qtr).trim(),
         startTime: gameDate.toISOString(),
       });
