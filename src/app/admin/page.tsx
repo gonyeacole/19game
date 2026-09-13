@@ -245,6 +245,7 @@ function Announcements() {
   const [announcements, setAnnouncements] = useState<AnnouncementDTO[] | null>(null);
   const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = () =>
@@ -261,14 +262,21 @@ function Announcements() {
   const post = async () => {
     if (!message.trim()) return;
     setPosting(true);
+    setPostError(null);
     try {
-      await fetch("/api/announcements", {
+      const res = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
+      if (!res.ok) {
+        setPostError("Couldn't post the announcement. Try again.");
+        return;
+      }
       setMessage("");
       await load();
+    } catch {
+      setPostError("Couldn't post the announcement. Try again.");
     } finally {
       setPosting(false);
     }
@@ -294,6 +302,7 @@ function Announcements() {
           rows={3}
           className="rounded-lg border border-line bg-panel-2 px-3 py-2 text-sm text-chalk placeholder:text-chalk-faint"
         />
+        {postError && <p className="text-xs text-live">{postError}</p>}
         <button
           onClick={post}
           disabled={!message.trim() || posting}
