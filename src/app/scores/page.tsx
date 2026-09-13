@@ -92,21 +92,21 @@ function TickerSide({
 
   return (
     <div
-      className={`flex min-w-0 flex-1 items-center justify-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+      className={`flex min-w-0 flex-1 items-center justify-between gap-2 ${reverse ? "flex-row-reverse" : ""}`}
     >
-      <div className="flex shrink-0 flex-col items-center gap-0.5">
+      <div className="flex w-16 shrink-0 flex-col items-center gap-0.5">
         {team.logoUrl ? (
           <Image src={team.logoUrl} alt="" width={28} height={28} unoptimized />
         ) : (
           <div className="h-7 w-7 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} text-xs leading-none ${color}`}
+          className={`${leagueGothic.className} block w-16 truncate text-center text-[10px] leading-none ${color}`}
           style={{ fontWeight: 700 }}
         >
-          {team.abbreviation}
+          {team.name}
         </span>
-        <span className="max-w-[52px] truncate text-[9px] leading-none text-chalk-faint">
+        <span className="block w-16 truncate text-center text-[9px] leading-none text-chalk-faint">
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
