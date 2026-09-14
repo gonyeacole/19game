@@ -311,7 +311,7 @@ export default function ScoresPage() {
       <SearchBar
         value={query}
         onChange={setQuery}
-        placeholder="Search for games or teams"
+        placeholder="Search for games or owners"
       />
 
       {error && (
