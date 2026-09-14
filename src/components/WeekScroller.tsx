@@ -61,20 +61,9 @@ export default function WeekScroller({
         <button
           onClick={() => setOpen((o) => !o)}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-1.5 rounded-full border border-line bg-panel-3 py-2.5 text-center text-sm font-semibold text-chalk-dim transition-opacity disabled:opacity-50"
+          className="w-full rounded-full border border-line bg-panel-3 py-2.5 text-center text-sm font-semibold text-chalk-dim transition-opacity disabled:opacity-50"
         >
           <span className={loading ? "opacity-50" : ""}>Week {current}</span>
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
-          >
-            <polyline points="5 7.5 10 12.5 15 7.5" />
-          </svg>
         </button>
 
         {open && (
