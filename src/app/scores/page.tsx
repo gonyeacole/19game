@@ -68,6 +68,24 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   watch: "text-live",
 };
 
+const BORDER_COLOR: Record<"win" | "hit-live" | "watch", string> = {
+  win: "border-win",
+  "hit-live": "border-led",
+  watch: "border-live",
+};
+
+// If both teams somehow trigger a highlight at once, a win/hit-19 takes
+// priority over a watch score for which color outlines the card.
+function cardHighlight(
+  a: "win" | "hit-live" | "watch" | null,
+  b: "win" | "hit-live" | "watch" | null
+): "win" | "hit-live" | "watch" | null {
+  for (const h of [a, b]) {
+    if (h === "win" || h === "hit-live") return h;
+  }
+  return a ?? b;
+}
+
 function PossessionTriangle({ side }: { side: "left" | "right" }) {
   return (
     <span
@@ -194,9 +212,14 @@ function GameCard({ game }: { game: GameDTO }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const { line1, line2 } = centerLines(game);
+  const highlight = cardHighlight(
+    rowHighlight(game.awayScore, game.status),
+    rowHighlight(game.homeScore, game.status)
+  );
+  const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
 
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
+    <div className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor}`}>
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
