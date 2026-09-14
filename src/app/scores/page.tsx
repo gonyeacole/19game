@@ -147,21 +147,32 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
   };
 }
 
+// Mirrors TickerSide's stacked logo/name/player-name column plus the score
+// box so the skeleton's height matches the real card — a flatter skeleton
+// here previously rendered noticeably shorter than loaded content, causing
+// a layout jump even when the placeholder count was right.
+function SkeletonSide({ reverse }: { reverse?: boolean }) {
+  return (
+    <div className={`flex flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
+      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3 w-14" />
+        <Skeleton className="h-[11px] w-16" />
+      </div>
+      <Skeleton className="h-10 w-10 shrink-0" />
+    </div>
+  );
+}
+
 function GameCardSkeleton() {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
-      <div className="flex flex-1 items-center gap-2">
-        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
-        <Skeleton className="h-8 w-10 shrink-0" />
-      </div>
+      <SkeletonSide />
       <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
         <Skeleton className="h-3.5 w-16" />
         <Skeleton className="h-2.5 w-20" />
       </div>
-      <div className="flex flex-1 flex-row-reverse items-center gap-2">
-        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
-        <Skeleton className="h-8 w-10 shrink-0" />
-      </div>
+      <SkeletonSide reverse />
     </div>
   );
 }
@@ -277,7 +288,10 @@ export default function ScoresPage() {
 
       {loading && !games ? (
         <div className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {/* A full NFL week has 16 games (fewer once bye weeks start) —
+              matching that count avoids the large layout shift a smaller
+              placeholder count would cause once real data loads. */}
+          {Array.from({ length: 16 }).map((_, i) => (
             <GameCardSkeleton key={i} />
           ))}
         </div>
