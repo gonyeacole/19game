@@ -157,13 +157,15 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
 // a layout jump even when the placeholder count was right.
 function SkeletonSide({ reverse }: { reverse?: boolean }) {
   return (
-    <div className={`flex flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
+    <div
+      className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+    >
       <div className="flex w-20 shrink-0 flex-col items-center gap-1">
         <Skeleton className="h-9 w-9" rounded="rounded-full" />
         <Skeleton className="h-3 w-14" />
         <Skeleton className="mt-0.5 h-[14px] w-16" rounded="rounded-full" />
       </div>
-      <Skeleton className="h-10 w-10 shrink-0" />
+      <Skeleton className="h-10 w-6" />
     </div>
   );
 }
