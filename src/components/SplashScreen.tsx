@@ -38,6 +38,27 @@ const FADE_MS = 500; // whole screen fading out
 
 type Phase = "pre" | "visible" | "out" | "done";
 
+const LAST_OPEN_KEY = "splashLastOpenAt";
+const SKIP_WINDOW_MS = 5 * 60 * 1000; // don't replay the splash within 5 minutes of the last open
+
+// True the first time ever (nothing stored yet) or once 5+ minutes have
+// passed since the last open; false — skip the splash — otherwise. Always
+// stamps "now" as the new last-open time so the window is measured from
+// whichever open was most recent, not from the very first one.
+function shouldSkipSplash(): boolean {
+  try {
+    const last = window.localStorage.getItem(LAST_OPEN_KEY);
+    const now = Date.now();
+    window.localStorage.setItem(LAST_OPEN_KEY, String(now));
+    if (last == null) return false;
+    const lastOpenAt = Number(last);
+    return Number.isFinite(lastOpenAt) && now - lastOpenAt < SKIP_WINDOW_MS;
+  } catch {
+    // Storage unavailable (private browsing, etc.) — default to showing it.
+    return false;
+  }
+}
+
 function charStyle(delay: number, visible: boolean): React.CSSProperties {
   return {
     color: SPLASH_BLACK,
@@ -59,6 +80,23 @@ export default function SplashScreen() {
   const [phase, setPhase] = useState<Phase>("pre");
   const leagueRef = useRef<HTMLSpanElement>(null);
   const nineteenRef = useRef<HTMLSpanElement>(null);
+  // Mirrors the skip decision outside of state: the RAF callback below fires
+  // asynchronously (after this mount's layout effects, including the one
+  // that decides to skip, have already run) and needs a same-tick-readable
+  // way to know not to flip the phase back to "visible" and resurrect a
+  // splash that was just skipped.
+  const skippedRef = useRef(false);
+
+  // Runs before paint so a skip never flashes the green screen even for a
+  // frame — SSR/first hydration always render the "pre" state (there's no
+  // way to know localStorage during server rendering), and this corrects
+  // it synchronously before the browser ever paints that frame.
+  useLayoutEffect(() => {
+    if (!shouldSkipSplash()) return;
+    skippedRef.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time check against localStorage, unavailable during render/SSR
+    setPhase("done");
+  }, []);
 
   // Positions "19" dead-center (offset right by half of "League"'s width,
   // which compensates for "19" otherwise sitting left-of-center as the
@@ -91,6 +129,7 @@ export default function SplashScreen() {
   // every character's enter transition entirely.
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
+      if (skippedRef.current) return;
       setPhase("visible");
       nineteenRef.current?.style.setProperty("transform", "translateX(0)");
     });
