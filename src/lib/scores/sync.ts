@@ -1,10 +1,15 @@
 import { prisma } from "@/lib/db/prisma";
 import { scoreProvider } from "./index";
 
-// The Scores tab polls every 30s while open — only actually hit the provider
-// at most this often per week, and serve cached DB data the rest of the
-// time. Matches the sheet's own 1-minute refresh cadence.
+// The Scores tab polls while open — only actually hit the provider at most
+// this often per week, and serve cached DB data the rest of the time.
+// Matches the sheet's own 1-minute refresh cadence when nothing is live.
 const MIN_SYNC_INTERVAL_MS = 60 * 1000;
+// While a game in the week is in progress, sync more often so we catch the
+// sheet's next tick sooner instead of waiting up to a full minute — this
+// doesn't make the sheet itself update faster, just shrinks the added delay
+// on top of it.
+const LIVE_SYNC_INTERVAL_MS = 20 * 1000;
 
 /**
  * Fetches the scoreboard for a given week from the active score provider and
@@ -23,6 +28,9 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
     existing.games.length > 0 &&
     existing.games.every((g) => g.status === "FINAL");
 
+  const hasLiveGame = existing?.games.some((g) => g.status === "IN_PROGRESS") ?? false;
+  const syncInterval = hasLiveGame ? LIVE_SYNC_INTERVAL_MS : MIN_SYNC_INTERVAL_MS;
+
   // Only throttle re-fetching when we actually have something cached to show
   // — an empty result is never worth caching, since there's nothing to lose
   // by retrying immediately.
@@ -30,7 +38,7 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
     existing != null &&
     existing.games.length > 0 &&
     existing.lastSyncedAt != null &&
-    Date.now() - existing.lastSyncedAt.getTime() < MIN_SYNC_INTERVAL_MS;
+    Date.now() - existing.lastSyncedAt.getTime() < syncInterval;
 
   if (existing && (allGamesFinal || syncedRecently)) {
     return { week: existing, games: existing.games };

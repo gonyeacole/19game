@@ -10,6 +10,10 @@ import { leagueGothic } from "@/lib/fonts";
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
 const POLL_MS = 30_000;
+// Poll faster while a game is live so on-screen clock/situation data lags
+// the sheet's own updates by less — doesn't help once we've caught up to
+// its ~1-minute refresh cadence, just shrinks the wait to catch the next one.
+const LIVE_POLL_MS = 15_000;
 
 interface PlayerDTO {
   id: string;
@@ -207,6 +211,10 @@ export default function ScoresPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
   const inFlight = useRef(false);
+  const gamesRef = useRef<GameDTO[] | null>(null);
+  useEffect(() => {
+    gamesRef.current = games;
+  }, [games]);
 
   const load = useCallback(async (year?: number, week?: number) => {
     if (inFlight.current) return;
@@ -245,11 +253,28 @@ export default function ScoresPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Poll for live updates once we know which week we're looking at.
+  // Poll for live updates once we know which week we're looking at. Uses a
+  // self-rescheduling timeout (rather than setInterval) so the delay can
+  // shrink to LIVE_POLL_MS on each tick once a game in the week goes live.
   useEffect(() => {
     if (seasonYear == null || weekNumber == null) return;
-    const id = setInterval(() => load(seasonYear, weekNumber), POLL_MS);
-    return () => clearInterval(id);
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      const hasLiveGame = gamesRef.current?.some((g) => g.status === "IN_PROGRESS") ?? false;
+      timeoutId = setTimeout(tick, hasLiveGame ? LIVE_POLL_MS : POLL_MS);
+    };
+    const tick = async () => {
+      await load(seasonYear, weekNumber);
+      if (!cancelled) scheduleNext();
+    };
+
+    scheduleNext();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [seasonYear, weekNumber, load]);
 
   const selectWeek = (week: number) => {
