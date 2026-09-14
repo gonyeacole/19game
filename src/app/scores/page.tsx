@@ -117,12 +117,14 @@ function TickerSide({
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
-      <div
-        className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
-        style={{ fontWeight: 700 }}
-      >
-        {score}
-      </div>
+      {status !== "SCHEDULED" && (
+        <div
+          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
+          style={{ fontWeight: 700 }}
+        >
+          {score}
+        </div>
+      )}
     </div>
   );
 }
