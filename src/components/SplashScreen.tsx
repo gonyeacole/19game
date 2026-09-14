@@ -10,10 +10,13 @@ const SPLASH_GREEN = "#00dd94";
 const SPLASH_BLACK = "#0a0a0a";
 
 const LEAGUE_LETTERS = "League".split("");
-// Must match the Tailwind duration-500 class on the "19" span below — the
-// letter reveal can't start until that scale/opacity transition finishes.
-const ENTER_TRANSITION_MS = 500;
-const LETTER_STAGGER_MS = 140; // gap between each "League" letter appearing
+// A gentle deceleration curve (easeOutQuint-ish) used everywhere below for
+// a smoother, less mechanical fade than the default "ease-out".
+const SMOOTH_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
+// Must match the Tailwind duration-[750ms] class on the "19" span below —
+// the letter reveal can't start until that scale/opacity transition finishes.
+const ENTER_TRANSITION_MS = 750;
+const LETTER_STAGGER_MS = 170; // gap between each "League" letter appearing
 const HOLD_MS = 500; // full "19League" held once fully revealed
 const FADE_MS = 450; // whole screen fading out
 
@@ -113,7 +116,7 @@ export default function SplashScreen() {
       />
       <div className="flex items-center">
         <span
-          className={`${leagueGothic.className} whitespace-nowrap text-6xl uppercase leading-none tracking-wide transition-all duration-500 ease-out ${
+          className={`${leagueGothic.className} whitespace-nowrap text-6xl uppercase leading-none tracking-wide transition-all duration-[750ms] ${SMOOTH_EASE} ${
             nineteenVisible ? "scale-100 opacity-100" : "scale-50 opacity-0"
           }`}
           style={{ fontWeight: 700, color: SPLASH_BLACK }}
@@ -121,7 +124,7 @@ export default function SplashScreen() {
           19
         </span>
         <span
-          className="inline-block overflow-hidden whitespace-nowrap transition-[width] duration-200 ease-out"
+          className={`inline-block overflow-hidden whitespace-nowrap transition-[width] duration-[350ms] ${SMOOTH_EASE}`}
           style={{ width: wrapperWidth }}
         >
           <span
@@ -131,7 +134,7 @@ export default function SplashScreen() {
             {LEAGUE_LETTERS.map((letter, i) => (
               <span
                 key={i}
-                className="inline-block transition-opacity duration-200 ease-out"
+                className={`inline-block transition-opacity duration-[550ms] ${SMOOTH_EASE}`}
                 style={{ opacity: revealedCount > i ? 1 : 0 }}
               >
                 {letter}
