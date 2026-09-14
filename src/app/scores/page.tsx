@@ -141,7 +141,12 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
     const timeZone = "America/Chicago";
     return {
       line1: date.toLocaleString(undefined, { weekday: "short", timeZone }),
-      line2: date.toLocaleString(undefined, { hour: "numeric", minute: "2-digit", timeZone }),
+      line2: date.toLocaleString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+        timeZone,
+      }),
     };
   }
   // The sheet's own situation text for a finished game (e.g. "Game Over")
