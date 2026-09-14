@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import TabNav from "@/components/TabNav";
+import SplashScreen from "@/components/SplashScreen";
 import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
         <main className="flex-1 pb-24">{children}</main>
         <TabNav />
+        <SplashScreen />
       </body>
     </html>
   );
