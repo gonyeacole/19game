@@ -113,7 +113,7 @@ function TickerSide({
         >
           {team.name.split(" ").at(-1)}
         </span>
-        <span className="block w-20 truncate text-center text-[11px] leading-none text-chalk-faint">
+        <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
@@ -161,7 +161,7 @@ function SkeletonSide({ reverse }: { reverse?: boolean }) {
       <div className="flex w-20 shrink-0 flex-col items-center gap-1">
         <Skeleton className="h-9 w-9 rounded-full" />
         <Skeleton className="h-3 w-14" />
-        <Skeleton className="h-[11px] w-16" />
+        <Skeleton className="mt-0.5 h-[14px] w-16 rounded-full" />
       </div>
       <Skeleton className="h-10 w-10 shrink-0" />
     </div>
