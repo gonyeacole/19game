@@ -91,3 +91,16 @@ html[data-standalone="true"] .safe-top {
 html[data-standalone="true"] .safe-bottom {
   padding-bottom: 34px;
 }
+
+/*
+  SplashScreen always renders the same markup on the server and on first
+  client hydration (there's no way to know localStorage during either), so
+  the decision of whether to actually show it has to be made here, in plain
+  CSS, keyed off the [data-splash] attribute the blocking SPLASH_INIT_SCRIPT
+  in layout.tsx sets before the browser paints anything — otherwise the
+  splash's green background flashes on screen for a frame on every reload,
+  even when SplashScreen's own JS immediately hides it afterward.
+*/
+html[data-splash="skip"] #splash-root {
+  display: none;
+}

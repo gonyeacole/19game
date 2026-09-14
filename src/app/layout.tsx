@@ -53,12 +53,36 @@ const STANDALONE_INIT_SCRIPT = `
 })();
 `;
 
+// Decides here — before the browser paints any HTML at all — whether the
+// splash should show, and stamps the result onto <html> for the CSS rule in
+// globals.css to key off. SplashScreen itself always renders the same
+// markup on the server and on first hydration (there's no way to know
+// localStorage during either), so without this, the splash's green
+// background would flash on screen for a frame on every reload before
+// SplashScreen's own client-side effects had a chance to hide it.
+const SPLASH_INIT_SCRIPT = `
+(function () {
+  try {
+    var KEY = "splashLastOpenAt";
+    var WINDOW_MS = 5 * 60 * 1000;
+    var last = localStorage.getItem(KEY);
+    var now = Date.now();
+    localStorage.setItem(KEY, String(now));
+    var skip = last != null && now - Number(last) < WINDOW_MS;
+    document.documentElement.dataset.splash = skip ? "skip" : "show";
+  } catch (e) {
+    document.documentElement.dataset.splash = "show";
+  }
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`h-full antialiased ${ibmPlexSans.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <header className="safe-top sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">

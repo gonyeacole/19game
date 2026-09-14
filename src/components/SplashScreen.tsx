@@ -38,25 +38,15 @@ const FADE_MS = 500; // whole screen fading out
 
 type Phase = "pre" | "visible" | "out" | "done";
 
-const LAST_OPEN_KEY = "splashLastOpenAt";
-const SKIP_WINDOW_MS = 5 * 60 * 1000; // don't replay the splash within 5 minutes of the last open
-
-// True the first time ever (nothing stored yet) or once 5+ minutes have
-// passed since the last open; false — skip the splash — otherwise. Always
-// stamps "now" as the new last-open time so the window is measured from
-// whichever open was most recent, not from the very first one.
+// The actual show/skip decision (and the localStorage read/write behind it)
+// happens in SPLASH_INIT_SCRIPT in layout.tsx, which runs before the browser
+// paints anything — this component just reads the result off <html> rather
+// than redoing that check itself. Redoing it here would also be wrong, not
+// just redundant: SPLASH_INIT_SCRIPT already stamped "now" as the last-open
+// time by the time this runs, so a second independent check would always
+// see an ~instant gap and conclude "skip" even on a genuine first visit.
 function shouldSkipSplash(): boolean {
-  try {
-    const last = window.localStorage.getItem(LAST_OPEN_KEY);
-    const now = Date.now();
-    window.localStorage.setItem(LAST_OPEN_KEY, String(now));
-    if (last == null) return false;
-    const lastOpenAt = Number(last);
-    return Number.isFinite(lastOpenAt) && now - lastOpenAt < SKIP_WINDOW_MS;
-  } catch {
-    // Storage unavailable (private browsing, etc.) — default to showing it.
-    return false;
-  }
+  return document.documentElement.dataset.splash === "skip";
 }
 
 function charStyle(delay: number, visible: boolean): React.CSSProperties {
@@ -154,6 +144,7 @@ export default function SplashScreen() {
 
   return (
     <div
+      id="splash-root"
       className="fixed inset-0 z-40 flex items-center justify-center"
       style={{
         backgroundColor: SPLASH_GREEN,
