@@ -48,14 +48,14 @@ function PlayerCardSkeleton() {
   return (
     <div className="rounded-xl border border-line bg-panel p-3">
       <div className="mb-2 flex items-center gap-2">
-        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-6 w-6" rounded="rounded-full" />
         <Skeleton className="h-3.5 w-32" />
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Skeleton className="h-8 flex-1 rounded-lg" />
-        <Skeleton className="h-8 flex-1 rounded-lg" />
+        <Skeleton className="h-8 flex-1" rounded="rounded-lg" />
+        <Skeleton className="h-8 flex-1" rounded="rounded-lg" />
       </div>
-      <Skeleton className="mt-2 h-7 w-16 rounded-full" />
+      <Skeleton className="mt-2 h-7 w-16" rounded="rounded-full" />
     </div>
   );
 }
@@ -371,8 +371,8 @@ function PaymentRowSkeleton() {
         <Skeleton className="mt-1.5 h-3 w-20" />
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Skeleton className="h-7 w-20 rounded-full" />
-        <Skeleton className="h-7 w-9 rounded-full" />
+        <Skeleton className="h-7 w-20" rounded="rounded-full" />
+        <Skeleton className="h-7 w-9" rounded="rounded-full" />
       </div>
     </div>
   );

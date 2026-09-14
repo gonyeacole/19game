@@ -35,7 +35,7 @@ function TeamRowSkeleton() {
   return (
     <div className="rounded-xl border border-line bg-panel p-3">
       <div className="flex items-center gap-2">
-        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
+        <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
         <div className="min-w-0 flex-1">
           <Skeleton className="h-3.5 w-32" />
           <Skeleton className="mt-1.5 h-3 w-20" />

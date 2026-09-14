@@ -55,7 +55,7 @@ function WeekCardSkeleton() {
         <Skeleton className="h-4 w-14" />
       </div>
       <Skeleton className="mt-2 h-3 w-40" />
-      <Skeleton className="mt-3 h-6 w-28 rounded-full" />
+      <Skeleton className="mt-3 h-6 w-28" rounded="rounded-full" />
       <Skeleton className="mt-3 h-3 w-24" />
     </div>
   );
