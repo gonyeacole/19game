@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { leagueGothic } from "@/lib/fonts";
 
 // Matches the app icon's green/near-black — literal hex rather than the
@@ -9,84 +9,51 @@ import { leagueGothic } from "@/lib/fonts";
 const SPLASH_GREEN = "#00dd94";
 const SPLASH_BLACK = "#0a0a0a";
 
-const LEAGUE_LETTERS = "League".split("");
-// A gentle deceleration curve (easeOutQuint-ish) used everywhere below for
-// a smoother, less mechanical fade than the default "ease-out".
-const SMOOTH_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
-// Must match the Tailwind duration-[750ms] class on the "19" span below —
-// the letter reveal can't start until that scale/opacity transition finishes.
-const ENTER_TRANSITION_MS = 750;
-const LETTER_STAGGER_MS = 170; // gap between each "League" letter appearing
-const HOLD_MS = 500; // full "19League" held once fully revealed
-const FADE_MS = 450; // whole screen fading out
+// Every character is laid out in its final position from the very first
+// frame (nothing ever reflows) and revealed purely via opacity/transform/
+// filter — compositor-only properties a phone's GPU can animate at 60fps.
+// An earlier version grew a wrapper's `width` to reveal each letter, which
+// triggers real layout on every step and reads as janky/"blocky" — this
+// avoids that class of jank entirely.
+const CHARS = ["1", "9", "L", "e", "a", "g", "u", "e"];
+const LEAGUE_START_INDEX = 2; // "L" — "1" and "9" appear together before it
 
-type Phase = "pre" | "entering" | "revealing" | "hold" | "out" | "done";
+const CHAR_DURATION_MS = 700;
+const LETTER_STAGGER_MS = 90;
+// League starts slightly before "19" finishes settling — a touch of overlap
+// reads as one continuous, fluid motion rather than two separate steps.
+const LEAGUE_START_DELAY_MS = 550;
+// A very smooth, gentle deceleration (easeOutExpo-ish).
+const SMOOTH_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+function delayFor(index: number): number {
+  if (index < LEAGUE_START_INDEX) return 0;
+  return LEAGUE_START_DELAY_MS + (index - LEAGUE_START_INDEX) * LETTER_STAGGER_MS;
+}
+
+const REVEAL_DONE_MS = delayFor(CHARS.length - 1) + CHAR_DURATION_MS;
+const HOLD_MS = 550; // full "19League" held once fully revealed
+const FADE_MS = 550; // whole screen fading out
+
+type Phase = "pre" | "visible" | "out" | "done";
 
 // One-time brand splash on a cold app open (root layout only mounts this
 // once per real page load — client-side tab navigation never remounts it,
-// so switching tabs never re-triggers it). Sequence: "19" scales/fades in
-// alone and centered, then "League"'s letters fade in one at a time to its
-// right (smoothly re-centering the whole mark as it grows), then a brief
-// hold, then the whole screen fades out.
+// so switching tabs never re-triggers it).
 export default function SplashScreen() {
   const [phase, setPhase] = useState<Phase>("pre");
-  const [revealedCount, setRevealedCount] = useState(0);
-  const [letterWidths, setLetterWidths] = useState<number[] | null>(null);
-  const measureRef = useRef<HTMLSpanElement>(null);
 
-  // Measure the pixel width of "League" after each additional letter, in
-  // the real splash font, so the reveal wrapper's width can be transitioned
-  // smoothly instead of jumping — waiting for the font to finish loading
-  // first avoids measuring against a fallback font's (different) widths.
-  useLayoutEffect(() => {
-    let cancelled = false;
-    const measure = () => {
-      if (cancelled || !measureRef.current) return;
-      const widths = LEAGUE_LETTERS.map((_, i) => {
-        measureRef.current!.textContent = LEAGUE_LETTERS.slice(0, i + 1).join("");
-        return measureRef.current!.getBoundingClientRect().width;
-      });
-      setLetterWidths(widths);
-    };
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(measure);
-    } else {
-      measure();
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // A tick after mount so the browser paints the "pre" (scaled-down,
-  // transparent) state first — flipping straight to "entering" in the same
-  // frame would skip the enter transition entirely.
+  // A tick after mount so the browser paints the "pre" (hidden) state
+  // first — flipping straight to "visible" in the same frame would skip
+  // every character's enter transition entirely.
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setPhase("entering"));
+    const raf = requestAnimationFrame(() => setPhase("visible"));
     return () => cancelAnimationFrame(raf);
   }, []);
 
   useEffect(() => {
-    if (phase !== "entering") return;
-    const t = setTimeout(() => setPhase("revealing"), ENTER_TRANSITION_MS);
-    return () => clearTimeout(t);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== "revealing" || !letterWidths || revealedCount >= LEAGUE_LETTERS.length) return;
-    const t = setTimeout(() => setRevealedCount((c) => c + 1), LETTER_STAGGER_MS);
-    return () => clearTimeout(t);
-  }, [phase, revealedCount, letterWidths]);
-
-  useEffect(() => {
-    if (phase !== "revealing" || !letterWidths || revealedCount < LEAGUE_LETTERS.length) return;
-    const t = setTimeout(() => setPhase("hold"), 0);
-    return () => clearTimeout(t);
-  }, [phase, revealedCount, letterWidths]);
-
-  useEffect(() => {
-    if (phase !== "hold") return;
-    const t = setTimeout(() => setPhase("out"), HOLD_MS);
+    if (phase !== "visible") return;
+    const t = setTimeout(() => setPhase("out"), REVEAL_DONE_MS + HOLD_MS);
     return () => clearTimeout(t);
   }, [phase]);
 
@@ -98,50 +65,40 @@ export default function SplashScreen() {
 
   if (phase === "done") return null;
 
-  const wrapperWidth = revealedCount === 0 ? 0 : (letterWidths?.[revealedCount - 1] ?? 0);
-  const nineteenVisible = phase !== "pre";
+  const visible = phase !== "pre";
 
   return (
     <div
-      className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-[450ms] ${
-        phase === "out" ? "opacity-0" : "opacity-100"
-      }`}
-      style={{ backgroundColor: SPLASH_GREEN }}
+      className="fixed inset-0 z-40 flex items-center justify-center"
+      style={{
+        backgroundColor: SPLASH_GREEN,
+        opacity: phase === "out" ? 0 : 1,
+        transition: `opacity ${FADE_MS}ms ${SMOOTH_EASE}`,
+      }}
     >
-      <span
-        ref={measureRef}
-        aria-hidden
-        className={`${leagueGothic.className} pointer-events-none whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
-        style={{ fontWeight: 700, position: "absolute", left: -9999, top: 0 }}
-      />
-      <div className="flex items-center">
-        <span
-          className={`${leagueGothic.className} whitespace-nowrap text-6xl uppercase leading-none tracking-wide transition-all duration-[750ms] ${SMOOTH_EASE} ${
-            nineteenVisible ? "scale-100 opacity-100" : "scale-50 opacity-0"
-          }`}
-          style={{ fontWeight: 700, color: SPLASH_BLACK }}
-        >
-          19
-        </span>
-        <span
-          className={`inline-block overflow-hidden whitespace-nowrap transition-[width] duration-[350ms] ${SMOOTH_EASE}`}
-          style={{ width: wrapperWidth }}
-        >
+      <div
+        className={`${leagueGothic.className} whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
+        style={{ fontWeight: 700 }}
+      >
+        {CHARS.map((ch, i) => (
           <span
-            className={`${leagueGothic.className} whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
-            style={{ fontWeight: 700, color: SPLASH_BLACK }}
+            key={i}
+            className="inline-block"
+            style={{
+              color: SPLASH_BLACK,
+              opacity: visible ? 1 : 0,
+              filter: visible ? "blur(0px)" : "blur(8px)",
+              transform: visible ? "translateY(0) scale(1)" : "translateY(14px) scale(0.9)",
+              transition: [
+                `opacity ${CHAR_DURATION_MS}ms ${SMOOTH_EASE} ${delayFor(i)}ms`,
+                `filter ${CHAR_DURATION_MS}ms ${SMOOTH_EASE} ${delayFor(i)}ms`,
+                `transform ${CHAR_DURATION_MS}ms ${SMOOTH_EASE} ${delayFor(i)}ms`,
+              ].join(", "),
+            }}
           >
-            {LEAGUE_LETTERS.map((letter, i) => (
-              <span
-                key={i}
-                className={`inline-block transition-opacity duration-[550ms] ${SMOOTH_EASE}`}
-                style={{ opacity: revealedCount > i ? 1 : 0 }}
-              >
-                {letter}
-              </span>
-            ))}
+            {ch}
           </span>
-        </span>
+        ))}
       </div>
     </div>
   );
