@@ -139,7 +139,7 @@ export default function PotPage() {
     <div className="mx-auto max-w-lg px-4 py-4">
       <div className="mb-4 rounded-xl border border-led/20 bg-gradient-to-br from-led-bg to-panel p-5 text-center">
         <div className="text-xs font-semibold uppercase tracking-widest text-led">
-          Current Payout
+          Current Pot
         </div>
         <div className={`${leagueGothic.className} text-6xl leading-none tracking-wide tabular-nums text-led`}>
           {data ? (
