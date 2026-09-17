@@ -107,16 +107,22 @@ html[data-splash="skip"] #splash-root {
 
 /*
   Chat fills exactly the space between the sticky header and the fixed
-  TabNav so only the message list scrolls, not the whole page — otherwise
-  the input row ends up just below the fold and needs a scroll to reach.
-  9.5rem = the header's rendered height (~55px) plus the 96px (pb-24) <main>
-  already reserves in layout.tsx for TabNav clearance. Standalone mode adds
-  extra top padding to the header via .safe-top's env(safe-area-inset-top),
-  so the same amount is subtracted again here to match.
+  TabNav so only the message list scrolls, not the whole page. A fixed-px
+  calc here (100dvh minus a guessed header/TabNav height) drifted on real
+  devices as mobile browser chrome show/hides and dvh is recalculated,
+  visibly shifting the TabNav. Pinning <body> to a definite height instead
+  lets flexbox (body > header + <main>) size <main> to the exact remaining
+  space with no arithmetic, on any device or screen size — ChatPage toggles
+  this class on/off via document.body.classList in an effect so every other
+  page keeps its normal, unbounded document scroll.
 */
-.chat-viewport {
-  height: calc(100dvh - 9.5rem);
+body.chat-mode {
+  height: 100dvh;
+  overflow: hidden;
 }
-html[data-standalone="true"] .chat-viewport {
-  height: calc(100dvh - 9.5rem - env(safe-area-inset-top));
+body.chat-mode main {
+  overflow: hidden;
+}
+.chat-viewport {
+  height: 100%;
 }

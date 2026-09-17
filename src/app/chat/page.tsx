@@ -123,6 +123,14 @@ export default function ChatPage() {
     if (!stored) setShowPicker(true);
   }, []);
 
+  // Pins <body> to a definite height only while this page is mounted, so
+  // flexbox can size the chat area to exactly fill the space above the
+  // TabNav — see the body.chat-mode rule in globals.css for why.
+  useEffect(() => {
+    document.body.classList.add("chat-mode");
+    return () => document.body.classList.remove("chat-mode");
+  }, []);
+
   useEffect(() => {
     fetch("/api/teams", { cache: "no-store" })
       .then((res) => res.json())
