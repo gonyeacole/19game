@@ -81,6 +81,18 @@ model Announcement {
   createdAt DateTime @default(now())
 }
 
+// Group chat. No login system exists for regular users, so authorName is a
+// self-picked display name persisted client-side (localStorage), not tied to
+// any Player/account record.
+model Message {
+  id         String   @id @default(cuid())
+  authorName String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // SQLite has no native enum support in Prisma, so GameStatus is stored as a
 // String constrained in application code to: "SCHEDULED" | "IN_PROGRESS" | "FINAL"
 model Game {

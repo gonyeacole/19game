@@ -43,6 +43,15 @@ const TABS = [
     ),
   },
   {
+    href: "/chat",
+    label: "Chat",
+    icon: (
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin",
     label: "Admin",
     icon: (
@@ -73,7 +82,7 @@ export default function TabNav() {
       style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
       aria-label="Primary"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-4">
+      <ul className="mx-auto grid max-w-lg grid-cols-5">
         {TABS.map((tab) => {
           const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
           return (
