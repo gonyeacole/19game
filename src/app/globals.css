@@ -104,3 +104,19 @@ html[data-standalone="true"] .safe-bottom {
 html[data-splash="skip"] #splash-root {
   display: none;
 }
+
+/*
+  Chat fills exactly the space between the sticky header and the fixed
+  TabNav so only the message list scrolls, not the whole page — otherwise
+  the input row ends up just below the fold and needs a scroll to reach.
+  9.5rem = the header's rendered height (~55px) plus the 96px (pb-24) <main>
+  already reserves in layout.tsx for TabNav clearance. Standalone mode adds
+  extra top padding to the header via .safe-top's env(safe-area-inset-top),
+  so the same amount is subtracted again here to match.
+*/
+.chat-viewport {
+  height: calc(100dvh - 9.5rem);
+}
+html[data-standalone="true"] .chat-viewport {
+  height: calc(100dvh - 9.5rem - env(safe-area-inset-top));
+}

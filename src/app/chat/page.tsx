@@ -192,7 +192,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-8.5rem)] max-w-lg flex-col px-4 py-4">
+    <div className="chat-viewport mx-auto flex max-w-lg flex-col px-4 py-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
         {name && (
