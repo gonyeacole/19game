@@ -104,3 +104,21 @@ html[data-standalone="true"] .safe-bottom {
 html[data-splash="skip"] #splash-root {
   display: none;
 }
+
+/*
+  Chat fills exactly the space between the sticky header and the fixed
+  TabNav so only the message list scrolls, not the whole page. This has to
+  be a static value baked in from the very first paint, with no JS
+  resizing it after mount (an earlier version measured this at runtime via
+  getBoundingClientRect and toggled <main>'s padding in an effect) —
+  standalone iOS web apps are known to jitter/reposition fixed elements
+  during page-content reflows (see TabNav's own translateZ(0)/contain
+  fix), and every extra layout pass this page forced after mounting was
+  itself a reflow that could retrigger exactly that. 9.5rem = the header's
+  rendered height (~55px) plus the 96px (pb-24) <main> reserves everywhere
+  for TabNav clearance — chat needs none of that reserved separately since
+  this already reaches the TabNav's top edge.
+*/
+.chat-viewport {
+  height: calc(100dvh - 9.5rem);
+}

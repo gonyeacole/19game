@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface MessageDTO {
@@ -123,45 +123,6 @@ export default function ChatPage() {
     if (!stored) setShowPicker(true);
   }, []);
 
-  // Fills exactly the space between the sticky header and the fixed
-  // TabNav by measuring their real rendered positions, rather than
-  // guessing at it with viewport-unit CSS (100dvh) — a fixed-px subtraction
-  // drifted as mobile browser chrome showed/hid, and even pinning <body> to
-  // a definite height caused Safari to keep its own chrome expanded on this
-  // now-unscrollable page, adding space below the TabNav that no CSS value
-  // here could see or account for. Measuring live DOM rects sidesteps all
-  // of that: it's correct regardless of what the browser's viewport is
-  // doing. <main>'s normal pb-24 (TabNav clearance for every other, longer
-  // page) is disabled here since this measurement already reaches exactly
-  // to the TabNav's top edge.
-  const [availableHeight, setAvailableHeight] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const mainEl = document.querySelector("main");
-    const prevPaddingBottom = mainEl?.style.paddingBottom ?? "";
-    if (mainEl) mainEl.style.paddingBottom = "0px";
-
-    const recalc = () => {
-      const header = document.querySelector("header");
-      const nav = document.querySelector("nav");
-      if (!header || !nav) return;
-      const top = header.getBoundingClientRect().bottom;
-      const bottom = nav.getBoundingClientRect().top;
-      setAvailableHeight(Math.max(0, bottom - top));
-    };
-
-    recalc();
-    window.addEventListener("resize", recalc);
-    window.visualViewport?.addEventListener("resize", recalc);
-    window.addEventListener("orientationchange", recalc);
-    return () => {
-      window.removeEventListener("resize", recalc);
-      window.visualViewport?.removeEventListener("resize", recalc);
-      window.removeEventListener("orientationchange", recalc);
-      if (mainEl) mainEl.style.paddingBottom = prevPaddingBottom;
-    };
-  }, []);
-
   useEffect(() => {
     fetch("/api/teams", { cache: "no-store" })
       .then((res) => res.json())
@@ -231,10 +192,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div
-      className="mx-auto flex max-w-lg flex-col px-4 py-4"
-      style={availableHeight != null ? { height: availableHeight } : undefined}
-    >
+    <div className="chat-viewport mx-auto flex max-w-lg flex-col px-4 py-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
         {name && (
