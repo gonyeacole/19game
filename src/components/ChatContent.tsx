@@ -217,7 +217,7 @@ export default function ChatContent() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div
-                      className={`inline-block max-w-full rounded-2xl px-3 py-2 ${
+                      className={`block w-full rounded-2xl px-3 py-2 ${
                         own ? "bg-led-bg" : "bg-panel-2"
                       }`}
                     >
