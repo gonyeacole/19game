@@ -100,16 +100,25 @@ export default function TabNav() {
             <li key={tab.href}>
               {tab.href === "/chat" ? (
                 // A plain <a> forces a full page reload instead of Next's
-                // client-side transition. Every CSS/JS mitigation tried for
-                // the standalone-iOS TabNav jitter on this one transition
-                // (contain, static sizing, isolating every post-mount
-                // effect) failed to stop it — going from a tall, scrollable
-                // tab straight into Chat's shorter, fixed-height layout
-                // without a full repaint seems to be the actual trigger. A
-                // hard navigation paints the final layout from scratch, so
-                // there's no "old, taller page" state for anything to
-                // animate/jitter out of.
-                <a href={tab.href} className={className}>
+                // client-side transition, to sidestep a standalone-iOS
+                // TabNav jitter that no layout-level fix stopped. onClick
+                // rewrites the destination with a cache-busting query param
+                // computed at click time (baking Date.now() into the initial
+                // href would mismatch between server and client render) so
+                // every tap is a genuinely fresh network request — a
+                // standalone PWA's WKWebView can serve a cached full-page
+                // load from its HTTP cache in a way force-quitting the app
+                // doesn't clear, unlike this app's own data fetches (which
+                // already opt out of caching).
+                <a
+                  href={tab.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a hard reload, bypassing Next's client-side router, is the point
+                    window.location.href = `${tab.href}?_=${Date.now()}`;
+                  }}
+                  className={className}
+                >
                   <span className="h-6 w-6">{tab.icon}</span>
                   {tab.label}
                 </a>
