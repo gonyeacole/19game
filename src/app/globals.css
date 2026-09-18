@@ -112,9 +112,10 @@ html[data-splash="skip"] #splash-root {
   resizing it after mount (an earlier version measured this at runtime via
   getBoundingClientRect and toggled <main>'s padding in an effect) —
   standalone iOS web apps are known to jitter/reposition fixed elements
-  during page-content reflows (see TabNav's own translateZ(0)/contain
-  fix), and every extra layout pass this page forced after mounting was
-  itself a reflow that could retrigger exactly that. 9.5rem = the header's
+  during page-content reflows (see TabNav's own translateZ(0) fix, and the
+  data-nav-settling rule below), and every extra layout pass this page
+  forced after mounting was itself a reflow that could retrigger exactly
+  that. 9.5rem = the header's
   rendered height on a non-notched device (~55px) plus the 96px (pb-24)
   <main> reserves everywhere for TabNav clearance — chat needs none of
   that reserved separately since this already reaches the TabNav's top
@@ -135,4 +136,15 @@ html[data-standalone="true"] .chat-viewport {
   height: calc(
     100dvh - 9.5rem - var(--keyboard-inset, 0px) - env(safe-area-inset-top)
   );
+}
+
+/*
+  ChatPage sets data-nav-settling on <html> for a brief window right as it
+  mounts (see the useLayoutEffect in chat/page.tsx) so TabNav stays hidden
+  through whatever standalone-iOS jitter that transition causes — visibility
+  rather than display/opacity, since it doesn't change TabNav's box and so
+  can't itself trigger the very reflow this is working around.
+*/
+html[data-nav-settling="true"] nav[aria-label="Primary"] {
+  visibility: hidden;
 }

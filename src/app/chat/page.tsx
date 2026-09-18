@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface MessageDTO {
@@ -116,6 +116,28 @@ export default function ChatPage() {
   const listRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
+
+  // Navigating here from a taller, natively-scrolling tab has been reported
+  // to visibly jitter TabNav in standalone iOS — every layout-level fix
+  // tried (isolating TabNav's own CSS, sizing this page statically instead
+  // of measuring it, a hard page reload instead of a client-side
+  // transition) either didn't stop it or introduced a worse, unrelated
+  // static positioning bug of its own. Masking it is more reliable than
+  // continuing to chase its exact cause: hide TabNav for one brief window
+  // right as this page mounts, then reveal it once any transition-related
+  // settling has had time to finish. visibility (not display or opacity)
+  // keeps TabNav's box exactly where it already is — toggling it can't
+  // itself trigger a layout reflow the way display/height changes would.
+  useLayoutEffect(() => {
+    document.documentElement.dataset.navSettling = "true";
+    const t = setTimeout(() => {
+      delete document.documentElement.dataset.navSettling;
+    }, 700);
+    return () => {
+      clearTimeout(t);
+      delete document.documentElement.dataset.navSettling;
+    };
+  }, []);
 
   // The on-screen keyboard shrinks the visual viewport but not 100dvh (dvh
   // only tracks browser chrome, not the keyboard), so without this the
