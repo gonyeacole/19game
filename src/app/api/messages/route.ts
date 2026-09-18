@@ -5,25 +5,6 @@ import { withChatSchemaRetry } from "@/lib/db/ensureChatSchema";
 const NAME_MAX = 24;
 const BODY_MAX = 500;
 
-// Reactions come back grouped per emoji (count + who reacted) rather than as
-// raw rows — the client only ever needs "how many of 🔥" and "did I react",
-// and grouping here once is cheaper than every client doing it on every poll.
-function groupReactions(
-  reactions: { emoji: string; authorName: string }[]
-): { emoji: string; count: number; authorNames: string[] }[] {
-  const byEmoji = new Map<string, string[]>();
-  for (const r of reactions) {
-    const names = byEmoji.get(r.emoji) ?? [];
-    names.push(r.authorName);
-    byEmoji.set(r.emoji, names);
-  }
-  return [...byEmoji.entries()].map(([emoji, authorNames]) => ({
-    emoji,
-    count: authorNames.length,
-    authorNames,
-  }));
-}
-
 // Public chat — no login system, so anyone can read and post. Only the last
 // 100 messages are returned; this is a friend-group pool chat, not an
 // archive.
@@ -34,20 +15,10 @@ export async function GET() {
       take: 100,
       include: {
         replyTo: { select: { id: true, authorName: true, body: true } },
-        reactions: { select: { emoji: true, authorName: true } },
       },
     })
   );
-  return NextResponse.json({
-    messages: messages.reverse().map((m) => ({
-      id: m.id,
-      authorName: m.authorName,
-      body: m.body,
-      createdAt: m.createdAt,
-      replyTo: m.replyTo,
-      reactions: groupReactions(m.reactions),
-    })),
-  });
+  return NextResponse.json({ messages: messages.reverse() });
 }
 
 export async function POST(req: NextRequest) {
@@ -74,11 +45,8 @@ export async function POST(req: NextRequest) {
       data: { authorName: name, body: text, replyToId: replyToId ?? null },
       include: {
         replyTo: { select: { id: true, authorName: true, body: true } },
-        reactions: { select: { emoji: true, authorName: true } },
       },
     })
   );
-  return NextResponse.json({
-    message: { ...message, reactions: groupReactions(message.reactions) },
-  });
+  return NextResponse.json({ message });
 }

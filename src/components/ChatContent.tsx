@@ -2,22 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-interface ReactionDTO {
-  emoji: string;
-  count: number;
-  authorNames: string[];
-}
-
 interface MessageDTO {
   id: string;
   authorName: string;
   body: string;
   createdAt: string;
   replyTo: { id: string; authorName: string; body: string } | null;
-  reactions: ReactionDTO[];
 }
-
-const REACTION_EMOJI = ["👍", "❤️", "😂", "🔥", "😢", "🎉"];
 
 interface TeamDTO {
   player: { name: string } | null;
@@ -64,46 +55,8 @@ export default function ChatContent() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [replyingTo, setReplyingTo] = useState<MessageDTO | null>(null);
-  const [reactingTo, setReactingTo] = useState<string | null>(null);
-  const [whoReacted, setWhoReacted] = useState<{ messageId: string; emoji: string } | null>(
-    null
-  );
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
-  // A single pair of refs (not per-chip) is fine — only one chip can ever
-  // be mid-press at a time, and both get reset the moment a press starts
-  // or a click actually fires.
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const longPressFiredRef = useRef(false);
-
-  const startLongPress = (messageId: string, emoji: string) => {
-    longPressFiredRef.current = false;
-    longPressTimerRef.current = setTimeout(() => {
-      longPressFiredRef.current = true;
-      // Best-effort — iOS Safari has never implemented the Vibration API
-      // (a deliberate omission, not a bug), so this is a no-op there. Still
-      // worth calling for the browsers that do support it.
-      navigator.vibrate?.(15);
-      // Long-pressing the same chip a popover is already showing for
-      // dismisses it instead of doing nothing — symmetric with the gesture
-      // that opened it.
-      setWhoReacted((prev) =>
-        prev && prev.messageId === messageId && prev.emoji === emoji
-          ? null
-          : { messageId, emoji }
-      );
-    }, 450);
-  };
-  const cancelLongPress = () => {
-    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-    longPressTimerRef.current = null;
-  };
-
-  useEffect(() => {
-    if (!whoReacted) return;
-    const id = setTimeout(() => setWhoReacted(null), 4000);
-    return () => clearTimeout(id);
-  }, [whoReacted]);
 
   useEffect(() => {
     const stored = localStorage.getItem(NAME_KEY);
@@ -177,26 +130,6 @@ export default function ChatContent() {
       setDraft(text);
     } finally {
       setSending(false);
-    }
-  };
-
-  const react = async (messageId: string, emoji: string) => {
-    setReactingTo(null);
-    if (!name) return;
-    try {
-      const res = await fetch(`/api/messages/${messageId}/reactions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authorName: name, emoji }),
-      });
-      const data: { reactions: ReactionDTO[] } = await res.json();
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === messageId ? { ...m, reactions: data.reactions } : m
-        )
-      );
-    } catch {
-      // Best-effort — a failed reaction toggle just isn't reflected.
     }
   };
 
@@ -274,13 +207,6 @@ export default function ChatContent() {
           <div className="flex flex-col gap-3">
             {messages.map((m) => {
               const own = m.authorName === name;
-              const reactedEmoji = new Set(
-                name
-                  ? m.reactions
-                      .filter((r) => r.authorNames.includes(name))
-                      .map((r) => r.emoji)
-                  : []
-              );
               return (
                 <div key={m.id} className="flex items-start gap-2.5">
                   <div
@@ -334,89 +260,6 @@ export default function ChatContent() {
                     <p className="whitespace-pre-wrap break-words text-base text-chalk">
                       {m.body}
                     </p>
-
-                    {reactingTo === m.id && (
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {REACTION_EMOJI.map((emoji) => (
-                          <button
-                            key={emoji}
-                            onClick={() => react(m.id, emoji)}
-                            className="flex h-7 w-7 items-center justify-center rounded-full bg-panel-2 text-sm active:scale-90"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {name && (
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
-                        {m.reactions.map((r) => (
-                          <button
-                            key={r.emoji}
-                            onPointerDown={() => startLongPress(m.id, r.emoji)}
-                            onPointerUp={cancelLongPress}
-                            onPointerLeave={cancelLongPress}
-                            onPointerCancel={cancelLongPress}
-                            onClick={() => {
-                              if (longPressFiredRef.current) {
-                                longPressFiredRef.current = false;
-                                return;
-                              }
-                              react(m.id, r.emoji);
-                            }}
-                            className={`rounded-full border px-1.5 py-0.5 text-sm select-none ${
-                              reactedEmoji.has(r.emoji)
-                                ? "border-led bg-led-bg text-led"
-                                : "border-line bg-panel-2 text-chalk-faint"
-                            }`}
-                          >
-                            {r.emoji} {r.count}
-                          </button>
-                        ))}
-                        <button
-                          onClick={() =>
-                            setReactingTo((prev) => (prev === m.id ? null : m.id))
-                          }
-                          aria-label="Add reaction"
-                          className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-chalk-faint active:scale-90"
-                        >
-                          <svg
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-3.5 w-3.5"
-                          >
-                            <circle cx="8.5" cy="11.5" r="6.5" />
-                            <circle cx="6.3" cy="10" r="0.6" fill="currentColor" stroke="none" />
-                            <circle cx="10.7" cy="10" r="0.6" fill="currentColor" stroke="none" />
-                            <path d="M6 13c.7 1 1.6 1.5 2.5 1.5s1.8-.5 2.5-1.5" />
-                            <path d="M16 2.5v5M13.5 5h5" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-
-                    {whoReacted &&
-                      whoReacted.messageId === m.id &&
-                      (() => {
-                        const names = m.reactions.find(
-                          (r) => r.emoji === whoReacted.emoji
-                        )?.authorNames;
-                        if (!names) return null;
-                        return (
-                          <button
-                            onClick={() => setWhoReacted(null)}
-                            className="mt-1 block rounded-lg border border-line bg-panel-2 px-2.5 py-1.5 text-left text-sm text-chalk-faint"
-                          >
-                            <span className="mr-1">{whoReacted.emoji}</span>
-                            {names.join(", ")}
-                          </button>
-                        );
-                      })()}
                   </div>
                 </div>
               );

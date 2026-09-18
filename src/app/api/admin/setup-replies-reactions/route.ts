@@ -9,12 +9,18 @@ function isAdmin(req: NextRequest): boolean {
   return adminPassword != null && cookie === adminPassword;
 }
 
-// One-time-use endpoint to add the replyToId column and Reaction table to
-// production — same reason as setup-messages/setup-game-columns: "prisma
-// migrate deploy" only ever reaches the local DATABASE_URL, never Turso.
-// Safe to hit more than once (ALTER TABLE ADD COLUMN errors are swallowed
-// when the column already exists, since SQLite has no ADD COLUMN IF NOT
-// EXISTS; CREATE TABLE/INDEX IF NOT EXISTS are no-ops on their own).
+// One-time-use endpoint to add the replyToId column to production — same
+// reason as setup-messages/setup-game-columns: "prisma migrate deploy" only
+// ever reaches the local DATABASE_URL, never Turso. Safe to hit more than
+// once (ALTER TABLE ADD COLUMN errors are swallowed when the column already
+// exists, since SQLite has no ADD COLUMN IF NOT EXISTS).
+//
+// The reaction feature this endpoint originally also set up a Reaction
+// table for has since been removed; any such table left over in production
+// from before is unused and harmless. Kept at its original path/name rather
+// than renamed, since /api/messages/route.ts already self-heals this same
+// column via withChatSchemaRetry — this manual endpoint is a redundant
+// fallback at this point, not load-bearing.
 export async function GET(req: NextRequest) {
   if (!isAdmin(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,22 +36,6 @@ export async function GET(req: NextRequest) {
   }
   await prisma.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS "Message_replyToId_idx" ON "Message"("replyToId")`
-  );
-
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS "Reaction" (
-      "id" TEXT NOT NULL PRIMARY KEY,
-      "messageId" TEXT NOT NULL,
-      "authorName" TEXT NOT NULL,
-      "emoji" TEXT NOT NULL,
-      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  await prisma.$executeRawUnsafe(
-    `CREATE INDEX IF NOT EXISTS "Reaction_messageId_idx" ON "Reaction"("messageId")`
-  );
-  await prisma.$executeRawUnsafe(
-    `CREATE UNIQUE INDEX IF NOT EXISTS "Reaction_messageId_authorName_emoji_key" ON "Reaction"("messageId", "authorName", "emoji")`
   );
 
   return NextResponse.json({ ok: true });
