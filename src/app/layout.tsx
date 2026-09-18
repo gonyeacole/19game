@@ -123,7 +123,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           if invisible, scroll room on every page is the standard fix for
           this class of bug.
         */}
-        <main className="min-h-[calc(100dvh+20px)] flex-1 pb-24">{children}</main>
+        {/*
+          pb-40 (160px) clears TabNav's now-taller fixed area — the chat
+          preview bar plus the tab row, ~109px normally and up to ~143px in
+          standalone mode's extra safe-bottom inset — so scrolled content on
+          any page doesn't end up hidden behind it.
+        */}
+        <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
         <TabNav />
         <SplashScreen />
       </body>
