@@ -115,9 +115,14 @@ html[data-splash="skip"] #splash-root {
   during page-content reflows (see TabNav's own translateZ(0)/contain
   fix), and every extra layout pass this page forced after mounting was
   itself a reflow that could retrigger exactly that. 9.5rem = the header's
-  rendered height (~55px) plus the 96px (pb-24) <main> reserves everywhere
-  for TabNav clearance — chat needs none of that reserved separately since
-  this already reaches the TabNav's top edge.
+  rendered height on a non-notched device (~55px) plus the 96px (pb-24)
+  <main> reserves everywhere for TabNav clearance — chat needs none of
+  that reserved separately since this already reaches the TabNav's top
+  edge. Standalone mode makes the header taller via .safe-top's own
+  env(safe-area-inset-top) (notch/Dynamic Island clearance), so that same
+  amount has to come off here too or the wrapper overlaps the TabNav by
+  however tall that inset is — which is device-specific and invisible to
+  any simulator/headless test that doesn't emulate a real notch.
 
   --keyboard-inset is set by ChatPage from visualViewport (dvh doesn't
   shrink for the on-screen keyboard, only for browser chrome) so the
@@ -125,4 +130,9 @@ html[data-splash="skip"] #splash-root {
 */
 .chat-viewport {
   height: calc(100dvh - 9.5rem - var(--keyboard-inset, 0px));
+}
+html[data-standalone="true"] .chat-viewport {
+  height: calc(
+    100dvh - 9.5rem - var(--keyboard-inset, 0px) - env(safe-area-inset-top)
+  );
 }
