@@ -79,7 +79,8 @@ const SEEN_KEY = "lastSeenMessageId";
 const POLL_MS = 15_000;
 
 const COLLAPSED_HEIGHT = 60;
-const EXPANDED_RATIO = 0.6; // fraction of the viewport height when swiped open
+const EXPANDED_RATIO = 0.6; // fraction of the viewport height when swiped open, keyboard closed
+const KEYBOARD_TOP_MARGIN = 60; // px left visible above the sheet once the keyboard is open
 const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
 const SNAP_MS = 220;
 
@@ -106,10 +107,13 @@ function ChatSheet() {
   const dragStartHeightRef = useRef(COLLAPSED_HEIGHT);
   const draggedRef = useRef(0);
   const [keyboardInset, setKeyboardInset] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(800);
 
   useEffect(() => {
-    const update = () =>
+    const update = () => {
+      setViewportHeight(window.innerHeight);
       setExpandedHeight(Math.round(window.innerHeight * EXPANDED_RATIO));
+    };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -162,10 +166,14 @@ function ChatSheet() {
     return () => clearInterval(id);
   }, []);
 
-  const effectiveExpandedHeight = Math.max(
-    COLLAPSED_HEIGHT,
-    expandedHeight - keyboardInset
-  );
+  // While the keyboard is open, filling most of the space above it (rather
+  // than staying capped at the normal 60%-of-screen resting height minus
+  // the keyboard) matters far more than leaving the underlying page
+  // peeking through — the user is actively typing, not browsing.
+  const effectiveExpandedHeight =
+    keyboardInset > 0
+      ? Math.max(COLLAPSED_HEIGHT, viewportHeight - keyboardInset - KEYBOARD_TOP_MARGIN)
+      : expandedHeight;
 
   // Snap to the resting height for whichever state we're in, whenever it's
   // not the user's own finger actively controlling height.
