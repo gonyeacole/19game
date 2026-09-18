@@ -80,7 +80,18 @@ export default function ChatContent() {
     longPressFiredRef.current = false;
     longPressTimerRef.current = setTimeout(() => {
       longPressFiredRef.current = true;
-      setWhoReacted({ messageId, emoji });
+      // Best-effort — iOS Safari has never implemented the Vibration API
+      // (a deliberate omission, not a bug), so this is a no-op there. Still
+      // worth calling for the browsers that do support it.
+      navigator.vibrate?.(15);
+      // Long-pressing the same chip a popover is already showing for
+      // dismisses it instead of doing nothing — symmetric with the gesture
+      // that opened it.
+      setWhoReacted((prev) =>
+        prev && prev.messageId === messageId && prev.emoji === emoji
+          ? null
+          : { messageId, emoji }
+      );
     }, 450);
   };
   const cancelLongPress = () => {
