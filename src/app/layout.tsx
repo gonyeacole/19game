@@ -101,7 +101,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AnnouncementBell />
           </div>
         </header>
-        <main className="flex-1 pb-24">{children}</main>
+        {/*
+          min-h forces every page to be at least a little taller than the
+          viewport, even ones whose own content (Chat, a logged-out Admin)
+          doesn't naturally fill it. iOS WebKit has been observed
+          positioning position:fixed elements (TabNav) against a different
+          reference on a page that's exactly viewport height or shorter —
+          nothing to scroll — than on a genuinely scrollable one; comparing
+          screenshots pixel-for-pixel showed TabNav sitting measurably
+          higher specifically on the short pages. Guaranteeing real,
+          if invisible, scroll room on every page is the standard fix for
+          this class of bug.
+        */}
+        <main className="min-h-[calc(100dvh+20px)] flex-1 pb-24">{children}</main>
         <TabNav />
         <SplashScreen />
       </body>
