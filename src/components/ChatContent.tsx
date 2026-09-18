@@ -85,6 +85,8 @@ function NamePickerModal({
           maxLength={24}
           placeholder="Your name"
           list="chat-name-suggestions"
+          autoComplete="off"
+          name="chat-display-name"
           className="mt-3 w-full rounded-lg border border-line bg-search-bg px-3 py-2 text-sm text-chalk outline-none focus:border-led"
         />
         <datalist id="chat-name-suggestions">
@@ -276,6 +278,8 @@ export default function ChatContent() {
           maxLength={500}
           placeholder={name ? "Message..." : "Pick a name to chat"}
           disabled={!name}
+          autoComplete="off"
+          name="chat-message-draft"
           className="flex-1 rounded-full border border-line bg-search-bg px-4 py-2.5 text-sm text-chalk outline-none focus:border-led disabled:opacity-50"
         />
         <button
