@@ -85,12 +85,17 @@ const KEYBOARD_TOP_MARGIN = 60; // px left visible above the sheet once the keyb
 const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
 const SNAP_MS = 220;
 
-function ChatSheet() {
+function ChatSheet({
+  expanded,
+  setExpanded,
+}: {
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [expanded, setExpanded] = useState(false);
   const [height, setHeight] = useState(COLLAPSED_HEIGHT);
   // Real touch input can fire pointer events faster than React re-renders
   // (they can land in the same event-loop turn as the state update that's
@@ -215,9 +220,8 @@ function ChatSheet() {
   // Collapse on navigating to a different tab, and mark the latest message
   // seen the moment it's actually opened (not just tapped).
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting local UI state in response to a route change, not derivable during render
     setExpanded(false);
-  }, [pathname]);
+  }, [pathname, setExpanded]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -276,7 +280,11 @@ function ChatSheet() {
           // guaranteed-scrollable min-height (see layout.tsx) is exactly
           // what keeps TabNav positioned correctly on standalone iOS, and
           // taking that away while the sheet is open would bring that bug
-          // back.
+          // back. The tab row itself (Scores/Teams/Pot/Admin) sits inside
+          // <nav> above this backdrop's z-index, so TabNav additionally
+          // makes it `invisible` while expanded — that reserves its space
+          // (no layout jump) while letting this same backdrop show through
+          // in its place.
           <div
             className="fixed inset-0 z-[15] bg-field"
             onClick={() => setExpanded(false)}
@@ -296,33 +304,42 @@ function ChatSheet() {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="shrink-0 touch-none select-none bg-led px-4 pb-2.5 pt-2 text-pill-text"
+          className="flex shrink-0 touch-none select-none items-center gap-2.5 bg-led px-4 text-pill-text"
+          // Collapsed, this row IS the whole sheet (COLLAPSED_HEIGHT), so it
+          // has to fill that height exactly via flex centering rather than
+          // padding — padding that merely approximates 60px left a sliver of
+          // the container's own bg-field peeking out underneath it, above
+          // the tab row's border line. Expanded, it goes back to sizing
+          // itself from padding since ChatContent owns the rest of the
+          // height.
+          style={
+            expanded
+              ? { paddingTop: 8, paddingBottom: 10 }
+              : { height: COLLAPSED_HEIGHT }
+          }
         >
-          <div className="mx-auto mb-1.5 h-1 w-9 rounded-full bg-pill-text/40" />
-          <div className="flex items-center gap-2.5">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
-              <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
-            </svg>
-            <div className="flex min-w-0 flex-1 items-center gap-1.5">
-              <span className="text-sm font-bold">Chat</span>
-              {!expanded && unreadCount > 0 && (
-                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-pill-text px-1 text-[10px] font-bold text-led">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </div>
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4 shrink-0"
-            >
-              <path d={expanded ? "M5 8l5 5 5-5" : "M5 12l5-5 5 5"} />
-            </svg>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
+            <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
+          </svg>
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <span className="text-sm font-bold">Chat</span>
+            {!expanded && unreadCount > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-pill-text px-1 text-[10px] font-bold text-led">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </div>
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4 shrink-0"
+          >
+            <path d={expanded ? "M5 8l5 5 5-5" : "M5 12l5-5 5 5"} />
+          </svg>
         </div>
 
         <div className="min-h-0 flex-1">
@@ -335,6 +352,7 @@ function ChatSheet() {
 
 export default function TabNav() {
   const pathname = usePathname();
+  const [chatExpanded, setChatExpanded] = useState(false);
 
   return (
     <nav
@@ -343,8 +361,10 @@ export default function TabNav() {
       style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
       aria-label="Primary"
     >
-      <ChatSheet />
-      <div className="safe-bottom border-t border-line bg-field">
+      <ChatSheet expanded={chatExpanded} setExpanded={setChatExpanded} />
+      <div
+        className={`safe-bottom border-t border-line bg-field ${chatExpanded ? "invisible" : ""}`}
+      >
         <ul className="mx-auto grid max-w-lg grid-cols-4">
           {TABS.map((tab) => {
             const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
