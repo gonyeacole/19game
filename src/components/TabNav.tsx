@@ -80,10 +80,15 @@ const SEEN_KEY = "lastSeenMessageId";
 const POLL_MS = 15_000;
 
 const COLLAPSED_HEIGHT = 48; // Apple's ~44pt minimum tap target, plus a couple px of breathing room
-const EXPANDED_RATIO = 0.6; // fraction of the viewport height when swiped open, keyboard closed
+const EXPANDED_RATIO = 0.78; // fraction of the viewport height when swiped open, keyboard closed
 const KEYBOARD_TOP_MARGIN = 60; // px left visible above the sheet once the keyboard is open
 const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
-const SNAP_MS = 220;
+const SNAP_MS = 320;
+// iOS's own sheet-presentation curve (a slow-in, fast-out "ease" rather than
+// the browser's built-in `ease-out`, which decelerates too abruptly to read
+// as smooth for a distance this large) — mirrors the native feel of the
+// modal sheets this is styled after.
+const SNAP_EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 function ChatSheet({
   expanded,
@@ -303,7 +308,8 @@ function ChatSheet({
           transition:
             dragging || keyboardInset > 0
               ? "none"
-              : `height ${SNAP_MS}ms ease-out`,
+              : `height ${SNAP_MS}ms ${SNAP_EASING}`,
+          willChange: dragging ? undefined : "height",
         }}
         // Collapsed, the tab row below (with its own safe-bottom) provides
         // clearance from the home indicator, so this doesn't need its own.
