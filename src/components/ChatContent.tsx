@@ -24,6 +24,24 @@ function timeLabel(iso: string): string {
   });
 }
 
+// A stable, deliberately dark-ish palette (rather than a raw HSL-from-
+// hash) — keeps white initials readable against every entry regardless of
+// name, instead of occasionally landing on a hue too light for that
+// contrast. Independent of the app's own theme colors on purpose, so
+// avatars stay recognizable across both themes.
+const AVATAR_COLORS = [
+  "#c0392b", "#d35400", "#16a085", "#2980b9", "#8e44ad",
+  "#27ae60", "#e74c3c", "#2c3e50", "#e67e22", "#1abc9c",
+];
+
+function avatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 function NamePickerModal({
   currentName,
   suggestions,
@@ -246,31 +264,32 @@ export default function ChatContent() {
             No messages yet. Say hi.
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {messages.map((m) => {
               const own = m.authorName === name;
               return (
-                <div
-                  key={m.id}
-                  className={`flex flex-col ${own ? "items-end" : "items-start"}`}
-                >
-                  {!own && (
-                    <span className="px-1 text-[11px] font-semibold text-chalk-faint">
-                      {m.authorName}
-                    </span>
-                  )}
+                <div key={m.id} className="flex items-start gap-2.5">
                   <div
-                    className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                      own
-                        ? "bg-led text-pill-text"
-                        : "bg-panel-3 text-chalk"
-                    }`}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ backgroundColor: avatarColor(m.authorName) }}
                   >
-                    <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                    {m.authorName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="px-1 text-[10px] text-chalk-faint">
-                    {timeLabel(m.createdAt)}
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-1.5">
+                      <span
+                        className={`text-sm font-bold ${own ? "text-led" : "text-chalk"}`}
+                      >
+                        {m.authorName}
+                      </span>
+                      <span className="text-[11px] text-chalk-faint">
+                        {timeLabel(m.createdAt)}
+                      </span>
+                    </div>
+                    <p className="whitespace-pre-wrap break-words text-sm text-chalk">
+                      {m.body}
+                    </p>
+                  </div>
                 </div>
               );
             })}
