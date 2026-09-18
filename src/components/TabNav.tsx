@@ -359,10 +359,16 @@ export default function TabNav() {
       aria-label="Primary"
     >
       <ChatSheet expanded={chatExpanded} setExpanded={setChatExpanded} />
-      <div
-        className={`safe-bottom border-t border-line bg-field ${chatExpanded ? "invisible" : ""}`}
-      >
-        <ul className="mx-auto grid max-w-lg grid-cols-4">
+      {/*
+        This div's own bg-field is what blocks out this strip of screen —
+        hiding the div itself (rather than just its contents) would let the
+        transparent backdrop above the sheet show the real page through here
+        too. Only the tab icons/labels inside it hide while chat is open.
+      */}
+      <div className="safe-bottom border-t border-line bg-field">
+        <ul
+          className={`mx-auto grid max-w-lg grid-cols-4 ${chatExpanded ? "invisible" : ""}`}
+        >
           {TABS.map((tab) => {
             const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
             const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
