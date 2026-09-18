@@ -75,43 +75,53 @@ function NamePickerModal({
           set it once.
         </p>
 
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && trimmed) closeAndBlur(() => onSave(trimmed));
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (trimmed) closeAndBlur(() => onSave(trimmed));
           }}
-          maxLength={24}
-          placeholder="Your name"
-          list="chat-name-suggestions"
           autoComplete="off"
-          name="chat-display-name"
-          className="mt-3 w-full rounded-lg border border-line bg-search-bg px-3 py-2 text-sm text-chalk outline-none focus:border-led"
-        />
-        <datalist id="chat-name-suggestions">
-          {suggestions.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
+        >
+          <input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            maxLength={24}
+            placeholder="Your name"
+            list="chat-name-suggestions"
+            // iOS Safari largely ignores the literal string "off" for
+            // fields it heuristically decides look like a name field — a
+            // known, deliberate override — but tends to respect
+            // unrecognized values it has no special-cased behavior for.
+            autoComplete="not-autofillable"
+            name="chat-display-name"
+            className="mt-3 w-full rounded-lg border border-line bg-search-bg px-3 py-2 text-sm text-chalk outline-none focus:border-led"
+          />
+          <datalist id="chat-name-suggestions">
+            {suggestions.map((n) => (
+              <option key={n} value={n} />
+            ))}
+          </datalist>
 
-        <div className="mt-3 flex justify-end gap-2">
-          {onClose && (
+          <div className="mt-3 flex justify-end gap-2">
+            {onClose && (
+              <button
+                type="button"
+                onClick={() => closeAndBlur(onClose)}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-chalk-faint"
+              >
+                Cancel
+              </button>
+            )}
             <button
-              onClick={() => closeAndBlur(onClose)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-chalk-faint"
+              type="submit"
+              disabled={!trimmed}
+              className="rounded-lg bg-led px-4 py-2 text-sm font-bold text-pill-text disabled:opacity-40"
             >
-              Cancel
+              Save
             </button>
-          )}
-          <button
-            onClick={() => trimmed && closeAndBlur(() => onSave(trimmed))}
-            disabled={!trimmed}
-            className="rounded-lg bg-led px-4 py-2 text-sm font-bold text-pill-text disabled:opacity-40"
-          >
-            Save
-          </button>
-        </div>
+          </div>
+        </form>
       </div>
     </div>,
     document.body
@@ -268,22 +278,30 @@ export default function ChatContent() {
         )}
       </div>
 
-      <div className="mt-2 flex shrink-0 items-center gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          send();
+        }}
+        autoComplete="off"
+        className="mt-2 flex shrink-0 items-center gap-2"
+      >
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") send();
-          }}
           maxLength={500}
           placeholder={name ? "Message..." : "Pick a name to chat"}
           disabled={!name}
-          autoComplete="off"
+          // iOS Safari largely ignores the literal string "off" for fields
+          // it heuristically decides look like a name/message field — a
+          // known, deliberate override — but tends to respect unrecognized
+          // values it has no special-cased behavior for.
+          autoComplete="not-autofillable"
           name="chat-message-draft"
           className="flex-1 rounded-full border border-line bg-search-bg px-4 py-2.5 text-sm text-chalk outline-none focus:border-led disabled:opacity-50"
         />
         <button
-          onClick={send}
+          type="submit"
           disabled={!name || !draft.trim() || sending}
           aria-label="Send"
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-led text-pill-text transition-transform active:scale-90 disabled:opacity-40"
@@ -300,7 +318,7 @@ export default function ChatContent() {
             <path d="M3.5 10h11M10.5 5.5 16 10l-5.5 4.5" />
           </svg>
         </button>
-      </div>
+      </form>
 
       {showPicker && (
         <NamePickerModal
