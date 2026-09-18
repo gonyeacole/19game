@@ -216,52 +216,52 @@ export default function ChatContent() {
                     {m.authorName.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-1.5">
-                      <span
-                        className={`text-base font-bold ${own ? "text-led" : "text-chalk"}`}
-                      >
-                        {m.authorName}
-                      </span>
-                      <span className="text-sm text-chalk-faint">
-                        {timeLabel(m.createdAt)}
-                      </span>
-                      {name && (
-                        <button
-                          onClick={() => setReplyingTo(m)}
-                          className="text-sm font-semibold text-chalk-faint underline underline-offset-2"
-                        >
-                          Reply
-                        </button>
-                      )}
-                    </div>
-
-                    {m.replyTo && (
-                      <div className="mt-1 rounded-lg border border-line bg-panel-2 px-2.5 py-1.5">
-                        <div className="flex items-center gap-1 text-sm font-semibold text-chalk-faint">
-                          <svg
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-3 w-3 shrink-0"
-                          >
-                            <path d="M12 6 6 10l6 4M6 10h6a4 4 0 0 1 4 4v1" />
-                          </svg>
-                          {m.replyTo.authorName}
-                        </div>
-                        <p className="truncate text-sm text-chalk-faint">
-                          {m.replyTo.body}
-                        </p>
-                      </div>
-                    )}
-
                     <div
-                      className={`mt-1 inline-block max-w-full rounded-2xl px-3 py-2 ${
+                      className={`inline-block max-w-full rounded-2xl px-3 py-2 ${
                         own ? "bg-led-bg" : "bg-panel-2"
                       }`}
                     >
+                      <div className="flex flex-wrap items-baseline gap-x-1.5">
+                        <span
+                          className={`text-base font-bold ${own ? "text-led" : "text-chalk"}`}
+                        >
+                          {m.authorName}
+                        </span>
+                        <span className="text-sm text-chalk-faint">
+                          {timeLabel(m.createdAt)}
+                        </span>
+                        {name && (
+                          <button
+                            onClick={() => setReplyingTo(m)}
+                            className="text-sm font-semibold text-chalk-faint underline underline-offset-2"
+                          >
+                            Reply
+                          </button>
+                        )}
+                      </div>
+
+                      {m.replyTo && (
+                        <div className="mt-1 rounded-lg border border-line bg-panel-3 px-2.5 py-1.5">
+                          <div className="flex items-center gap-1 text-sm font-semibold text-chalk-faint">
+                            <svg
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="h-3 w-3 shrink-0"
+                            >
+                              <path d="M12 6 6 10l6 4M6 10h6a4 4 0 0 1 4 4v1" />
+                            </svg>
+                            {m.replyTo.authorName}
+                          </div>
+                          <p className="truncate text-sm text-chalk-faint">
+                            {m.replyTo.body}
+                          </p>
+                        </div>
+                      )}
+
                       <p className="whitespace-pre-wrap break-words text-base text-chalk">
                         {m.body}
                       </p>
