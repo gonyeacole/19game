@@ -257,9 +257,15 @@ export default function ChatContent() {
                       </div>
                     )}
 
-                    <p className="whitespace-pre-wrap break-words text-base text-chalk">
-                      {m.body}
-                    </p>
+                    <div
+                      className={`mt-1 inline-block max-w-full rounded-2xl px-3 py-2 ${
+                        own ? "bg-led-bg" : "bg-panel-2"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap break-words text-base text-chalk">
+                        {m.body}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
