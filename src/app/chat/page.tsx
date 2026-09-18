@@ -117,28 +117,6 @@ export default function ChatPage() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
 
-  // Arriving here from a long, natively-scrolling tab (Scores, etc.) can
-  // leave iOS mid-momentum-scroll from whatever gesture launched this
-  // navigation. That inertia keeps decelerating into this page — which,
-  // unlike every other tab, is intentionally not scrollable — and shows up
-  // as the TabNav slowly gliding/settling into its resting position over
-  // that decay instead of just being there. Toggling overflow off for one
-  // frame is the standard way to hard-stop any in-flight momentum scroll;
-  // it's a scroll-behavior change, not a layout one, so it can't touch
-  // TabNav's own now-isolated (contain: layout) position.
-  useEffect(() => {
-    const { style } = document.body;
-    const prev = style.overflow;
-    style.overflow = "hidden";
-    const id = requestAnimationFrame(() => {
-      style.overflow = prev;
-    });
-    return () => {
-      cancelAnimationFrame(id);
-      style.overflow = prev;
-    };
-  }, []);
-
   // The on-screen keyboard shrinks the visual viewport but not 100dvh (dvh
   // only tracks browser chrome, not the keyboard), so without this the
   // input row stays put and ends up hidden underneath the keyboard. Only
