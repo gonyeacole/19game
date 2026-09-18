@@ -294,7 +294,12 @@ function ChatSheet({
           height,
           transition: dragging ? "none" : `height ${SNAP_MS}ms ease-out`,
         }}
-        className="relative z-20 mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field"
+        // Collapsed, the tab row below (with its own safe-bottom) provides
+        // clearance from the home indicator, so this doesn't need its own.
+        // Expanded, that row isn't rendered at all, so this picks up that
+        // same clearance directly — otherwise the input would sit flush
+        // against the home indicator in standalone mode.
+        className={`relative z-20 mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field ${expanded ? "safe-bottom" : ""}`}
       >
         <div
           onPointerDown={onPointerDown}
@@ -360,31 +365,33 @@ export default function TabNav() {
     >
       <ChatSheet expanded={chatExpanded} setExpanded={setChatExpanded} />
       {/*
-        This div's own bg-field is what blocks out this strip of screen —
-        hiding the div itself (rather than just its contents) would let the
-        transparent backdrop above the sheet show the real page through here
-        too. Only the tab icons/labels inside it hide while chat is open.
+        Not rendered at all while chat is expanded — reserving its space
+        (e.g. via `invisible`) instead of removing it left a dead strip
+        between the message input and the real bottom of the screen. With
+        it gone entirely, nav's height is just the sheet's, so the sheet's
+        own opaque body reaches all the way to the true bottom and there's
+        no leftover gap for anything (real page or otherwise) to occupy.
       */}
-      <div className="safe-bottom border-t border-line bg-field">
-        <ul
-          className={`mx-auto grid max-w-lg grid-cols-4 ${chatExpanded ? "invisible" : ""}`}
-        >
-          {TABS.map((tab) => {
-            const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-            const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
-              active ? "text-led" : "text-icon"
-            }`;
-            return (
-              <li key={tab.href}>
-                <Link href={tab.href} className={className}>
-                  <span className="h-6 w-6">{tab.icon}</span>
-                  {tab.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      {!chatExpanded && (
+        <div className="safe-bottom border-t border-line bg-field">
+          <ul className="mx-auto grid max-w-lg grid-cols-4">
+            {TABS.map((tab) => {
+              const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
+              const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
+                active ? "text-led" : "text-icon"
+              }`;
+              return (
+                <li key={tab.href}>
+                  <Link href={tab.href} className={className}>
+                    <span className="h-6 w-6">{tab.icon}</span>
+                    {tab.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </nav>
   );
 }
