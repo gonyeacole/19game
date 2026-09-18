@@ -79,16 +79,15 @@ export default function TabNav() {
   return (
     <nav
       className="safe-bottom fixed bottom-0 left-0 right-0 z-20 border-t border-line bg-field"
-      // translateZ(0) alone (see git history) wasn't enough to stop this
-      // jittering during Chat's own JS-driven height reflow — contain
-      // additionally tells the browser this element's layout is fully
-      // isolated from the rest of the document (and vice versa), so a
-      // reflow anywhere else on the page can't touch its computed position.
-      style={{
-        transform: "translateZ(0)",
-        WebkitTransform: "translateZ(0)",
-        contain: "layout style",
-      }}
+      // GPU-layer isolation for standalone iOS (see git history, 78b0727).
+      // A later attempt also added `contain: layout style` to fight
+      // SPA-transition jitter specifically on the Chat tab, but that
+      // transition is now a hard page reload instead (TabNav.tsx's Chat
+      // link), which sidesteps that class of bug entirely — and `contain`
+      // combined with `position: fixed; bottom: 0` produced a large,
+      // static gap under the bar on real devices, so it's removed rather
+      // than layered on top of a fix that no longer needs it.
+      style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
       aria-label="Primary"
     >
       <ul className="mx-auto grid max-w-lg grid-cols-5">
