@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
@@ -86,6 +87,7 @@ const SNAP_MS = 220;
 
 function ChatSheet() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -108,6 +110,34 @@ function ChatSheet() {
   const draggedRef = useRef(0);
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(800);
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target (document.body) is unavailable during SSR/render
+    setMounted(true);
+  }, []);
+
+  // The backdrop being opaque and on top only stops the user from *seeing*
+  // the page scroll — a wheel/touch gesture still bubbles up to actually
+  // scroll it underneath, just invisibly, leaving the page in a different
+  // spot once the sheet closes. Native (non-passive — React's synthetic
+  // touch/wheel handlers can't preventDefault in most browsers, since
+  // they're attached passively by default) listeners block that, except
+  // for gestures that start inside the sheet itself, which should still
+  // scroll the message list normally.
+  useEffect(() => {
+    if (!expanded) return;
+    const block = (e: TouchEvent | WheelEvent) => {
+      if (sheetRef.current?.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", block, { passive: false });
+    document.addEventListener("wheel", block, { passive: false });
+    return () => {
+      document.removeEventListener("touchmove", block);
+      document.removeEventListener("wheel", block);
+    };
+  }, [expanded]);
 
   useEffect(() => {
     const update = () => {
@@ -199,8 +229,6 @@ function ChatSheet() {
 
   if (pathname === "/chat") return null;
 
-  const latest = messages[messages.length - 1];
-
   const onPointerDown = (e: React.PointerEvent) => {
     draggingRef.current = true;
     setDragging(true);
@@ -234,27 +262,48 @@ function ChatSheet() {
   };
 
   return (
-    <div
-      style={{
-        height,
-        transition: dragging ? "none" : `height ${SNAP_MS}ms ease-out`,
-      }}
-      className="mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field"
-    >
+    <>
+      {expanded &&
+        mounted &&
+        createPortal(
+          // Opaque, not dimmed — fully hides whatever tab is behind it
+          // rather than just darkening it. Also the mechanism for "don't
+          // scroll the page behind the chat": it's the topmost, non-
+          // scrollable thing under the finger for the entire screen above
+          // the sheet, so a scroll gesture there does nothing instead of
+          // reaching the real page underneath. Deliberately not touching
+          // <body>'s own overflow/height to achieve that — this page's
+          // guaranteed-scrollable min-height (see layout.tsx) is exactly
+          // what keeps TabNav positioned correctly on standalone iOS, and
+          // taking that away while the sheet is open would bring that bug
+          // back.
+          <div
+            className="fixed inset-0 z-[15] bg-field"
+            onClick={() => setExpanded(false)}
+          />,
+          document.body
+        )}
       <div
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        className="shrink-0 touch-none select-none bg-led px-4 pb-2.5 pt-2 text-pill-text"
+        ref={sheetRef}
+        style={{
+          height,
+          transition: dragging ? "none" : `height ${SNAP_MS}ms ease-out`,
+        }}
+        className="relative z-20 mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field"
       >
-        <div className="mx-auto mb-1.5 h-1 w-9 rounded-full bg-pill-text/40" />
-        <div className="flex items-center gap-2.5">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
-            <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
-          </svg>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
+        <div
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          className="shrink-0 touch-none select-none bg-led px-4 pb-2.5 pt-2 text-pill-text"
+        >
+          <div className="mx-auto mb-1.5 h-1 w-9 rounded-full bg-pill-text/40" />
+          <div className="flex items-center gap-2.5">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
+              <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
+            </svg>
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
               <span className="text-sm font-bold">Chat</span>
               {!expanded && unreadCount > 0 && (
                 <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-pill-text px-1 text-[10px] font-bold text-led">
@@ -262,19 +311,25 @@ function ChatSheet() {
                 </span>
               )}
             </div>
-            {!expanded && (
-              <p className="truncate text-xs text-pill-text/80">
-                {latest ? `${latest.authorName}: ${latest.body}` : "No messages yet"}
-              </p>
-            )}
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4 shrink-0"
+            >
+              <path d={expanded ? "M5 8l5 5 5-5" : "M5 12l5-5 5 5"} />
+            </svg>
           </div>
         </div>
-      </div>
 
-      <div className="min-h-0 flex-1">
-        <ChatContent />
+        <div className="min-h-0 flex-1">
+          <ChatContent />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
