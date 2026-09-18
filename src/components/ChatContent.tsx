@@ -65,8 +65,34 @@ export default function ChatContent() {
   const [sending, setSending] = useState(false);
   const [replyingTo, setReplyingTo] = useState<MessageDTO | null>(null);
   const [reactingTo, setReactingTo] = useState<string | null>(null);
+  const [whoReacted, setWhoReacted] = useState<{ messageId: string; emoji: string } | null>(
+    null
+  );
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
+  // A single pair of refs (not per-chip) is fine — only one chip can ever
+  // be mid-press at a time, and both get reset the moment a press starts
+  // or a click actually fires.
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFiredRef = useRef(false);
+
+  const startLongPress = (messageId: string, emoji: string) => {
+    longPressFiredRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressFiredRef.current = true;
+      setWhoReacted({ messageId, emoji });
+    }, 450);
+  };
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  useEffect(() => {
+    if (!whoReacted) return;
+    const id = setTimeout(() => setWhoReacted(null), 4000);
+    return () => clearTimeout(id);
+  }, [whoReacted]);
 
   useEffect(() => {
     const stored = localStorage.getItem(NAME_KEY);
@@ -304,8 +330,18 @@ export default function ChatContent() {
                         {m.reactions.map((r) => (
                           <button
                             key={r.emoji}
-                            onClick={() => react(m.id, r.emoji)}
-                            className={`rounded-full border px-1.5 py-0.5 text-xs ${
+                            onPointerDown={() => startLongPress(m.id, r.emoji)}
+                            onPointerUp={cancelLongPress}
+                            onPointerLeave={cancelLongPress}
+                            onPointerCancel={cancelLongPress}
+                            onClick={() => {
+                              if (longPressFiredRef.current) {
+                                longPressFiredRef.current = false;
+                                return;
+                              }
+                              react(m.id, r.emoji);
+                            }}
+                            className={`rounded-full border px-1.5 py-0.5 text-xs select-none ${
                               reactedEmoji.has(r.emoji)
                                 ? "border-led bg-led-bg text-led"
                                 : "border-line bg-panel-2 text-chalk-faint"
@@ -339,6 +375,24 @@ export default function ChatContent() {
                         </button>
                       </div>
                     )}
+
+                    {whoReacted &&
+                      whoReacted.messageId === m.id &&
+                      (() => {
+                        const names = m.reactions.find(
+                          (r) => r.emoji === whoReacted.emoji
+                        )?.authorNames;
+                        if (!names) return null;
+                        return (
+                          <button
+                            onClick={() => setWhoReacted(null)}
+                            className="mt-1 block rounded-lg border border-line bg-panel-2 px-2.5 py-1.5 text-left text-xs text-chalk-faint"
+                          >
+                            <span className="mr-1">{whoReacted.emoji}</span>
+                            {names.join(", ")}
+                          </button>
+                        );
+                      })()}
                   </div>
                 </div>
               );
