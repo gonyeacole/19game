@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ChatContent from "@/components/ChatContent";
 
 const TABS = [
   {
@@ -77,9 +78,63 @@ interface MessageDTO {
 const SEEN_KEY = "lastSeenMessageId";
 const POLL_MS = 15_000;
 
-function ChatBar() {
+const COLLAPSED_HEIGHT = 60;
+const EXPANDED_RATIO = 0.6; // fraction of the viewport height when swiped open
+const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
+const SNAP_MS = 220;
+
+function ChatSheet() {
+  const pathname = usePathname();
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const [height, setHeight] = useState(COLLAPSED_HEIGHT);
+  // Real touch input can fire pointer events faster than React re-renders
+  // (they can land in the same event-loop turn as the state update that's
+  // supposed to gate or inform the next one), so pointer handlers read
+  // these refs instead of the state/closure versions — always current,
+  // unlike a value closed over from a stale render.
+  const heightRef = useRef(COLLAPSED_HEIGHT);
+  const setHeightTracked = (next: number) => {
+    heightRef.current = next;
+    setHeight(next);
+  };
+  const [dragging, setDragging] = useState(false);
+  const draggingRef = useRef(false);
+  const [expandedHeight, setExpandedHeight] = useState(480);
+  const dragStartYRef = useRef(0);
+  const dragStartHeightRef = useRef(COLLAPSED_HEIGHT);
+  const draggedRef = useRef(0);
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
+  useEffect(() => {
+    const update = () =>
+      setExpandedHeight(Math.round(window.innerHeight * EXPANDED_RATIO));
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // The keyboard only ever opens from an input inside the expanded sheet,
+  // so this doubly serves as "hide the tab row too while typing" (same
+  // data-keyboard-open attribute/CSS rule ChatPage's standalone version
+  // uses) and "keep the sheet itself above the keyboard" by shrinking its
+  // resting height by the same amount.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height);
+      setKeyboardInset(inset);
+      document.documentElement.dataset.keyboardOpen =
+        inset > 40 ? "true" : "false";
+    };
+    vv.addEventListener("resize", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      delete document.documentElement.dataset.keyboardOpen;
+    };
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -107,33 +162,111 @@ function ChatBar() {
     return () => clearInterval(id);
   }, []);
 
+  const effectiveExpandedHeight = Math.max(
+    COLLAPSED_HEIGHT,
+    expandedHeight - keyboardInset
+  );
+
+  // Snap to the resting height for whichever state we're in, whenever it's
+  // not the user's own finger actively controlling height.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing the live drag height to the target resting state (expanded/collapsed/keyboard-adjusted), not derivable during render
+    if (!dragging) setHeightTracked(expanded ? effectiveExpandedHeight : COLLAPSED_HEIGHT);
+  }, [expanded, effectiveExpandedHeight, dragging]);
+
+  // Collapse on navigating to a different tab, and mark the latest message
+  // seen the moment it's actually opened (not just tapped).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting local UI state in response to a route change, not derivable during render
+    setExpanded(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const latest = messages[messages.length - 1];
+    if (latest) localStorage.setItem(SEEN_KEY, latest.id);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing the badge as a side effect of the sheet being opened, not derivable during render
+    setUnreadCount(0);
+  }, [expanded, messages]);
+
+  if (pathname === "/chat") return null;
+
   const latest = messages[messages.length - 1];
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    draggingRef.current = true;
+    setDragging(true);
+    dragStartYRef.current = e.clientY;
+    dragStartHeightRef.current = heightRef.current;
+    draggedRef.current = 0;
+    (e.target as Element).setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!draggingRef.current) return;
+    const delta = dragStartYRef.current - e.clientY; // positive = finger moved up
+    draggedRef.current = Math.max(draggedRef.current, Math.abs(delta));
+    const next = Math.min(
+      effectiveExpandedHeight,
+      Math.max(COLLAPSED_HEIGHT, dragStartHeightRef.current + delta)
+    );
+    setHeightTracked(next);
+  };
+
+  const onPointerUp = () => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    setDragging(false);
+    if (draggedRef.current < DRAG_TAP_THRESHOLD) {
+      setExpanded((prev) => !prev);
+      return;
+    }
+    const midpoint = (COLLAPSED_HEIGHT + effectiveExpandedHeight) / 2;
+    setExpanded(heightRef.current > midpoint);
+  };
+
   return (
-    <Link
-      href="/chat"
-      onClick={() => {
-        if (latest) localStorage.setItem(SEEN_KEY, latest.id);
+    <div
+      style={{
+        height,
+        transition: dragging ? "none" : `height ${SNAP_MS}ms ease-out`,
       }}
-      className="mx-auto flex max-w-lg items-center gap-2.5 rounded-t-2xl bg-led px-4 py-2.5 text-pill-text transition-transform active:scale-[0.98]"
+      className="mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field"
     >
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
-        <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
-      </svg>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-bold">Chat</span>
-          {unreadCount > 0 && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-pill-text px-1 text-[10px] font-bold text-led">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
+      <div
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className="shrink-0 touch-none select-none bg-led px-4 pb-2.5 pt-2 text-pill-text"
+      >
+        <div className="mx-auto mb-1.5 h-1 w-9 rounded-full bg-pill-text/40" />
+        <div className="flex items-center gap-2.5">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
+            <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
+          </svg>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold">Chat</span>
+              {!expanded && unreadCount > 0 && (
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-pill-text px-1 text-[10px] font-bold text-led">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </div>
+            {!expanded && (
+              <p className="truncate text-xs text-pill-text/80">
+                {latest ? `${latest.authorName}: ${latest.body}` : "No messages yet"}
+              </p>
+            )}
+          </div>
         </div>
-        <p className="truncate text-xs text-pill-text/80">
-          {latest ? `${latest.authorName}: ${latest.body}` : "No messages yet"}
-        </p>
       </div>
-    </Link>
+
+      <div className="min-h-0 flex-1">
+        <ChatContent />
+      </div>
+    </div>
   );
 }
 
@@ -147,7 +280,7 @@ export default function TabNav() {
       style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
       aria-label="Primary"
     >
-      {pathname !== "/chat" && <ChatBar />}
+      <ChatSheet />
       <div className="safe-bottom border-t border-line bg-field">
         <ul className="mx-auto grid max-w-lg grid-cols-4">
           {TABS.map((tab) => {
