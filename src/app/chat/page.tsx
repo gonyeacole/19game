@@ -293,8 +293,16 @@ export default function ChatPage() {
           aria-label="Send"
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-led text-pill-text transition-transform active:scale-90 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path d="M2.5 10 17 3.5 13 10 17 16.5 2.5 10Z" />
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <path d="M3.5 10h11M10.5 5.5 16 10l-5.5 4.5" />
           </svg>
         </button>
       </div>
