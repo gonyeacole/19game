@@ -212,21 +212,37 @@ export default function ChatContent() {
           it's somehow not in the pool list (e.g. a name set before this
           existed), so the pill never shows something other than what's
           actually selected.
+
+          It's invisible and laid on top of a plain, purely visual pill
+          instead of being the visible pill itself: a native select's own
+          closed-state width is sized to fit its WIDEST option (e.g.
+          "Christopher Alexander"), not the selected value — so a short
+          name like "Cole" would otherwise sit inside a pill padded out
+          with a large empty gap no matter how the select is styled. The
+          visible pill below sizes itself to the selected name alone; the
+          select just has to sit exactly on top of it to stay tappable and
+          keep the real native picker on open.
         */}
-        {/*
-          max-w + truncate on the <select> itself — left unconstrained, a
-          native select's closed-state width is sized to fit its WIDEST
-          option (e.g. "Christopher Alexander"), not the selected value, so
-          a short name like "Cole" would otherwise sit in a pill padded out
-          with a large empty gap. The dropdown itself still lists every
-          name in full; only the closed pill truncates.
-        */}
-        <div className="relative max-w-[8.5rem]">
+        <div className="relative inline-flex max-w-[9rem] items-center gap-1 rounded-full border border-line bg-panel-2 py-1 pl-3 pr-7 text-xs font-medium text-chalk">
+          <span className="truncate" aria-hidden="true">
+            {name ?? "Pick your name"}
+          </span>
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-chalk-faint"
+          >
+            <path d="M5 8l5 5 5-5" />
+          </svg>
           <select
             value={name ?? ""}
             onChange={(e) => saveName(e.target.value)}
             aria-label="Your name"
-            className="w-full appearance-none truncate rounded-full border border-line bg-panel-2 py-1 pl-3 pr-7 text-xs font-medium text-chalk"
+            className="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
           >
             <option value="" disabled>
               Pick your name
@@ -239,17 +255,6 @@ export default function ChatContent() {
               )
             )}
           </select>
-          <svg
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-chalk-faint"
-          >
-            <path d="M5 8l5 5 5-5" />
-          </svg>
         </div>
       </div>
 
