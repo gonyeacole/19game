@@ -119,9 +119,14 @@ html[data-splash="skip"] #splash-root {
   --keyboard-inset is set by ChatPage from visualViewport (dvh doesn't
   shrink for the on-screen keyboard, only for browser chrome) so the
   message input stays above the keyboard instead of hidden underneath it.
-  While the keyboard is open (data-keyboard-open, also set by ChatPage),
-  TabNav hides entirely and --tabnav-clearance drops to 0 so chat expands
-  to use the space TabNav would otherwise have reserved.
+  While the keyboard is open (data-keyboard-open, also set by ChatPage and
+  by TabNav's chat sheet), the tab row hides and --tabnav-clearance drops
+  to 0 so chat expands to use the space it would otherwise have reserved.
+  Only the tab row, not all of <nav> — the chat sheet (TabNav.tsx) renders
+  its own message input inside <nav> too, and that input is exactly what
+  triggered the keyboard in the first place; hiding its own ancestor would
+  forcibly blur it and immediately dismiss the keyboard that was just
+  opening.
 */
 :root {
   --tabnav-clearance: 6rem;
@@ -129,7 +134,7 @@ html[data-splash="skip"] #splash-root {
 html[data-keyboard-open="true"] {
   --tabnav-clearance: 0rem;
 }
-html[data-keyboard-open="true"] nav[aria-label="Primary"] {
+html[data-keyboard-open="true"] nav[aria-label="Primary"] > .safe-bottom {
   display: none;
 }
 .chat-viewport {
