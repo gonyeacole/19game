@@ -94,17 +94,32 @@ export default function TabNav() {
       <ul className="mx-auto grid max-w-lg grid-cols-5">
         {TABS.map((tab) => {
           const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
+          const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
+            active ? "text-led" : "text-icon"
+          }`;
           return (
             <li key={tab.href}>
-              <Link
-                href={tab.href}
-                className={`flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
-                  active ? "text-led" : "text-icon"
-                }`}
-              >
-                <span className="h-6 w-6">{tab.icon}</span>
-                {tab.label}
-              </Link>
+              {tab.href === "/chat" ? (
+                // A plain <a> forces a full page reload instead of Next's
+                // client-side transition. Every CSS/JS mitigation tried for
+                // the standalone-iOS TabNav jitter on this one transition
+                // (contain, static sizing, isolating every post-mount
+                // effect) failed to stop it — going from a tall, scrollable
+                // tab straight into Chat's shorter, fixed-height layout
+                // without a full repaint seems to be the actual trigger. A
+                // hard navigation paints the final layout from scratch, so
+                // there's no "old, taller page" state for anything to
+                // animate/jitter out of.
+                <a href={tab.href} className={className}>
+                  <span className="h-6 w-6">{tab.icon}</span>
+                  {tab.label}
+                </a>
+              ) : (
+                <Link href={tab.href} className={className}>
+                  <span className="h-6 w-6">{tab.icon}</span>
+                  {tab.label}
+                </Link>
+              )}
             </li>
           );
         })}
