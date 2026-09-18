@@ -79,7 +79,7 @@ interface MessageDTO {
 const SEEN_KEY = "lastSeenMessageId";
 const POLL_MS = 15_000;
 
-const COLLAPSED_HEIGHT = 60;
+const COLLAPSED_HEIGHT = 48; // Apple's ~44pt minimum tap target, plus a couple px of breathing room
 const EXPANDED_RATIO = 0.6; // fraction of the viewport height when swiped open, keyboard closed
 const KEYBOARD_TOP_MARGIN = 60; // px left visible above the sheet once the keyboard is open
 const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
