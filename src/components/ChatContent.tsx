@@ -327,22 +327,12 @@ export default function ChatContent() {
                         {timeLabel(m.createdAt)}
                       </span>
                       {name && (
-                        <>
-                          <button
-                            onClick={() => setReplyingTo(m)}
-                            className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
-                          >
-                            Reply
-                          </button>
-                          <button
-                            onClick={() =>
-                              setReactingTo((prev) => (prev === m.id ? null : m.id))
-                            }
-                            className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
-                          >
-                            React
-                          </button>
-                        </>
+                        <button
+                          onClick={() => setReplyingTo(m)}
+                          className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
+                        >
+                          Reply
+                        </button>
                       )}
                     </div>
 
@@ -386,8 +376,8 @@ export default function ChatContent() {
                       </div>
                     )}
 
-                    {m.reactions.length > 0 && (
-                      <div className="mt-1 flex flex-wrap gap-1">
+                    {name && (
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
                         {m.reactions.map((r) => (
                           <button
                             key={r.emoji}
@@ -401,6 +391,29 @@ export default function ChatContent() {
                             {r.emoji} {r.count}
                           </button>
                         ))}
+                        <button
+                          onClick={() =>
+                            setReactingTo((prev) => (prev === m.id ? null : m.id))
+                          }
+                          aria-label="Add reaction"
+                          className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-chalk-faint active:scale-90"
+                        >
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-3.5 w-3.5"
+                          >
+                            <circle cx="8.5" cy="11.5" r="6.5" />
+                            <circle cx="6.3" cy="10" r="0.6" fill="currentColor" stroke="none" />
+                            <circle cx="10.7" cy="10" r="0.6" fill="currentColor" stroke="none" />
+                            <path d="M6 13c.7 1 1.6 1.5 2.5 1.5s1.8-.5 2.5-1.5" />
+                            <path d="M16 2.5v5M13.5 5h5" />
+                          </svg>
+                        </button>
                       </div>
                     )}
                   </div>

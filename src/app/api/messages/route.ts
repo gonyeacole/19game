@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { withChatSchemaRetry } from "@/lib/db/ensureChatSchema";
 
 const NAME_MAX = 24;
 const BODY_MAX = 500;
@@ -27,14 +28,16 @@ function groupReactions(
 // 100 messages are returned; this is a friend-group pool chat, not an
 // archive.
 export async function GET() {
-  const messages = await prisma.message.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      replyTo: { select: { id: true, authorName: true, body: true } },
-      reactions: { select: { emoji: true, authorName: true } },
-    },
-  });
+  const messages = await withChatSchemaRetry(() =>
+    prisma.message.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+      include: {
+        replyTo: { select: { id: true, authorName: true, body: true } },
+        reactions: { select: { emoji: true, authorName: true } },
+      },
+    })
+  );
   return NextResponse.json({
     messages: messages.reverse().map((m) => ({
       id: m.id,
@@ -66,13 +69,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message too long" }, { status: 400 });
   }
 
-  const message = await prisma.message.create({
-    data: { authorName: name, body: text, replyToId: replyToId ?? null },
-    include: {
-      replyTo: { select: { id: true, authorName: true, body: true } },
-      reactions: { select: { emoji: true, authorName: true } },
-    },
-  });
+  const message = await withChatSchemaRetry(() =>
+    prisma.message.create({
+      data: { authorName: name, body: text, replyToId: replyToId ?? null },
+      include: {
+        replyTo: { select: { id: true, authorName: true, body: true } },
+        reactions: { select: { emoji: true, authorName: true } },
+      },
+    })
+  );
   return NextResponse.json({
     message: { ...message, reactions: groupReactions(message.reactions) },
   });

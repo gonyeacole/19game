@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { withChatSchemaRetry } from "@/lib/db/ensureChatSchema";
 
 const NAME_MAX = 24;
 // A small fixed set rather than free-entry emoji — keeps the picker a
@@ -43,19 +44,21 @@ export async function POST(
     return NextResponse.json({ error: "Unsupported emoji" }, { status: 400 });
   }
 
-  const existing = await prisma.reaction.findUnique({
-    where: { messageId_authorName_emoji: { messageId, authorName: name, emoji } },
-  });
+  const reactions = await withChatSchemaRetry(async () => {
+    const existing = await prisma.reaction.findUnique({
+      where: { messageId_authorName_emoji: { messageId, authorName: name, emoji } },
+    });
 
-  if (existing) {
-    await prisma.reaction.delete({ where: { id: existing.id } });
-  } else {
-    await prisma.reaction.create({ data: { messageId, authorName: name, emoji } });
-  }
+    if (existing) {
+      await prisma.reaction.delete({ where: { id: existing.id } });
+    } else {
+      await prisma.reaction.create({ data: { messageId, authorName: name, emoji } });
+    }
 
-  const reactions = await prisma.reaction.findMany({
-    where: { messageId },
-    select: { emoji: true, authorName: true },
+    return prisma.reaction.findMany({
+      where: { messageId },
+      select: { emoji: true, authorName: true },
+    });
   });
   return NextResponse.json({ reactions: groupReactions(reactions) });
 }
