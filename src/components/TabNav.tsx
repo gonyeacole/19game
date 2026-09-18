@@ -270,23 +270,20 @@ function ChatSheet({
       {expanded &&
         mounted &&
         createPortal(
-          // Opaque, not dimmed — fully hides whatever tab is behind it
-          // rather than just darkening it. Also the mechanism for "don't
-          // scroll the page behind the chat": it's the topmost, non-
-          // scrollable thing under the finger for the entire screen above
-          // the sheet, so a scroll gesture there does nothing instead of
-          // reaching the real page underneath. Deliberately not touching
-          // <body>'s own overflow/height to achieve that — this page's
-          // guaranteed-scrollable min-height (see layout.tsx) is exactly
-          // what keeps TabNav positioned correctly on standalone iOS, and
-          // taking that away while the sheet is open would bring that bug
-          // back. The tab row itself (Scores/Teams/Pot/Admin) sits inside
-          // <nav> above this backdrop's z-index, so TabNav additionally
-          // makes it `invisible` while expanded — that reserves its space
-          // (no layout jump) while letting this same backdrop show through
-          // in its place.
+          // Invisible, not opaque — the page behind stays visible above the
+          // sheet; only the tab row (Scores/Teams/Pot/Admin, hidden by
+          // TabNav via `invisible` while expanded) is actually blocked out.
+          // This div still exists to (a) catch taps to collapse the sheet
+          // and (b) sit as the topmost, non-scrollable thing under the
+          // finger for the whole screen above the sheet, so a scroll
+          // gesture there does nothing instead of reaching the real page
+          // underneath. Deliberately not touching <body>'s own overflow/
+          // height to block that scroll — this page's guaranteed-scrollable
+          // min-height (see layout.tsx) is exactly what keeps TabNav
+          // positioned correctly on standalone iOS, and taking that away
+          // while the sheet is open would bring that bug back.
           <div
-            className="fixed inset-0 z-[15] bg-field"
+            className="fixed inset-0 z-[15]"
             onClick={() => setExpanded(false)}
           />,
           document.body
