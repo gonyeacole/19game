@@ -283,13 +283,13 @@ export default function ChatContent() {
                       >
                         {m.authorName}
                       </span>
-                      <span className="text-[11px] text-chalk-faint">
+                      <span className="text-sm text-chalk-faint">
                         {timeLabel(m.createdAt)}
                       </span>
                       {name && (
                         <button
                           onClick={() => setReplyingTo(m)}
-                          className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
+                          className="text-sm font-semibold text-chalk-faint underline underline-offset-2"
                         >
                           Reply
                         </button>
@@ -298,7 +298,7 @@ export default function ChatContent() {
 
                     {m.replyTo && (
                       <div className="mt-1 rounded-lg border border-line bg-panel-2 px-2.5 py-1.5">
-                        <div className="flex items-center gap-1 text-[11px] font-semibold text-chalk-faint">
+                        <div className="flex items-center gap-1 text-sm font-semibold text-chalk-faint">
                           <svg
                             viewBox="0 0 20 20"
                             fill="none"
@@ -312,7 +312,7 @@ export default function ChatContent() {
                           </svg>
                           {m.replyTo.authorName}
                         </div>
-                        <p className="truncate text-xs text-chalk-faint">
+                        <p className="truncate text-sm text-chalk-faint">
                           {m.replyTo.body}
                         </p>
                       </div>
@@ -352,7 +352,7 @@ export default function ChatContent() {
                               }
                               react(m.id, r.emoji);
                             }}
-                            className={`rounded-full border px-1.5 py-0.5 text-xs select-none ${
+                            className={`rounded-full border px-1.5 py-0.5 text-sm select-none ${
                               reactedEmoji.has(r.emoji)
                                 ? "border-led bg-led-bg text-led"
                                 : "border-line bg-panel-2 text-chalk-faint"
@@ -397,7 +397,7 @@ export default function ChatContent() {
                         return (
                           <button
                             onClick={() => setWhoReacted(null)}
-                            className="mt-1 block rounded-lg border border-line bg-panel-2 px-2.5 py-1.5 text-left text-xs text-chalk-faint"
+                            className="mt-1 block rounded-lg border border-line bg-panel-2 px-2.5 py-1.5 text-left text-sm text-chalk-faint"
                           >
                             <span className="mr-1">{whoReacted.emoji}</span>
                             {names.join(", ")}
@@ -415,10 +415,10 @@ export default function ChatContent() {
       {replyingTo && (
         <div className="mt-2 flex shrink-0 items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-1.5">
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-semibold text-led">
+            <div className="text-sm font-semibold text-led">
               Replying to {replyingTo.authorName}
             </div>
-            <div className="truncate text-xs text-chalk-faint">
+            <div className="truncate text-sm text-chalk-faint">
               {replyingTo.body}
             </div>
           </div>
