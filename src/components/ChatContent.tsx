@@ -203,7 +203,7 @@ export default function ChatContent() {
   return (
     <div className="flex h-full flex-col px-4 py-2">
       <div className="mb-2 flex shrink-0 items-center justify-between">
-        <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
+        <h2 className="text-sm font-bold text-chalk">Messages</h2>
         {/*
           A native <select> rather than a custom dropdown — no text input
           means none of the iOS autofill/keyboard-toolbar issues earlier
