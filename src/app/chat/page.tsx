@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface MessageDTO {
@@ -37,6 +37,7 @@ function NamePickerModal({
 }) {
   const [value, setValue] = useState(currentName);
   const [mounted, setMounted] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target (document.body) is unavailable during SSR/render
@@ -47,10 +48,20 @@ function NamePickerModal({
 
   const trimmed = value.trim();
 
+  // Removing a still-focused input from the DOM (rather than an explicit
+  // blur) is a known iOS WebKit keyboard-dismissal glitch — it can leave a
+  // stale reservation for the keyboard's space behind. Blurring first, on
+  // both paths that unmount this modal, gives WebKit a clean dismissal
+  // signal instead.
+  const closeAndBlur = (action: () => void) => {
+    inputRef.current?.blur();
+    action();
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 px-4"
-      onClick={() => onClose?.()}
+      onClick={() => onClose && closeAndBlur(onClose)}
     >
       <div
         className="w-full max-w-sm rounded-xl border border-line bg-panel p-4"
@@ -65,11 +76,11 @@ function NamePickerModal({
         </p>
 
         <input
-          autoFocus
+          ref={inputRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && trimmed) onSave(trimmed);
+            if (e.key === "Enter" && trimmed) closeAndBlur(() => onSave(trimmed));
           }}
           maxLength={24}
           placeholder="Your name"
@@ -85,14 +96,14 @@ function NamePickerModal({
         <div className="mt-3 flex justify-end gap-2">
           {onClose && (
             <button
-              onClick={onClose}
+              onClick={() => closeAndBlur(onClose)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-chalk-faint"
             >
               Cancel
             </button>
           )}
           <button
-            onClick={() => trimmed && onSave(trimmed)}
+            onClick={() => trimmed && closeAndBlur(() => onSave(trimmed))}
             disabled={!trimmed}
             className="rounded-lg bg-led px-4 py-2 text-sm font-bold text-pill-text disabled:opacity-40"
           >
