@@ -118,7 +118,11 @@ html[data-splash="skip"] #splash-root {
   rendered height (~55px) plus the 96px (pb-24) <main> reserves everywhere
   for TabNav clearance — chat needs none of that reserved separately since
   this already reaches the TabNav's top edge.
+
+  --keyboard-inset is set by ChatPage from visualViewport (dvh doesn't
+  shrink for the on-screen keyboard, only for browser chrome) so the
+  message input stays above the keyboard instead of hidden underneath it.
 */
 .chat-viewport {
-  height: calc(100dvh - 9.5rem);
+  height: calc(100dvh - 9.5rem - var(--keyboard-inset, 0px));
 }

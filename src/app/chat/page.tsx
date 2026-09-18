@@ -114,7 +114,32 @@ export default function ChatPage() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
+
+  // The on-screen keyboard shrinks the visual viewport but not 100dvh (dvh
+  // only tracks browser chrome, not the keyboard), so without this the
+  // input row stays put and ends up hidden underneath the keyboard. Only
+  // ever touches a CSS variable on this page's own wrapper — never <main>
+  // or nav/header's layout — so it can't reintroduce the standalone-iOS
+  // fixed-position jitter the rest of this page's sizing had to work
+  // around (see the .chat-viewport comment in globals.css).
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onResize = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height);
+      wrapperRef.current?.style.setProperty("--keyboard-inset", `${inset}px`);
+      const el = listRef.current;
+      if (el && stickToBottomRef.current) {
+        el.scrollTop = el.scrollHeight;
+      }
+    };
+
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem(NAME_KEY);
@@ -192,7 +217,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="chat-viewport mx-auto flex max-w-lg flex-col px-4 py-4">
+    <div ref={wrapperRef} className="chat-viewport mx-auto flex max-w-lg flex-col px-4 py-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
         {name && (
