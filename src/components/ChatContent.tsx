@@ -3,12 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+interface ReactionDTO {
+  emoji: string;
+  count: number;
+  authorNames: string[];
+}
+
 interface MessageDTO {
   id: string;
   authorName: string;
   body: string;
   createdAt: string;
+  replyTo: { id: string; authorName: string; body: string } | null;
+  reactions: ReactionDTO[];
 }
+
+const REACTION_EMOJI = ["👍", "❤️", "😂", "🔥", "😢", "🎉"];
 
 interface TeamDTO {
   player: { name: string } | null;
@@ -159,6 +169,8 @@ export default function ChatContent() {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<MessageDTO | null>(null);
+  const [reactingTo, setReactingTo] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
 
@@ -221,11 +233,13 @@ export default function ChatContent() {
     if (!text || !name || sending) return;
     setSending(true);
     setDraft("");
+    const replyToId = replyingTo?.id;
+    setReplyingTo(null);
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authorName: name, body: text }),
+        body: JSON.stringify({ authorName: name, body: text, replyToId }),
       });
       const data: { message: MessageDTO } = await res.json();
       stickToBottomRef.current = true;
@@ -234,6 +248,26 @@ export default function ChatContent() {
       setDraft(text);
     } finally {
       setSending(false);
+    }
+  };
+
+  const react = async (messageId: string, emoji: string) => {
+    setReactingTo(null);
+    if (!name) return;
+    try {
+      const res = await fetch(`/api/messages/${messageId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ authorName: name, emoji }),
+      });
+      const data: { reactions: ReactionDTO[] } = await res.json();
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, reactions: data.reactions } : m
+        )
+      );
+    } catch {
+      // Best-effort — a failed reaction toggle just isn't reflected.
     }
   };
 
@@ -267,6 +301,13 @@ export default function ChatContent() {
           <div className="flex flex-col gap-3">
             {messages.map((m) => {
               const own = m.authorName === name;
+              const reactedEmoji = new Set(
+                name
+                  ? m.reactions
+                      .filter((r) => r.authorNames.includes(name))
+                      .map((r) => r.emoji)
+                  : []
+              );
               return (
                 <div key={m.id} className="flex items-start gap-2.5">
                   <div
@@ -285,10 +326,83 @@ export default function ChatContent() {
                       <span className="text-[11px] text-chalk-faint">
                         {timeLabel(m.createdAt)}
                       </span>
+                      {name && (
+                        <>
+                          <button
+                            onClick={() => setReplyingTo(m)}
+                            className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
+                          >
+                            Reply
+                          </button>
+                          <button
+                            onClick={() =>
+                              setReactingTo((prev) => (prev === m.id ? null : m.id))
+                            }
+                            className="text-[11px] font-semibold text-chalk-faint underline underline-offset-2"
+                          >
+                            React
+                          </button>
+                        </>
+                      )}
                     </div>
+
+                    {m.replyTo && (
+                      <div className="mt-1 rounded-lg border border-line bg-panel-2 px-2.5 py-1.5">
+                        <div className="flex items-center gap-1 text-[11px] font-semibold text-chalk-faint">
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-3 w-3 shrink-0"
+                          >
+                            <path d="M12 6 6 10l6 4M6 10h6a4 4 0 0 1 4 4v1" />
+                          </svg>
+                          {m.replyTo.authorName}
+                        </div>
+                        <p className="truncate text-xs text-chalk-faint">
+                          {m.replyTo.body}
+                        </p>
+                      </div>
+                    )}
+
                     <p className="whitespace-pre-wrap break-words text-sm text-chalk">
                       {m.body}
                     </p>
+
+                    {reactingTo === m.id && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {REACTION_EMOJI.map((emoji) => (
+                          <button
+                            key={emoji}
+                            onClick={() => react(m.id, emoji)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-panel-2 text-sm active:scale-90"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {m.reactions.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {m.reactions.map((r) => (
+                          <button
+                            key={r.emoji}
+                            onClick={() => react(m.id, r.emoji)}
+                            className={`rounded-full border px-1.5 py-0.5 text-xs ${
+                              reactedEmoji.has(r.emoji)
+                                ? "border-led bg-led-bg text-led"
+                                : "border-line bg-panel-2 text-chalk-faint"
+                            }`}
+                          >
+                            {r.emoji} {r.count}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -296,6 +410,35 @@ export default function ChatContent() {
           </div>
         )}
       </div>
+
+      {replyingTo && (
+        <div className="mt-2 flex shrink-0 items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-1.5">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-semibold text-led">
+              Replying to {replyingTo.authorName}
+            </div>
+            <div className="truncate text-xs text-chalk-faint">
+              {replyingTo.body}
+            </div>
+          </div>
+          <button
+            onClick={() => setReplyingTo(null)}
+            aria-label="Cancel reply"
+            className="shrink-0 px-1 text-chalk-faint"
+          >
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="h-4 w-4"
+            >
+              <path d="M5 5l10 10M15 5 5 15" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       <form
         onSubmit={(e) => {

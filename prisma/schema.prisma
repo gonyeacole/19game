@@ -90,7 +90,29 @@ model Message {
   body       String
   createdAt  DateTime @default(now())
 
+  replyToId String?
+  replyTo   Message?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies   Message[] @relation("MessageReplies")
+
+  reactions Reaction[]
+
   @@index([createdAt])
+  @@index([replyToId])
+}
+
+// One row per (message, author, emoji) — the unique constraint is what makes
+// reacting idempotent/toggleable: adding an existing one is a no-op check
+// client-side, removing is just deleting the row.
+model Reaction {
+  id         String   @id @default(cuid())
+  messageId  String
+  message    Message  @relation(fields: [messageId], references: [id])
+  authorName String
+  emoji      String
+  createdAt  DateTime @default(now())
+
+  @@unique([messageId, authorName, emoji])
+  @@index([messageId])
 }
 
 // SQLite has no native enum support in Prisma, so GameStatus is stored as a
