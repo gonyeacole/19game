@@ -279,7 +279,7 @@ export default function ChatContent() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-1.5">
                       <span
-                        className={`text-sm font-bold ${own ? "text-led" : "text-chalk"}`}
+                        className={`text-base font-bold ${own ? "text-led" : "text-chalk"}`}
                       >
                         {m.authorName}
                       </span>
@@ -318,7 +318,7 @@ export default function ChatContent() {
                       </div>
                     )}
 
-                    <p className="whitespace-pre-wrap break-words text-sm text-chalk">
+                    <p className="whitespace-pre-wrap break-words text-base text-chalk">
                       {m.body}
                     </p>
 
