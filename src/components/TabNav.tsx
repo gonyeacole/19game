@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -121,11 +121,41 @@ function ChatSheet({
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(800);
   const sheetRef = useRef<HTMLDivElement>(null);
+  // The size actually reflected on screen last time this ran — the "First"
+  // in FLIP, compared against the just-committed `height` (the "Last") to
+  // figure out how far the reveal transform below needs to travel.
+  const lastFlipHeightRef = useRef(COLLAPSED_HEIGHT);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target (document.body) is unavailable during SSR/render
     setMounted(true);
   }, []);
+
+  // Animating `height` directly (the old approach) forces a real layout
+  // recalculation on every frame — visibly less smooth than a pure
+  // transform, which the compositor can run independently of layout/paint.
+  // So `height` itself now jumps to its target instantly (see the style
+  // below), and this fakes the smooth grow/shrink via FLIP instead: measure
+  // how far the box's edge actually moved, immediately counter that with an
+  // equal-and-opposite translateY (so nothing visually changes yet), then on
+  // the next frame animate that transform back to neutral. Skipped while
+  // dragging (real-time 1:1 tracking, not a snap) or while the keyboard is
+  // open (that resize must stay instant — see the note on `transition`
+  // below for why).
+  useLayoutEffect(() => {
+    const el = sheetRef.current;
+    const delta = height - lastFlipHeightRef.current;
+    lastFlipHeightRef.current = height;
+    if (!el || dragging || keyboardInset > 0 || delta === 0) return;
+
+    el.style.transition = "none";
+    el.style.transform = `translateY(${delta}px)`;
+    void el.offsetHeight; // flush the style above before animating away from it
+    requestAnimationFrame(() => {
+      el.style.transition = `transform ${SNAP_MS}ms ${SNAP_EASING}`;
+      el.style.transform = "translateY(0px)";
+    });
+  }, [height, dragging, keyboardInset]);
 
   // The backdrop being opaque and on top only stops the user from *seeing*
   // the page scroll — a wheel/touch gesture still bubbles up to actually
@@ -296,20 +326,17 @@ function ChatSheet({
       <div
         ref={sheetRef}
         style={{
+          // Always instant — no CSS transition on height. The FLIP
+          // useLayoutEffect above fakes the smooth grow/shrink via a
+          // transform instead (much smoother — see its comment), and
+          // "instant" is also exactly what's wanted for the two cases that
+          // skip the FLIP animation entirely: live drag tracking, and the
+          // keyboard-open resize (animating that at the same time as iOS's
+          // own keyboard-opening animation was what made the first tap on
+          // the message input frequently fail to bring the keyboard up —
+          // see git history for that fix).
           height,
-          // Also skip the animation for the resize the keyboard itself
-          // triggers (keyboardInset > 0): letting the sheet's own height
-          // transition run at the same time as iOS's native keyboard-
-          // opening animation is what was making the first tap on the
-          // message input frequently fail to bring the keyboard up at
-          // all — the competing animation interrupts it, so it took a
-          // couple more taps once things settled. Snapping instantly
-          // avoids that fight.
-          transition:
-            dragging || keyboardInset > 0
-              ? "none"
-              : `height ${SNAP_MS}ms ${SNAP_EASING}`,
-          willChange: dragging ? undefined : "height",
+          willChange: dragging ? undefined : "height, transform",
         }}
         // Collapsed, the tab row below (with its own safe-bottom) provides
         // clearance from the home indicator, so this doesn't need its own.
