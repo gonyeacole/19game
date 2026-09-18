@@ -292,14 +292,27 @@ function ChatSheet({
         ref={sheetRef}
         style={{
           height,
-          transition: dragging ? "none" : `height ${SNAP_MS}ms ease-out`,
+          // Also skip the animation for the resize the keyboard itself
+          // triggers (keyboardInset > 0): letting the sheet's own height
+          // transition run at the same time as iOS's native keyboard-
+          // opening animation is what was making the first tap on the
+          // message input frequently fail to bring the keyboard up at
+          // all — the competing animation interrupts it, so it took a
+          // couple more taps once things settled. Snapping instantly
+          // avoids that fight.
+          transition:
+            dragging || keyboardInset > 0
+              ? "none"
+              : `height ${SNAP_MS}ms ease-out`,
         }}
         // Collapsed, the tab row below (with its own safe-bottom) provides
         // clearance from the home indicator, so this doesn't need its own.
         // Expanded, that row isn't rendered at all, so this picks up that
         // same clearance directly — otherwise the input would sit flush
-        // against the home indicator in standalone mode.
-        className={`relative z-20 mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field ${expanded ? "safe-bottom" : ""}`}
+        // against the home indicator in standalone mode. A differently-
+        // named class (globals.css) rather than plain .safe-bottom — see
+        // that file for why reusing it here breaks the keyboard.
+        className={`relative z-20 mx-auto flex max-w-lg flex-col overflow-hidden rounded-t-2xl bg-field ${expanded ? "chat-sheet-safe-bottom" : ""}`}
       >
         <div
           onPointerDown={onPointerDown}

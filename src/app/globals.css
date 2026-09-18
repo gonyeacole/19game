@@ -91,6 +91,21 @@ html[data-standalone="true"] .safe-top {
 html[data-standalone="true"] .safe-bottom {
   padding-bottom: 34px;
 }
+/*
+  Same home-indicator clearance as .safe-bottom, under a different class —
+  the expanded chat sheet (TabNav.tsx) needs this same bottom padding for
+  itself, but it can't just reuse .safe-bottom: it's also a direct child of
+  <nav>, so it would then also get caught by the
+  `nav[aria-label="Primary"] > .safe-bottom { display: none }` rule below
+  (written for the old tab row, to hide it while the keyboard is open) and
+  vanish itself the moment the keyboard opened.
+*/
+.chat-sheet-safe-bottom {
+  padding-bottom: 0px;
+}
+html[data-standalone="true"] .chat-sheet-safe-bottom {
+  padding-bottom: 34px;
+}
 
 /*
   SplashScreen always renders the same markup on the server and on first
