@@ -124,6 +124,30 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+
+  // The on-screen keyboard shrinks the visual viewport but not 100dvh (dvh
+  // only tracks browser chrome, not the keyboard), so without this the
+  // input row stays put and ends up hidden underneath the keyboard. Only
+  // ever touches a CSS variable on this page's own wrapper.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onResize = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height);
+      wrapperRef.current?.style.setProperty("--keyboard-inset", `${inset}px`);
+      const el = listRef.current;
+      if (el && stickToBottomRef.current) {
+        el.scrollTop = el.scrollHeight;
+      }
+    };
+
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem(NAME_KEY);
@@ -149,6 +173,11 @@ export default function ChatPage() {
       try {
         const res = await fetch("/api/messages", { cache: "no-store" });
         const data: { messages: MessageDTO[] } = await res.json();
+        const el = listRef.current;
+        if (el) {
+          stickToBottomRef.current =
+            el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        }
         setMessages(data.messages);
       } catch {
         // Best-effort — chat isn't on the critical path.
@@ -161,6 +190,12 @@ export default function ChatPage() {
     const id = setInterval(load, POLL_MS);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (stickToBottomRef.current && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const saveName = (newName: string) => {
     localStorage.setItem(NAME_KEY, newName);
@@ -180,6 +215,7 @@ export default function ChatPage() {
         body: JSON.stringify({ authorName: name, body: text }),
       });
       const data: { message: MessageDTO } = await res.json();
+      stickToBottomRef.current = true;
       setMessages((prev) => [...prev, data.message]);
     } catch {
       setDraft(text);
@@ -189,7 +225,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div ref={wrapperRef} className="chat-viewport mx-auto flex max-w-lg flex-col px-4 py-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
         {name && (
@@ -202,7 +238,10 @@ export default function ChatPage() {
         )}
       </div>
 
-      <div className="min-h-[300px] rounded-xl border border-line bg-panel p-3">
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto rounded-xl border border-line bg-panel p-3"
+      >
         {loading ? (
           <div className="py-10 text-center text-sm text-chalk-faint">
             Loading…
