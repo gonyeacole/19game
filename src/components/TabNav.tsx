@@ -83,7 +83,7 @@ const COLLAPSED_HEIGHT = 48; // Apple's ~44pt minimum tap target, plus a couple 
 const EXPANDED_RATIO = 0.78; // fraction of the viewport height when swiped open, keyboard closed
 const KEYBOARD_TOP_MARGIN = 60; // px left visible above the sheet once the keyboard is open
 const DRAG_TAP_THRESHOLD = 6; // px of movement below which a drag counts as a tap
-const SNAP_MS = 320;
+const SNAP_MS = 450;
 // iOS's own sheet-presentation curve (a slow-in, fast-out "ease" rather than
 // the browser's built-in `ease-out`, which decelerates too abruptly to read
 // as smooth for a distance this large) — mirrors the native feel of the
