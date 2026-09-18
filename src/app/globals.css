@@ -108,24 +108,39 @@ html[data-splash="skip"] #splash-root {
 /*
   Chat fills exactly the space between the sticky header and the fixed
   TabNav so only the message list scrolls, not the whole page. A static
-  value from the very first paint, no JS resizing it after mount. 9.5rem =
-  the header's rendered height on a non-notched device (~55px) plus the
-  96px (pb-24) <main> reserves everywhere for TabNav clearance — chat
-  needs none of that reserved separately since this already reaches the
-  TabNav's top edge. Standalone mode makes the header taller via
-  .safe-top's own env(safe-area-inset-top) (notch/Dynamic Island
-  clearance), so that same amount has to come off here too.
+  value from the very first paint, no JS resizing it after mount. 3.5rem =
+  the header's rendered height on a non-notched device (~55px).
+  --tabnav-clearance is the 96px (pb-24) <main> reserves everywhere for
+  TabNav clearance — chat needs none of that reserved separately since
+  this already reaches the TabNav's top edge. Standalone mode makes the
+  header taller via .safe-top's own env(safe-area-inset-top) (notch/
+  Dynamic Island clearance), so that same amount has to come off here too.
 
   --keyboard-inset is set by ChatPage from visualViewport (dvh doesn't
   shrink for the on-screen keyboard, only for browser chrome) so the
   message input stays above the keyboard instead of hidden underneath it.
+  While the keyboard is open (data-keyboard-open, also set by ChatPage),
+  TabNav hides entirely and --tabnav-clearance drops to 0 so chat expands
+  to use the space TabNav would otherwise have reserved.
 */
+:root {
+  --tabnav-clearance: 6rem;
+}
+html[data-keyboard-open="true"] {
+  --tabnav-clearance: 0rem;
+}
+html[data-keyboard-open="true"] nav[aria-label="Primary"] {
+  display: none;
+}
 .chat-viewport {
-  height: calc(100dvh - 9.5rem - var(--keyboard-inset, 0px));
+  height: calc(
+    100dvh - 3.5rem - var(--tabnav-clearance) - var(--keyboard-inset, 0px)
+  );
 }
 html[data-standalone="true"] .chat-viewport {
   height: calc(
-    100dvh - 9.5rem - var(--keyboard-inset, 0px) - env(safe-area-inset-top)
+    100dvh - 3.5rem - var(--tabnav-clearance) - var(--keyboard-inset, 0px) -
+      env(safe-area-inset-top)
   );
 }
 

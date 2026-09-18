@@ -131,7 +131,12 @@ export default function ChatPage() {
   // The on-screen keyboard shrinks the visual viewport but not 100dvh (dvh
   // only tracks browser chrome, not the keyboard), so without this the
   // input row stays put and ends up hidden underneath the keyboard. Only
-  // ever touches a CSS variable on this page's own wrapper.
+  // ever touches a CSS variable on this page's own wrapper. Also hides
+  // TabNav while typing (data-keyboard-open, read by globals.css) so the
+  // keyboard and chat get the screen to themselves — chat's own height
+  // calc drops TabNav's reserved clearance to match, via the same
+  // attribute. A 40px threshold (rather than inset > 0) avoids false
+  // positives from minor viewport jitter that isn't the keyboard.
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
@@ -139,6 +144,8 @@ export default function ChatPage() {
     const onResize = () => {
       const inset = Math.max(0, window.innerHeight - vv.height);
       wrapperRef.current?.style.setProperty("--keyboard-inset", `${inset}px`);
+      document.documentElement.dataset.keyboardOpen =
+        inset > 40 ? "true" : "false";
       const el = listRef.current;
       if (el && stickToBottomRef.current) {
         el.scrollTop = el.scrollHeight;
@@ -146,7 +153,10 @@ export default function ChatPage() {
     };
 
     vv.addEventListener("resize", onResize);
-    return () => vv.removeEventListener("resize", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      delete document.documentElement.dataset.keyboardOpen;
+    };
   }, []);
 
   useEffect(() => {
