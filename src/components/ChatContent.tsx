@@ -213,12 +213,20 @@ export default function ChatContent() {
           existed), so the pill never shows something other than what's
           actually selected.
         */}
-        <div className="relative">
+        {/*
+          max-w + truncate on the <select> itself — left unconstrained, a
+          native select's closed-state width is sized to fit its WIDEST
+          option (e.g. "Christopher Alexander"), not the selected value, so
+          a short name like "Cole" would otherwise sit in a pill padded out
+          with a large empty gap. The dropdown itself still lists every
+          name in full; only the closed pill truncates.
+        */}
+        <div className="relative max-w-[8.5rem]">
           <select
             value={name ?? ""}
             onChange={(e) => saveName(e.target.value)}
             aria-label="Your name"
-            className="appearance-none rounded-full border border-line bg-panel-2 py-1 pl-3 pr-7 text-xs font-medium text-chalk"
+            className="w-full appearance-none truncate rounded-full border border-line bg-panel-2 py-1 pl-3 pr-7 text-xs font-medium text-chalk"
           >
             <option value="" disabled>
               Pick your name

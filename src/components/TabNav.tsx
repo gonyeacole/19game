@@ -353,18 +353,11 @@ function ChatSheet({
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
           className="flex shrink-0 touch-none select-none items-center gap-2.5 bg-led px-4 text-pill-text"
-          // Collapsed, this row IS the whole sheet (COLLAPSED_HEIGHT), so it
-          // has to fill that height exactly via flex centering rather than
-          // padding — padding that merely approximates 60px left a sliver of
-          // the container's own bg-field peeking out underneath it, above
-          // the tab row's border line. Expanded, it goes back to sizing
-          // itself from padding since ChatContent owns the rest of the
-          // height.
-          style={
-            expanded
-              ? { paddingTop: 8, paddingBottom: 10 }
-              : { height: COLLAPSED_HEIGHT }
-          }
+          // Fixed at COLLAPSED_HEIGHT (flex-centered) in both states, not
+          // just collapsed — otherwise the header's own height (previously
+          // padding-driven while expanded) didn't match its collapsed size,
+          // making the whole bar visibly change height as the sheet opens.
+          style={{ height: COLLAPSED_HEIGHT }}
         >
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0">
             <path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v6A1.5 1.5 0 0 1 15.5 13H9l-3.6 3v-3H4.5A1.5 1.5 0 0 1 3 11.5Z" />
