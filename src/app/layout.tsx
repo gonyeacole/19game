@@ -60,6 +60,13 @@ const STANDALONE_INIT_SCRIPT = `
 // localStorage during either), so without this, the splash's green
 // background would flash on screen for a frame on every reload before
 // SplashScreen's own client-side effects had a chance to hide it.
+//
+// The same "fresh open" decision also sends a genuine app launch straight
+// to Scores, even if the last thing open before backgrounding (or closing)
+// was a different tab — a standalone PWA otherwise just resumes its
+// existing page. Reusing splash's own threshold means this only fires
+// alongside a real fresh open, never a brief app-switch-and-back. Runs
+// before paint so there's nothing to redirect away from visually.
 const SPLASH_INIT_SCRIPT = `
 (function () {
   try {
@@ -70,6 +77,9 @@ const SPLASH_INIT_SCRIPT = `
     localStorage.setItem(KEY, String(now));
     var skip = last != null && now - Number(last) < WINDOW_MS;
     document.documentElement.dataset.splash = skip ? "skip" : "show";
+    if (!skip && location.pathname !== "/scores" && location.pathname !== "/") {
+      location.replace("/scores");
+    }
   } catch (e) {
     document.documentElement.dataset.splash = "show";
   }
