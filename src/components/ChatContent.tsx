@@ -206,7 +206,6 @@ export default function ChatContent() {
         ) : (
           <div className="flex flex-col gap-3">
             {messages.map((m) => {
-              const own = m.authorName === name;
               return (
                 <div key={m.id} className="flex items-start gap-2.5">
                   <div
@@ -216,15 +215,9 @@ export default function ChatContent() {
                     {m.authorName.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div
-                      className={`block w-full rounded-2xl px-3 py-2 ${
-                        own ? "bg-led-bg" : "bg-panel-2"
-                      }`}
-                    >
+                    <div className="block w-full rounded-2xl bg-panel-2 px-3 py-2">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
-                        <span
-                          className={`text-base font-bold ${own ? "text-led" : "text-chalk"}`}
-                        >
+                        <span className="text-base font-bold text-chalk">
                           {m.authorName}
                         </span>
                         <span className="text-sm text-chalk-faint">
