@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 interface ReactionDTO {
   emoji: string;
@@ -52,110 +51,6 @@ function avatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-function NamePickerModal({
-  currentName,
-  suggestions,
-  onSave,
-  onClose,
-}: {
-  currentName: string;
-  suggestions: string[];
-  onSave: (name: string) => void;
-  onClose: (() => void) | null;
-}) {
-  const [value, setValue] = useState(currentName);
-  const [mounted, setMounted] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target (document.body) is unavailable during SSR/render
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const trimmed = value.trim();
-
-  // Removing a still-focused input from the DOM (rather than an explicit
-  // blur) is a known iOS WebKit keyboard-dismissal glitch — it can leave a
-  // stale reservation for the keyboard's space behind. Blurring first, on
-  // both paths that unmount this modal, gives WebKit a clean dismissal
-  // signal instead.
-  const closeAndBlur = (action: () => void) => {
-    inputRef.current?.blur();
-    action();
-  };
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4"
-      onClick={() => onClose && closeAndBlur(onClose)}
-    >
-      <div
-        className="w-full max-w-sm rounded-xl border border-line bg-panel p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-sm font-bold text-chalk">
-          {currentName ? "Change your name" : "Pick your name"}
-        </h3>
-        <p className="mt-1 text-xs text-chalk-faint">
-          This is how you&apos;ll show up in the group chat. You only need to
-          set it once.
-        </p>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (trimmed) closeAndBlur(() => onSave(trimmed));
-          }}
-          autoComplete="off"
-        >
-          <input
-            ref={inputRef}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            maxLength={24}
-            placeholder="Your name"
-            list="chat-name-suggestions"
-            // iOS Safari largely ignores the literal string "off" for
-            // fields it heuristically decides look like a name field — a
-            // known, deliberate override — but tends to respect
-            // unrecognized values it has no special-cased behavior for.
-            autoComplete="not-autofillable"
-            name="chat-display-name"
-            className="mt-3 w-full rounded-lg border border-line bg-search-bg px-3 py-2 text-sm text-chalk outline-none focus:border-led"
-          />
-          <datalist id="chat-name-suggestions">
-            {suggestions.map((n) => (
-              <option key={n} value={n} />
-            ))}
-          </datalist>
-
-          <div className="mt-3 flex justify-end gap-2">
-            {onClose && (
-              <button
-                type="button"
-                onClick={() => closeAndBlur(onClose)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-chalk-faint"
-              >
-                Cancel
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={!trimmed}
-              className="rounded-lg bg-led px-4 py-2 text-sm font-bold text-pill-text disabled:opacity-40"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
 // The actual chat UI — message list, input, name picker — with no opinion
 // about how much space it's given. Used both by the standalone /chat page
 // (sized via .chat-viewport) and TabNav's draggable chat sheet (sized via
@@ -163,8 +58,7 @@ function NamePickerModal({
 // once instead of twice.
 export default function ChatContent() {
   const [name, setName] = useState<string | null>(null);
-  const [showPicker, setShowPicker] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [poolNames, setPoolNames] = useState<string[]>([]);
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
@@ -178,7 +72,6 @@ export default function ChatContent() {
     const stored = localStorage.getItem(NAME_KEY);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is unavailable during SSR/render
     setName(stored);
-    if (!stored) setShowPicker(true);
   }, []);
 
   useEffect(() => {
@@ -188,7 +81,7 @@ export default function ChatContent() {
         const names = d.teams
           .map((t) => t.player?.name)
           .filter((n): n is string => Boolean(n));
-        setSuggestions(names);
+        setPoolNames(names);
       })
       .catch(() => {});
   }, []);
@@ -225,7 +118,6 @@ export default function ChatContent() {
   const saveName = (newName: string) => {
     localStorage.setItem(NAME_KEY, newName);
     setName(newName);
-    setShowPicker(false);
   };
 
   const send = async () => {
@@ -275,14 +167,45 @@ export default function ChatContent() {
     <div className="flex h-full flex-col px-4 py-2">
       <div className="mb-2 flex shrink-0 items-center justify-between">
         <h2 className="text-sm font-bold text-chalk">Group Chat</h2>
-        {name && (
-          <button
-            onClick={() => setShowPicker(true)}
-            className="text-xs font-medium text-placeholder underline underline-offset-2"
+        {/*
+          A native <select> rather than a custom dropdown — no text input
+          means none of the iOS autofill/keyboard-toolbar issues earlier
+          chat inputs ran into, and it gets a real native picker for free.
+          Falls back to including the current name as its own option if
+          it's somehow not in the pool list (e.g. a name set before this
+          existed), so the pill never shows something other than what's
+          actually selected.
+        */}
+        <div className="relative">
+          <select
+            value={name ?? ""}
+            onChange={(e) => saveName(e.target.value)}
+            aria-label="Your name"
+            className="appearance-none rounded-full border border-line bg-panel-2 py-1 pl-3 pr-7 text-xs font-medium text-chalk"
           >
-            {name} · change name
-          </button>
-        )}
+            <option value="" disabled>
+              Pick your name
+            </option>
+            {(name && !poolNames.includes(name) ? [name, ...poolNames] : poolNames).map(
+              (n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              )
+            )}
+          </select>
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-chalk-faint"
+          >
+            <path d="M5 8l5 5 5-5" />
+          </svg>
+        </div>
       </div>
 
       <div
@@ -494,15 +417,6 @@ export default function ChatContent() {
           </svg>
         </button>
       </form>
-
-      {showPicker && (
-        <NamePickerModal
-          currentName={name ?? ""}
-          suggestions={suggestions}
-          onSave={saveName}
-          onClose={name ? () => setShowPicker(false) : null}
-        />
-      )}
     </div>
   );
 }
