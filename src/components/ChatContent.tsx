@@ -306,8 +306,12 @@ export default function ChatContent() {
                       {m.authorName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <div className="block w-full rounded-2xl border border-line bg-panel px-3 py-2">
+                  <div
+                    className={`min-w-0 flex-1 ${
+                      name || m.reactions.length > 0 ? "mb-3" : ""
+                    }`}
+                  >
+                    <div className="relative block w-full rounded-2xl border border-line bg-panel px-3 py-2">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
                         <span className="text-base font-bold text-chalk">
                           {m.authorName}
@@ -350,55 +354,55 @@ export default function ChatContent() {
                       <p className="whitespace-pre-wrap break-words text-base text-chalk">
                         {m.body}
                       </p>
-                    </div>
 
-                    <div className="mt-1 flex flex-wrap items-center gap-1">
-                      {groupReactions(m.reactions, name).map((r) => (
-                        <button
-                          key={r.emoji}
-                          onClick={() => toggleReaction(m.id, r.emoji)}
-                          disabled={!name}
-                          className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${
-                            r.mine
-                              ? "border-led bg-led-bg text-led"
-                              : "border-line bg-panel-2 text-chalk-faint"
-                          }`}
-                        >
-                          <span>{r.emoji}</span>
-                          <span>{r.count}</span>
-                        </button>
-                      ))}
-                      {name && (
-                        <div
-                          className="relative"
-                          ref={openPickerFor === m.id ? pickerRef : undefined}
-                        >
+                      <div className="absolute bottom-0 right-2 flex translate-y-1/2 items-center gap-1">
+                        {groupReactions(m.reactions, name).map((r) => (
                           <button
-                            onClick={() =>
-                              setOpenPickerFor((cur) =>
-                                cur === m.id ? null : m.id
-                              )
-                            }
-                            aria-label="Add reaction"
-                            className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-sm leading-none text-chalk-faint"
+                            key={r.emoji}
+                            onClick={() => toggleReaction(m.id, r.emoji)}
+                            disabled={!name}
+                            className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs shadow-sm ${
+                              r.mine
+                                ? "border-led bg-led-bg text-led"
+                                : "border-line bg-panel-2 text-chalk-faint"
+                            }`}
                           >
-                            +
+                            <span>{r.emoji}</span>
+                            <span>{r.count}</span>
                           </button>
-                          {openPickerFor === m.id && (
-                            <div className="absolute bottom-full left-0 z-20 mb-1 flex gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
-                              {REACTION_EMOJI.map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => toggleReaction(m.id, emoji)}
-                                  className="text-base leading-none"
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        ))}
+                        {name && (
+                          <div
+                            className="relative"
+                            ref={openPickerFor === m.id ? pickerRef : undefined}
+                          >
+                            <button
+                              onClick={() =>
+                                setOpenPickerFor((cur) =>
+                                  cur === m.id ? null : m.id
+                                )
+                              }
+                              aria-label="Add reaction"
+                              className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-sm leading-none text-chalk-faint shadow-sm"
+                            >
+                              +
+                            </button>
+                            {openPickerFor === m.id && (
+                              <div className="absolute bottom-full left-0 z-20 mb-1 flex gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
+                                {REACTION_EMOJI.map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    onClick={() => toggleReaction(m.id, emoji)}
+                                    className="text-base leading-none"
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
