@@ -383,9 +383,21 @@ export default function ChatContent() {
                                 )
                               }
                               aria-label="Add reaction"
-                              className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-sm leading-none text-chalk-faint shadow-sm"
+                              className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-chalk-faint shadow-sm"
                             >
-                              +
+                              <svg
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="h-3.5 w-3.5"
+                              >
+                                <circle cx="10" cy="10" r="7.5" />
+                                <path d="M7 11.5c.7 1 1.7 1.5 3 1.5s2.3-.5 3-1.5" />
+                                <path d="M7.5 8h.01M12.5 8h.01" />
+                              </svg>
                             </button>
                             {openPickerFor === m.id && (
                               <div className="absolute bottom-full left-0 z-20 mb-1 flex gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
