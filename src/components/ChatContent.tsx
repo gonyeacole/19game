@@ -219,7 +219,10 @@ export default function ChatContent() {
             {messages.map((m) => {
               const logoUrl = teamLogoByName.get(m.authorName);
               return (
-                <div key={m.id} className="flex items-start gap-2.5">
+                <div
+                  key={m.id}
+                  className="flex animate-message-in items-start gap-2.5"
+                >
                   {logoUrl ? (
                     <Image
                       src={logoUrl}

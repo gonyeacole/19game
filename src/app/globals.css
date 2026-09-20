@@ -164,3 +164,28 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
+/*
+  Applied unconditionally to every chat message's wrapper (ChatContent.tsx)
+  rather than only to ones some "is this new" check flags — React only
+  creates a fresh DOM node the first time a message's key appears, and
+  reuses that same node on every later re-render (a poll tick, a reply
+  being added, etc.) as long as the key persists. A CSS animation plays
+  once when its element is first inserted and does not replay just because
+  the element re-renders with the same class list, so this alone is
+  enough to animate only genuinely new messages in, with no JS-side
+  "seen already" tracking needed.
+*/
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-message-in {
+  animation: message-in 220ms ease-out;
+}
+
