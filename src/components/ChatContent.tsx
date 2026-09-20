@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 interface MessageDTO {
@@ -11,6 +12,7 @@ interface MessageDTO {
 }
 
 interface TeamDTO {
+  logoUrl: string | null;
   player: { name: string } | null;
 }
 
@@ -50,6 +52,9 @@ function avatarColor(name: string): string {
 export default function ChatContent() {
   const [name, setName] = useState<string | null>(null);
   const [poolNames, setPoolNames] = useState<string[]>([]);
+  const [teamLogoByName, setTeamLogoByName] = useState<Map<string, string>>(
+    new Map()
+  );
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
@@ -72,6 +77,12 @@ export default function ChatContent() {
           .map((t) => t.player?.name)
           .filter((n): n is string => Boolean(n));
         setPoolNames(names);
+
+        const logos = new Map<string, string>();
+        for (const t of d.teams) {
+          if (t.player && t.logoUrl) logos.set(t.player.name, t.logoUrl);
+        }
+        setTeamLogoByName(logos);
       })
       .catch(() => {});
   }, []);
@@ -206,14 +217,26 @@ export default function ChatContent() {
         ) : (
           <div className="flex flex-col gap-3">
             {messages.map((m) => {
+              const logoUrl = teamLogoByName.get(m.authorName);
               return (
                 <div key={m.id} className="flex items-start gap-2.5">
-                  <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: avatarColor(m.authorName) }}
-                  >
-                    {m.authorName.charAt(0).toUpperCase()}
-                  </div>
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt=""
+                      width={32}
+                      height={32}
+                      unoptimized
+                      className="h-8 w-8 shrink-0 rounded-full bg-panel-2 object-contain p-0.5"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                      style={{ backgroundColor: avatarColor(m.authorName) }}
+                    >
+                      {m.authorName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="block w-full rounded-2xl bg-panel-2 px-3 py-2">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
