@@ -238,7 +238,7 @@ export default function ChatContent() {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="block w-full rounded-2xl bg-panel-2 px-3 py-2">
+                    <div className="block w-full rounded-2xl border border-line bg-panel-2 px-3 py-2">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
                         <span className="text-base font-bold text-chalk">
                           {m.authorName}
