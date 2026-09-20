@@ -215,12 +215,22 @@ export default function ChatContent() {
             No messages yet. Say hi.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {messages.map((m) => {
+          <div className="flex flex-col">
+            {messages.map((m, i) => {
               const logoUrl = teamLogoByName.get(m.authorName);
+              // Consecutive messages from the same sender collapse their
+              // repeated avatar/name into one tighter block instead of
+              // restating both every time — matches how iMessage/Slack
+              // group a burst of messages from one person.
+              const isGrouped = i > 0 && messages[i - 1].authorName === m.authorName;
               return (
-                <div key={m.id} className="flex items-start gap-2.5">
-                  {logoUrl ? (
+                <div
+                  key={m.id}
+                  className={`flex items-start gap-2.5 ${i === 0 ? "" : isGrouped ? "mt-1" : "mt-3"}`}
+                >
+                  {isGrouped ? (
+                    <div className="w-8 shrink-0" />
+                  ) : logoUrl ? (
                     <Image
                       src={logoUrl}
                       alt=""
@@ -238,11 +248,13 @@ export default function ChatContent() {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="block w-full rounded-2xl border border-line bg-panel px-3 py-2">
+                    <div className="block w-full rounded-2xl border border-line bg-panel px-3 py-2 shadow-sm">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
-                        <span className="text-base font-bold text-chalk">
-                          {m.authorName}
-                        </span>
+                        {!isGrouped && (
+                          <span className="text-base font-bold text-chalk">
+                            {m.authorName}
+                          </span>
+                        )}
                         <span className="text-sm text-chalk-faint">
                           {timeLabel(m.createdAt)}
                         </span>
