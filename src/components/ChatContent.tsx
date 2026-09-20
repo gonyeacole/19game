@@ -134,8 +134,8 @@ export default function ChatContent() {
   };
 
   return (
-    <div className="flex h-full flex-col px-4 py-2">
-      <div className="mb-2 flex shrink-0 items-center justify-between">
+    <div className="flex h-full flex-col py-2">
+      <div className="mb-2 flex shrink-0 items-center justify-between px-4">
         <h2 className="text-sm font-bold text-chalk">Messages</h2>
         {/*
           A native <select> rather than a custom dropdown — no text input
@@ -193,7 +193,7 @@ export default function ChatContent() {
 
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto rounded-xl border border-line bg-panel p-3"
+        className="flex-1 overflow-y-auto px-4 py-3"
       >
         {loading ? (
           <div className="py-10 text-center text-sm text-chalk-faint">
@@ -268,7 +268,7 @@ export default function ChatContent() {
       </div>
 
       {replyingTo && (
-        <div className="mt-2 flex shrink-0 items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-1.5">
+        <div className="mx-4 mt-2 flex shrink-0 items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 py-1.5">
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-led">
               Replying to {replyingTo.authorName}
@@ -302,7 +302,7 @@ export default function ChatContent() {
           send();
         }}
         autoComplete="off"
-        className="mt-2 flex shrink-0 items-center gap-2"
+        className="mt-2 flex shrink-0 items-center gap-2 px-4"
       >
         <input
           value={draft}
