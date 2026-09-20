@@ -296,11 +296,11 @@ export default function ChatContent() {
                       width={32}
                       height={32}
                       unoptimized
-                      className="h-8 w-8 shrink-0 rounded-full bg-panel-2 object-contain p-0.5"
+                      className="mt-[18px] h-8 w-8 shrink-0 rounded-full bg-panel-2 object-contain p-0.5"
                     />
                   ) : (
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                      className="mt-[18px] flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
                       style={{ backgroundColor: avatarColor(m.authorName) }}
                     >
                       {m.authorName.charAt(0).toUpperCase()}
