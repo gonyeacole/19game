@@ -400,7 +400,7 @@ export default function ChatContent() {
                               </svg>
                             </button>
                             {openPickerFor === m.id && (
-                              <div className="absolute bottom-full left-0 z-20 mb-1 flex gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
+                              <div className="absolute right-full top-1/2 z-20 mr-1 flex -translate-y-1/2 gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
                                 {REACTION_EMOJI.map((emoji) => (
                                   <button
                                     key={emoji}
