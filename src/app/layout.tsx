@@ -5,7 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import AnnouncementBell from "@/components/AnnouncementBell";
-import { ibmPlexSans, leagueGothic } from "@/lib/fonts";
+import { inter, leagueGothic } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -88,7 +88,7 @@ const SPLASH_INIT_SCRIPT = `
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`h-full antialiased ${ibmPlexSans.variable}`}>
+    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
