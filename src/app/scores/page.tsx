@@ -5,7 +5,7 @@ import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
-import { leagueGothic } from "@/lib/fonts";
+import { inter, leagueGothic } from "@/lib/fonts";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -126,8 +126,7 @@ function TickerSide({
           <div className="h-9 w-9 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${nameColor}`}
-          style={{ fontWeight: 700 }}
+          className={`${inter.className} block w-20 truncate text-center text-xs font-bold uppercase leading-none ${nameColor}`}
         >
           {team.name.split(" ").at(-1)}
         </span>
