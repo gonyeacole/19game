@@ -23,24 +23,10 @@ export async function ensureChatSchema() {
     `CREATE INDEX IF NOT EXISTS "Message_replyToId_idx" ON "Message"("replyToId")`
   );
 
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS "MessageReaction" (
-      "id" TEXT NOT NULL PRIMARY KEY,
-      "messageId" TEXT NOT NULL,
-      "authorName" TEXT NOT NULL,
-      "emoji" TEXT NOT NULL,
-      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE("messageId", "authorName", "emoji")
-    )
-  `);
-  await prisma.$executeRawUnsafe(
-    `CREATE INDEX IF NOT EXISTS "MessageReaction_messageId_idx" ON "MessageReaction"("messageId")`
-  );
-
   ensured = true;
 }
 
-const MISSING_SCHEMA = /no such column.*replyToId|no such table.*MessageReaction/i;
+const MISSING_SCHEMA = /no such column.*replyToId/i;
 
 // Runs `fn`; if it fails specifically because the reply schema isn't there
 // yet, ensures it and retries once. Any other error (bad input, a real DB

@@ -15,12 +15,13 @@ function isAdmin(req: NextRequest): boolean {
 // once (ALTER TABLE ADD COLUMN errors are swallowed when the column already
 // exists, since SQLite has no ADD COLUMN IF NOT EXISTS).
 //
-// The reaction feature this endpoint originally also set up a Reaction
-// table for has since been removed; any such table left over in production
-// from before is unused and harmless. Kept at its original path/name rather
-// than renamed, since /api/messages/route.ts already self-heals this same
-// column via withChatSchemaRetry — this manual endpoint is a redundant
-// fallback at this point, not load-bearing.
+// The reaction feature this endpoint originally also set up a table for
+// (first "Reaction", later "MessageReaction") has been added and removed
+// more than once; any such table left over in production from an earlier
+// round is unused and harmless. Kept at its original path/name rather than
+// renamed, since /api/messages/route.ts already self-heals this same column
+// via withChatSchemaRetry — this manual endpoint is a redundant fallback at
+// this point, not load-bearing.
 export async function GET(req: NextRequest) {
   if (!isAdmin(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

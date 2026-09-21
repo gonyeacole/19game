@@ -9,26 +9,6 @@ interface MessageDTO {
   body: string;
   createdAt: string;
   replyTo: { id: string; authorName: string; body: string } | null;
-  reactions: { authorName: string; emoji: string }[];
-}
-
-// Fixed set rather than a full emoji keyboard — a single tap beats a
-// searchable picker for a friend-group chat, and a consistent set renders
-// the same across everyone's devices.
-const REACTION_EMOJI = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
-
-function groupReactions(
-  reactions: { authorName: string; emoji: string }[],
-  myName: string | null
-): { emoji: string; count: number; mine: boolean }[] {
-  const byEmoji = new Map<string, { count: number; mine: boolean }>();
-  for (const r of reactions) {
-    const cur = byEmoji.get(r.emoji) ?? { count: 0, mine: false };
-    cur.count += 1;
-    if (r.authorName === myName) cur.mine = true;
-    byEmoji.set(r.emoji, cur);
-  }
-  return [...byEmoji.entries()].map(([emoji, v]) => ({ emoji, ...v }));
 }
 
 interface TeamDTO {
@@ -80,27 +60,8 @@ export default function ChatContent() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [replyingTo, setReplyingTo] = useState<MessageDTO | null>(null);
-  const [openPickerFor, setOpenPickerFor] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
-  const pickerRef = useRef<HTMLDivElement>(null);
-
-  // Closes the open reaction picker on an outside click. A ref-based check
-  // rather than a full-viewport backdrop overlay: the chat sheet wrapper
-  // (TabNav's draggable container) sets `will-change: transform` for the
-  // drag animation, which makes it the containing block for any
-  // `position: fixed` descendant — so a "fixed inset-0" backdrop nested in
-  // here only ever covers the sheet's own box, not the real viewport.
-  useEffect(() => {
-    if (!openPickerFor) return;
-    const handleClick = (e: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-        setOpenPickerFor(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [openPickerFor]);
 
   useEffect(() => {
     const stored = localStorage.getItem(NAME_KEY);
@@ -180,36 +141,6 @@ export default function ChatContent() {
       setDraft(text);
     } finally {
       setSending(false);
-    }
-  };
-
-  const toggleReaction = async (messageId: string, emoji: string) => {
-    if (!name) return;
-    setOpenPickerFor(null);
-    // Optimistic — flip it locally now, reconciled by the next poll either
-    // way, so a slow/failed request doesn't leave the tap feeling ignored.
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== messageId) return m;
-        const already = m.reactions.some(
-          (r) => r.authorName === name && r.emoji === emoji
-        );
-        const reactions = already
-          ? m.reactions.filter(
-              (r) => !(r.authorName === name && r.emoji === emoji)
-            )
-          : [...m.reactions, { authorName: name, emoji }];
-        return { ...m, reactions };
-      })
-    );
-    try {
-      await fetch(`/api/messages/${messageId}/reactions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authorName: name, emoji }),
-      });
-    } catch {
-      // Best-effort — next poll reconciles either way.
     }
   };
 
@@ -306,12 +237,8 @@ export default function ChatContent() {
                       {m.authorName.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div
-                    className={`min-w-0 flex-1 ${
-                      name || m.reactions.length > 0 ? "mb-3" : ""
-                    }`}
-                  >
-                    <div className="relative block w-full rounded-2xl border border-line bg-panel px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="block w-full rounded-2xl border border-line bg-panel px-3 py-2">
                       <div className="flex flex-wrap items-baseline gap-x-1.5">
                         <span className="text-base font-bold text-chalk">
                           {m.authorName}
@@ -354,67 +281,6 @@ export default function ChatContent() {
                       <p className="whitespace-pre-wrap break-words text-base text-chalk">
                         {m.body}
                       </p>
-
-                      <div className="absolute bottom-0 right-2 flex translate-y-1/2 items-center gap-1">
-                        {groupReactions(m.reactions, name).map((r) => (
-                          <button
-                            key={r.emoji}
-                            onClick={() => toggleReaction(m.id, r.emoji)}
-                            disabled={!name}
-                            className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs shadow-sm ${
-                              r.mine
-                                ? "border-led bg-led-bg text-led"
-                                : "border-line bg-panel-2 text-chalk-faint"
-                            }`}
-                          >
-                            <span>{r.emoji}</span>
-                            <span>{r.count}</span>
-                          </button>
-                        ))}
-                        {name && (
-                          <div
-                            className="relative"
-                            ref={openPickerFor === m.id ? pickerRef : undefined}
-                          >
-                            <button
-                              onClick={() =>
-                                setOpenPickerFor((cur) =>
-                                  cur === m.id ? null : m.id
-                                )
-                              }
-                              aria-label="Add reaction"
-                              className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-panel-2 text-chalk-faint shadow-sm"
-                            >
-                              <svg
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.6"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="h-3.5 w-3.5"
-                              >
-                                <circle cx="10" cy="10" r="7.5" />
-                                <path d="M7 11.5c.7 1 1.7 1.5 3 1.5s2.3-.5 3-1.5" />
-                                <path d="M7.5 8h.01M12.5 8h.01" />
-                              </svg>
-                            </button>
-                            {openPickerFor === m.id && (
-                              <div className="absolute right-full top-1/2 z-20 mr-1 flex -translate-y-1/2 gap-1 rounded-full border border-line bg-panel px-2 py-1 shadow-lg">
-                                {REACTION_EMOJI.map((emoji) => (
-                                  <button
-                                    key={emoji}
-                                    onClick={() => toggleReaction(m.id, emoji)}
-                                    className="text-base leading-none"
-                                  >
-                                    {emoji}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </div>
                 </div>
