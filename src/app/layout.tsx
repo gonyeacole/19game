@@ -5,7 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import AnnouncementBell from "@/components/AnnouncementBell";
-import { inter, leagueGothic } from "@/lib/fonts";
+import { inter } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -101,8 +101,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ThemeToggle />
           </div>
           <span
-            className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
-            style={{ fontWeight: 700 }}
+            className={`${inter.className} justify-self-center text-3xl font-bold leading-none tracking-wide text-led`}
           >
             19League
           </span>
