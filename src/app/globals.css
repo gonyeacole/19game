@@ -28,7 +28,7 @@
   --color-search-bg: #1d1d1d;
   --color-pill-text: #08150e;
   --color-icon: #727270;
-  --font-sans: var(--font-plex), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 /* Light theme — same token names, overridden when the toggle picks it. */
