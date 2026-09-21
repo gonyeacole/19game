@@ -86,6 +86,48 @@ function cardHighlight(
   return a ?? b;
 }
 
+// Fixed positions/tilts/timings rather than randomized on each render —
+// keeps the scatter looking deliberate instead of reshuffling every time
+// React re-renders the card (e.g. on each score poll).
+const CONFETTI_19S = [
+  { left: "6%", top: "12%", tilt: -14, delay: "0s", duration: "5.5s" },
+  { left: "20%", top: "72%", tilt: 12, delay: "0.8s", duration: "6.2s" },
+  { left: "36%", top: "8%", tilt: 8, delay: "1.6s", duration: "5s" },
+  { left: "52%", top: "60%", tilt: -18, delay: "0.3s", duration: "6.8s" },
+  { left: "66%", top: "18%", tilt: 16, delay: "1.1s", duration: "5.8s" },
+  { left: "80%", top: "75%", tilt: -9, delay: "2s", duration: "6s" },
+  { left: "10%", top: "88%", tilt: 20, delay: "0.5s", duration: "5.3s" },
+  { left: "90%", top: "38%", tilt: -15, delay: "1.4s", duration: "6.5s" },
+  { left: "44%", top: "88%", tilt: 5, delay: "1.9s", duration: "5.6s" },
+  { left: "28%", top: "42%", tilt: -6, delay: "0.9s", duration: "6.3s" },
+] as const;
+
+// Decorative background for a card whose game just hit 19 — a scatter of
+// faint, slowly bobbing green "19"s behind the score. Purely cosmetic
+// (aria-hidden, no pointer events), so it never competes with the actual
+// score/team content painted on top of it in DOM order.
+function Confetti19() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {CONFETTI_19S.map((c, i) => (
+        <span
+          key={i}
+          className="animate-confetti-19 absolute text-base font-extrabold text-win"
+          style={{
+            left: c.left,
+            top: c.top,
+            animationDelay: c.delay,
+            animationDuration: c.duration,
+            ["--tilt" as string]: `${c.tilt}deg`,
+          }}
+        >
+          19
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function PossessionTriangle({ side }: { side: "left" | "right" }) {
   return (
     <span
@@ -219,7 +261,10 @@ function GameCard({ game }: { game: GameDTO }) {
   const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
 
   return (
-    <div className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor}`}>
+    <div
+      className={`relative flex items-center gap-4 overflow-hidden rounded-xl border bg-panel p-3 ${borderColor}`}
+    >
+      {highlight === "win" && <Confetti19 />}
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}

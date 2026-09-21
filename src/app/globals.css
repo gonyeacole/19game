@@ -164,3 +164,27 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
+/*
+  Background "19" confetti for a final score card that hit the winning
+  number (ScoresPage's GameCard). Each span keeps its own tilt in --tilt
+  rather than a plain inline `transform`, since the keyframe below also
+  animates `transform` — an animated property always wins over a static
+  inline value for the same property, so baking the per-item rotation into
+  the keyframe via a variable is what keeps each piece of confetti at its
+  own angle instead of every one snapping to the same rotation.
+*/
+@keyframes confetti-19 {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(6px) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    opacity: 0.35;
+    transform: translateY(-6px) rotate(var(--tilt, 0deg));
+  }
+}
+.animate-confetti-19 {
+  animation: confetti-19 6s ease-in-out infinite;
+}
+
