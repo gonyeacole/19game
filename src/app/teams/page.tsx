@@ -87,11 +87,27 @@ function TeamRow({ team }: { team: TeamDTO }) {
             {team.player ? team.player.name : "Unassigned"}
           </div>
         </div>
-        <span className="shrink-0 text-icon">{expanded ? "▲" : "▼"}</span>
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`h-4 w-4 shrink-0 text-icon transition-transform duration-200 ${
+            expanded ? "rotate-180" : ""
+          }`}
+        >
+          <path d="M5 8l5 5 5-5" />
+        </svg>
       </button>
 
-      {expanded && (
-        <div className="mt-3 border-t border-line pt-2">
+      <div
+        className={`grid overflow-hidden transition-all duration-200 ease-out ${
+          expanded ? "mt-3 max-h-[640px] opacity-100" : "mt-0 max-h-0 opacity-0"
+        }`}
+      >
+        <div className="border-t border-line pt-2">
           {loading ? (
             <div className="flex items-center justify-center gap-1.5 py-4">
               <span
@@ -131,7 +147,7 @@ function TeamRow({ team }: { team: TeamDTO }) {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
