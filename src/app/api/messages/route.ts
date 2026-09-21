@@ -15,7 +15,6 @@ export async function GET() {
       take: 100,
       include: {
         replyTo: { select: { id: true, authorName: true, body: true } },
-        reactions: { select: { authorName: true, emoji: true } },
       },
     })
   );
@@ -46,7 +45,6 @@ export async function POST(req: NextRequest) {
       data: { authorName: name, body: text, replyToId: replyToId ?? null },
       include: {
         replyTo: { select: { id: true, authorName: true, body: true } },
-        reactions: { select: { authorName: true, emoji: true } },
       },
     })
   );
