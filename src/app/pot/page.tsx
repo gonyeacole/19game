@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { POT_VENMO_USERNAME } from "@/lib/pool";
 import Skeleton from "@/components/Skeleton";
 import { leagueGothic } from "@/lib/fonts";
 
 interface WinnerDTO {
   player: { id: string; name: string };
-  team: { id: string; name: string; abbreviation: string };
+  team: { id: string; name: string; abbreviation: string; logoUrl: string | null };
 }
 
 interface PaymentRowDTO {
@@ -86,8 +87,20 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
             {week.winners.map((w) => (
               <span
                 key={w.player.id + w.team.id}
-                className="inline-flex items-center gap-1 rounded-full bg-win-bg px-2.5 py-1 text-xs font-semibold text-win"
+                className="inline-flex items-center gap-1.5 rounded-full bg-win-bg py-1 pl-1 pr-2.5 text-xs font-semibold text-win"
               >
+                {w.team.logoUrl ? (
+                  <Image
+                    src={w.team.logoUrl}
+                    alt=""
+                    width={16}
+                    height={16}
+                    unoptimized
+                    className="h-4 w-4 shrink-0 rounded-full bg-panel object-contain p-0.5"
+                  />
+                ) : (
+                  <span className="h-4 w-4 shrink-0 rounded-full bg-panel-3" />
+                )}
                 {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
               </span>
             ))}
@@ -101,13 +114,30 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
 
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="mt-2 text-xs font-medium text-placeholder underline underline-offset-2"
+        className="mt-2 flex items-center gap-1 text-xs font-medium text-placeholder"
       >
-        {expanded ? "Hide" : "Show"} payment status
+        Payment status
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`h-3 w-3 transition-transform duration-200 ${
+            expanded ? "rotate-180" : ""
+          }`}
+        >
+          <path d="M5 8l5 5 5-5" />
+        </svg>
       </button>
 
-      {expanded && (
-        <div className="mt-2 border-t border-line pt-2 text-xs">
+      <div
+        className={`grid overflow-hidden text-xs transition-all duration-200 ease-out ${
+          expanded ? "mt-2 max-h-32 opacity-100" : "mt-0 max-h-0 opacity-0"
+        }`}
+      >
+        <div className="max-h-32 overflow-y-auto border-t border-line pt-2">
           {week.payments.length === 0 ? (
             <div className="text-chalk-faint">No payments tracked yet</div>
           ) : unpaid.length === 0 ? (
@@ -119,7 +149,7 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
