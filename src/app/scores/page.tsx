@@ -86,44 +86,43 @@ function cardHighlight(
   return a ?? b;
 }
 
-// Fixed columns/tilts/timings rather than randomized on each render — keeps
-// the scatter looking deliberate instead of reshuffling every time React
-// re-renders the card (e.g. on each score poll). Only `left` (which column
-// a piece falls down) is set here — the fall itself (`top`, 0% to 100%) is
-// entirely animation-driven, so there's no starting `top` to pick.
-const CONFETTI_19S = [
-  { left: "6%", tilt: -14, delay: "0s", duration: "4s" },
-  { left: "20%", tilt: 12, delay: "0.9s", duration: "4.6s" },
-  { left: "36%", tilt: 8, delay: "1.8s", duration: "3.8s" },
-  { left: "52%", tilt: -18, delay: "0.4s", duration: "5s" },
-  { left: "66%", tilt: 16, delay: "1.3s", duration: "4.3s" },
-  { left: "80%", tilt: -9, delay: "2.2s", duration: "4.4s" },
-  { left: "10%", tilt: 20, delay: "0.6s", duration: "3.9s" },
-  { left: "90%", tilt: -15, delay: "1.6s", duration: "4.8s" },
-  { left: "44%", tilt: 5, delay: "2.5s", duration: "4.1s" },
-  { left: "28%", tilt: -6, delay: "1s", duration: "4.7s" },
+// Each spark's direction is expressed as `rotate(angle) translateY(--dist)`
+// — translateY moves it outward in the element's own (unrotated) coordinate
+// space first, and rotate then swings that whole outward path to point the
+// right way, which is the standard CSS trick for radiating particles from a
+// point. 0deg points straight up, so the left cluster's angles sit around
+// -90deg (left) and the right cluster mirrors them around +90deg (right).
+const LEFT_SPARKS = [
+  { angle: -100, dist: "-22px", delay: "0s", duration: "1.3s" },
+  { angle: -85, dist: "-30px", delay: "0.25s", duration: "1.5s" },
+  { angle: -70, dist: "-25px", delay: "0.5s", duration: "1.4s" },
+  { angle: -110, dist: "-19px", delay: "0.75s", duration: "1.6s" },
+  { angle: -95, dist: "-27px", delay: "0.1s", duration: "1.2s" },
 ] as const;
+const RIGHT_SPARKS = LEFT_SPARKS.map((s) => ({ ...s, angle: -s.angle }));
 
-// Decorative background for a card whose game just hit 19 — a scatter of
-// faint green "19"s continuously falling through the card like confetti.
-// Purely cosmetic (aria-hidden, no pointer events), so it never competes
-// with the actual score/team content painted on top of it in DOM order.
-function Confetti19() {
+// Decorative bursts of green sparks flanking a card whose game just hit 19
+// — like a sparkler firework at each side of the score. Purely cosmetic
+// (aria-hidden, no pointer events), so it never competes with the actual
+// score/team content painted on top of it in DOM order.
+function Sparkler({ side }: { side: "left" | "right" }) {
+  const sparks = side === "left" ? LEFT_SPARKS : RIGHT_SPARKS;
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {CONFETTI_19S.map((c, i) => (
+    <div
+      className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 ${side === "left" ? "left-3" : "right-3"}`}
+      aria-hidden="true"
+    >
+      {sparks.map((s, i) => (
         <span
           key={i}
-          className="animate-confetti-19 absolute text-base font-extrabold text-win"
+          className="animate-spark absolute left-0 top-0 h-3.5 w-1 rounded-full bg-win shadow-[0_0_4px_var(--color-win)]"
           style={{
-            left: c.left,
-            animationDelay: c.delay,
-            animationDuration: c.duration,
-            ["--tilt" as string]: `${c.tilt}deg`,
+            animationDelay: s.delay,
+            animationDuration: s.duration,
+            ["--angle" as string]: `${s.angle}deg`,
+            ["--dist" as string]: s.dist,
           }}
-        >
-          19
-        </span>
+        />
       ))}
     </div>
   );
@@ -265,7 +264,12 @@ function GameCard({ game }: { game: GameDTO }) {
     <div
       className={`relative flex items-center gap-4 overflow-hidden rounded-xl border bg-panel p-3 ${borderColor}`}
     >
-      {highlight === "win" && <Confetti19 />}
+      {highlight === "win" && (
+        <>
+          <Sparkler side="left" />
+          <Sparkler side="right" />
+        </>
+      )}
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
