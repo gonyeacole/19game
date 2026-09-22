@@ -119,9 +119,13 @@ function TickerSide({
   // A confirmed final win goes a step further than the live "hit-live"
   // case (still just colored text) — the owner pill itself fills solid
   // green, since the game is actually over and this is the real result.
+  // text-pill-text (not text-white) since --color-win is light enough in
+  // dark mode that white text fails contrast against it — pill-text
+  // already flips to near-black there for exactly this kind of bright-
+  // accent-background badge (see the Pay button on the Pot tab).
   const ownerPillClass =
     highlight === "win"
-      ? "bg-win text-white"
+      ? "bg-win text-pill-text"
       : `bg-panel-3 ${hitNineteen ? nameColor : "text-chalk-faint"}`;
 
   return (
