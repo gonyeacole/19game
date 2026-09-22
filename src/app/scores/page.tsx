@@ -110,10 +110,20 @@ function TickerSide({
   reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
-  // Highlights (win/hit-19, watch 12/16) only call out the score — the
-  // team name always stays its normal color.
   const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  const nameColor = "text-chalk";
+  // The team name and owner pill pick up the score's own color too, but
+  // only for actually being at 19 (win/hit-live) — not the "watch" 12/16
+  // scores, which just nudge the score number itself, not the whole row.
+  const hitNineteen = highlight === "win" || highlight === "hit-live";
+  const nameColor = hitNineteen ? scoreColor : "text-chalk";
+  // A confirmed final win goes a step further than the live "hit-live"
+  // case (still just colored text) — the owner pill matches the winner
+  // badge style on the Pot tab (bg-win-bg + text-win), since the game is
+  // actually over and this is the same "you won" result shown there.
+  const ownerPillClass =
+    highlight === "win"
+      ? "bg-win-bg text-win"
+      : `bg-panel-3 ${hitNineteen ? nameColor : "text-chalk-faint"}`;
 
   return (
     <div
@@ -131,7 +141,9 @@ function TickerSide({
         >
           {team.name.split(" ").at(-1)}
         </span>
-        <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
+        <span
+          className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
+        >
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
@@ -219,7 +231,11 @@ function GameCard({ game }: { game: GameDTO }) {
   const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
 
   return (
-    <div className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor}`}>
+    <div
+      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor} ${
+        highlight === "win" ? "animate-win-glow" : ""
+      }`}
+    >
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}

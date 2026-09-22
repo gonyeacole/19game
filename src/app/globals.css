@@ -164,3 +164,21 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
+/*
+  Ongoing celebration for a final score card that hit the winning number
+  (ScoresPage's GameCard): the green border keeps gently pulsing with a
+  glow for as long as the card is mounted in this "win" state.
+*/
+@keyframes win-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 18px 3px color-mix(in srgb, var(--color-win) 55%, transparent);
+  }
+}
+.animate-win-glow {
+  animation: win-glow-pulse 1.8s ease-in-out infinite;
+}
+
