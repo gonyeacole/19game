@@ -101,7 +101,7 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
                 ) : (
                   <span className="h-4 w-4 shrink-0 rounded-full bg-panel-3" />
                 )}
-                {w.player.name} ({w.team.abbreviation}) won {money(week.payoutPerWinner)}
+                {w.player.name} won {money(week.payoutPerWinner)}
               </span>
             ))}
           </div>

@@ -116,6 +116,13 @@ function TickerSide({
   // scores, which just nudge the score number itself, not the whole row.
   const hitNineteen = highlight === "win" || highlight === "hit-live";
   const nameColor = hitNineteen ? scoreColor : "text-chalk";
+  // A confirmed final win goes a step further than the live "hit-live"
+  // case (still just colored text) — the owner pill itself fills solid
+  // green, since the game is actually over and this is the real result.
+  const ownerPillClass =
+    highlight === "win"
+      ? "bg-win text-white"
+      : `bg-panel-3 ${hitNineteen ? nameColor : "text-chalk-faint"}`;
 
   return (
     <div
@@ -134,9 +141,7 @@ function TickerSide({
           {team.name.split(" ").at(-1)}
         </span>
         <span
-          className={`mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none ${
-            hitNineteen ? nameColor : "text-chalk-faint"
-          }`}
+          className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
         >
           {team.player ? team.player.name : "Unassigned"}
         </span>
