@@ -92,16 +92,24 @@ function cardHighlight(
 // a piece falls down) is set here — the fall itself (`top`, 0% to 100%) is
 // entirely animation-driven, so there's no starting `top` to pick.
 const CONFETTI_DOLLARS = [
-  { left: "6%", tilt: -14, delay: "0s", duration: "4s" },
+  { left: "3%", tilt: -14, delay: "0s", duration: "4s" },
+  { left: "12%", tilt: 20, delay: "0.6s", duration: "3.9s" },
   { left: "20%", tilt: 12, delay: "0.9s", duration: "4.6s" },
-  { left: "36%", tilt: 8, delay: "1.8s", duration: "3.8s" },
-  { left: "52%", tilt: -18, delay: "0.4s", duration: "5s" },
-  { left: "66%", tilt: 16, delay: "1.3s", duration: "4.3s" },
-  { left: "80%", tilt: -9, delay: "2.2s", duration: "4.4s" },
-  { left: "10%", tilt: 20, delay: "0.6s", duration: "3.9s" },
-  { left: "90%", tilt: -15, delay: "1.6s", duration: "4.8s" },
-  { left: "44%", tilt: 5, delay: "2.5s", duration: "4.1s" },
   { left: "28%", tilt: -6, delay: "1s", duration: "4.7s" },
+  { left: "36%", tilt: 8, delay: "1.8s", duration: "3.8s" },
+  { left: "44%", tilt: 5, delay: "2.5s", duration: "4.1s" },
+  { left: "52%", tilt: -18, delay: "0.4s", duration: "5s" },
+  { left: "60%", tilt: 14, delay: "3s", duration: "3.7s" },
+  { left: "66%", tilt: 16, delay: "1.3s", duration: "4.3s" },
+  { left: "74%", tilt: -11, delay: "2.8s", duration: "4.9s" },
+  { left: "80%", tilt: -9, delay: "2.2s", duration: "4.4s" },
+  { left: "86%", tilt: 18, delay: "0.2s", duration: "4.2s" },
+  { left: "90%", tilt: -15, delay: "1.6s", duration: "4.8s" },
+  { left: "96%", tilt: 10, delay: "1.1s", duration: "3.6s" },
+  { left: "8%", tilt: -20, delay: "2s", duration: "5.2s" },
+  { left: "48%", tilt: 22, delay: "1.5s", duration: "4s" },
+  { left: "70%", tilt: -13, delay: "0.7s", duration: "4.5s" },
+  { left: "94%", tilt: 7, delay: "2.6s", duration: "3.9s" },
 ] as const;
 
 // Decorative background for a card whose game just hit 19 — a scatter of
