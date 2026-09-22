@@ -45,7 +45,13 @@ export function getDefaultSeasonAndWeek(now: Date = new Date()): {
   const kickoff = regularSeasonKickoff(seasonYear);
 
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const diff = now.getTime() - kickoff.getTime();
+  const msPerDay = 24 * 60 * 60 * 1000;
+  // A week's games run kickoff (Thu) through Monday Night Football — so
+  // the "current week" conventionally flips over on Tuesday, the day after
+  // MNF wraps, not on the following Thursday when the next slate actually
+  // kicks off. Shift the boundary two days earlier than a flat 7-day timer
+  // from kickoff would put it, so Tue/Wed already count as the next week.
+  const diff = now.getTime() - kickoff.getTime() + 2 * msPerDay;
   const week = diff < 0 ? 1 : Math.floor(diff / msPerWeek) + 1;
 
   return { seasonYear, week: Math.min(Math.max(week, 1), 18) };
