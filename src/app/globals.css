@@ -167,11 +167,7 @@ html[data-standalone="true"] .chat-viewport {
 /*
   Ongoing celebration for a final score card that hit the winning number
   (ScoresPage's GameCard): the green border keeps gently pulsing with a
-  glow, and a light diagonal shine keeps sweeping across the card. Both
-  loop for as long as the card is mounted in this "win" state — the shine's
-  keyframe holds it off-screen for the back half of each cycle (instead of
-  sweeping the entire time) so it reads as a periodic flash rather than a
-  constant streak.
+  glow for as long as the card is mounted in this "win" state.
 */
 @keyframes win-glow-pulse {
   0%,
@@ -184,20 +180,5 @@ html[data-standalone="true"] .chat-viewport {
 }
 .animate-win-glow {
   animation: win-glow-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes win-shine-sweep {
-  0% {
-    transform: translateX(-120%) skewX(-20deg);
-  }
-  35% {
-    transform: translateX(380%) skewX(-20deg);
-  }
-  100% {
-    transform: translateX(380%) skewX(-20deg);
-  }
-}
-.animate-win-shine {
-  animation: win-shine-sweep 3s ease-out infinite;
 }
 

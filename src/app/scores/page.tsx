@@ -110,10 +110,10 @@ function TickerSide({
   reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
-  // Highlights (win/hit-19, watch 12/16) only call out the score — the
-  // team name always stays its normal color.
+  // The team name and owner pill match the score's own highlight color
+  // (e.g. green for a final 19), instead of always staying neutral.
   const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  const nameColor = "text-chalk";
+  const nameColor = scoreColor;
 
   return (
     <div
@@ -131,7 +131,11 @@ function TickerSide({
         >
           {team.name.split(" ").at(-1)}
         </span>
-        <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
+        <span
+          className={`mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none ${
+            highlight ? nameColor : "text-chalk-faint"
+          }`}
+        >
           {team.player ? team.player.name : "Unassigned"}
         </span>
       </div>
@@ -220,16 +224,10 @@ function GameCard({ game }: { game: GameDTO }) {
 
   return (
     <div
-      className={`relative flex items-center gap-4 overflow-hidden rounded-xl border bg-panel p-3 ${borderColor} ${
+      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor} ${
         highlight === "win" ? "animate-win-glow" : ""
       }`}
     >
-      {highlight === "win" && (
-        <div
-          className="animate-win-shine pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-          aria-hidden="true"
-        />
-      )}
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
