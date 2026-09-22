@@ -165,13 +165,13 @@ html[data-standalone="true"] .chat-viewport {
 }
 
 /*
-  Celebration for a final score card that hit the winning number
-  (ScoresPage's GameCard): the green border pulses with a glow a couple
-  times, and a light diagonal shine sweeps across the card once. Both are
-  plain (non-infinite) animations, so — like the message-in animation
-  elsewhere in this app — they play once when the card's DOM node is first
-  inserted and never replay on a later re-render (e.g. a score poll tick)
-  as long as the card keeps the same React key.
+  Ongoing celebration for a final score card that hit the winning number
+  (ScoresPage's GameCard): the green border keeps gently pulsing with a
+  glow, and a light diagonal shine keeps sweeping across the card. Both
+  loop for as long as the card is mounted in this "win" state — the shine's
+  keyframe holds it off-screen for the back half of each cycle (instead of
+  sweeping the entire time) so it reads as a periodic flash rather than a
+  constant streak.
 */
 @keyframes win-glow-pulse {
   0%,
@@ -183,18 +183,21 @@ html[data-standalone="true"] .chat-viewport {
   }
 }
 .animate-win-glow {
-  animation: win-glow-pulse 1s ease-in-out 2;
+  animation: win-glow-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes win-shine-sweep {
   0% {
     transform: translateX(-120%) skewX(-20deg);
   }
+  35% {
+    transform: translateX(380%) skewX(-20deg);
+  }
   100% {
     transform: translateX(380%) skewX(-20deg);
   }
 }
 .animate-win-shine {
-  animation: win-shine-sweep 1.3s ease-out 1;
+  animation: win-shine-sweep 3s ease-out infinite;
 }
 
