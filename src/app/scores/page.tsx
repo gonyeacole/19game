@@ -110,10 +110,12 @@ function TickerSide({
   reverse?: boolean;
 }) {
   const highlight = rowHighlight(score, status);
-  // The team name and owner pill match the score's own highlight color
-  // (e.g. green for a final 19), instead of always staying neutral.
   const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  const nameColor = scoreColor;
+  // The team name and owner pill pick up the score's own color too, but
+  // only for actually being at 19 (win/hit-live) — not the "watch" 12/16
+  // scores, which just nudge the score number itself, not the whole row.
+  const hitNineteen = highlight === "win" || highlight === "hit-live";
+  const nameColor = hitNineteen ? scoreColor : "text-chalk";
 
   return (
     <div
@@ -133,7 +135,7 @@ function TickerSide({
         </span>
         <span
           className={`mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none ${
-            highlight ? nameColor : "text-chalk-faint"
+            hitNineteen ? nameColor : "text-chalk-faint"
           }`}
         >
           {team.player ? team.player.name : "Unassigned"}
