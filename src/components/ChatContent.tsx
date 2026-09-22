@@ -19,11 +19,26 @@ interface TeamDTO {
 const NAME_KEY = "chatDisplayName";
 const POLL_MS = 6_000;
 
+// Relative instead of a clock time — "now" for under a minute, then a
+// climbing count through minutes/hours/days/weeks/months. Recomputes on
+// every render, so it naturally advances as the chat polls for new
+// messages (see POLL_MS below) without any timer of its own.
 function timeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"}`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+
+  const months = Math.floor(days / 30.44);
+  return `${months} month${months === 1 ? "" : "s"} ago`;
 }
 
 // A stable, deliberately dark-ish palette (rather than a raw HSL-from-
