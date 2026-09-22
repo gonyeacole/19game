@@ -115,10 +115,17 @@ export interface SeasonSummary {
 /**
  * Total Collected/Paid Out are full-season figures — every week counts,
  * regardless of whether it's been reached yet. Current Pot is different:
- * it only counts weeks through the current one (the first week that isn't
- * complete yet, inclusive). Admin can mark a future week's payments paid
- * ahead of time (nothing stops them), but that money shouldn't show up in
- * the live pot until the season actually reaches that week.
+ * it only counts weeks through the current one (the first week that's
+ * neither complete nor already resolved by a confirmed winner, inclusive).
+ * Admin can mark a future week's payments paid ahead of time (nothing stops
+ * them), but that money shouldn't show up in the live pot until the season
+ * actually reaches that week.
+ *
+ * A week counts as resolved even if `complete` (derived from synced game
+ * data) is still false — score sync can lag behind a real-world win (e.g.
+ * the free API tier's daily throttle), but once the admin has confirmed a
+ * winner that week is definitively settled and shouldn't block later
+ * weeks' collections from showing up.
  */
 export function computeSeasonSummary(weeks: WeekPotSummary[]): SeasonSummary {
   const totalCollected = weeks.reduce((sum, w) => sum + w.collected, 0);
@@ -129,7 +136,8 @@ export function computeSeasonSummary(weeks: WeekPotSummary[]): SeasonSummary {
   for (const week of weeks) {
     currentPotCollected += week.collected;
     currentPotPaidOut += week.paidOut;
-    if (!week.complete) break;
+    const resolved = week.complete || week.winners.length > 0;
+    if (!resolved) break;
   }
 
   return {
