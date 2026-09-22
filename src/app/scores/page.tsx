@@ -86,6 +86,49 @@ function cardHighlight(
   return a ?? b;
 }
 
+// Fixed columns/tilts/timings rather than randomized on each render — keeps
+// the scatter looking deliberate instead of reshuffling every time React
+// re-renders the card (e.g. on each score poll). Only `left` (which column
+// a piece falls down) is set here — the fall itself (`top`, 0% to 100%) is
+// entirely animation-driven, so there's no starting `top` to pick.
+const CONFETTI_DOLLARS = [
+  { left: "6%", tilt: -14, delay: "0s", duration: "4s" },
+  { left: "20%", tilt: 12, delay: "0.9s", duration: "4.6s" },
+  { left: "36%", tilt: 8, delay: "1.8s", duration: "3.8s" },
+  { left: "52%", tilt: -18, delay: "0.4s", duration: "5s" },
+  { left: "66%", tilt: 16, delay: "1.3s", duration: "4.3s" },
+  { left: "80%", tilt: -9, delay: "2.2s", duration: "4.4s" },
+  { left: "10%", tilt: 20, delay: "0.6s", duration: "3.9s" },
+  { left: "90%", tilt: -15, delay: "1.6s", duration: "4.8s" },
+  { left: "44%", tilt: 5, delay: "2.5s", duration: "4.1s" },
+  { left: "28%", tilt: -6, delay: "1s", duration: "4.7s" },
+] as const;
+
+// Decorative background for a card whose game just hit 19 — a scatter of
+// faint green "$" continuously falling through the card like confetti.
+// Purely cosmetic (aria-hidden, no pointer events), so it never competes
+// with the actual score/team content painted on top of it in DOM order.
+function DollarConfetti() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {CONFETTI_DOLLARS.map((c, i) => (
+        <span
+          key={i}
+          className="animate-confetti-19 absolute text-base font-extrabold text-win"
+          style={{
+            left: c.left,
+            animationDelay: c.delay,
+            animationDuration: c.duration,
+            ["--tilt" as string]: `${c.tilt}deg`,
+          }}
+        >
+          $
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function PossessionTriangle({ side }: { side: "left" | "right" }) {
   return (
     <span
@@ -219,7 +262,10 @@ function GameCard({ game }: { game: GameDTO }) {
   const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
 
   return (
-    <div className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor}`}>
+    <div
+      className={`relative flex items-center gap-4 overflow-hidden rounded-xl border bg-panel p-3 ${borderColor}`}
+    >
+      {highlight === "win" && <DollarConfetti />}
       <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}

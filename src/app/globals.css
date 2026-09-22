@@ -164,3 +164,45 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
+/*
+  Background "$" confetti for a final score card that hit the winning
+  number (ScoresPage's GameCard). Each piece falls straight down its own
+  fixed `left` column (set inline, untouched by this animation) from just
+  above the card to just below it, looping forever with a per-item
+  animation-delay so they don't all fall in lockstep. `top` (not
+  `transform: translateY`) carries the fall — its percentages resolve
+  against the confetti layer's own height (it fills the card via
+  `inset-0`), where a `transform` percentage would instead resolve against
+  each tiny "$" span's own near-zero height and barely move it. Rotation
+  and a little sideways sway ride on `transform` in the same keyframe,
+  cheap for the handful of pieces here; `--tilt` (not a plain inline
+  `transform`) holds each one's own angle since an animated property always
+  overrides a static inline value for that same property, so folding the
+  per-item rotation into the keyframe via a variable is what keeps every
+  piece at its own angle instead of them all snapping to one rotation.
+*/
+@keyframes confetti-19 {
+  0% {
+    top: -12%;
+    opacity: 0;
+    transform: translateX(0) rotate(var(--tilt, 0deg));
+  }
+  10% {
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(6px) rotate(calc(var(--tilt, 0deg) + 30deg));
+  }
+  85% {
+    opacity: 0.35;
+  }
+  100% {
+    top: 112%;
+    opacity: 0;
+    transform: translateX(-5px) rotate(calc(var(--tilt, 0deg) + 60deg));
+  }
+}
+.animate-confetti-19 {
+  animation: confetti-19 4.5s linear infinite;
+}
+
