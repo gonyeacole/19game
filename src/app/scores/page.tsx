@@ -101,13 +101,13 @@ function TeamChip({
 }) {
   const ring = highlight ? RING_COLOR[highlight] : "";
   const logo = team.logoUrl ? (
-    <Image src={team.logoUrl} alt="" width={24} height={24} unoptimized />
+    <Image src={team.logoUrl} alt="" width={38} height={38} unoptimized />
   ) : (
-    <div className="h-6 w-6 shrink-0 rounded-full bg-white/25" />
+    <div className="h-9 w-9 shrink-0 rounded-full bg-white/25" />
   );
   const scoreEl = showScore && (
     <span
-      className={`${leagueGothic.className} text-[22px] leading-none tabular-nums text-white`}
+      className={`${leagueGothic.className} text-[30px] leading-none tabular-nums text-white`}
       style={{ fontWeight: 700 }}
     >
       {score}
@@ -116,7 +116,7 @@ function TeamChip({
 
   return (
     <div
-      className={`flex min-w-[64px] shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2 ${ring} ${
+      className={`flex min-w-[92px] shrink-0 items-center justify-center gap-2.5 rounded-lg px-4 py-3 ${ring} ${
         highlight === "win" ? "animate-win-glow" : ""
       }`}
       style={{ backgroundColor: teamColor(team.abbreviation) }}
@@ -210,9 +210,9 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
 // count was right.
 function SkeletonChip() {
   return (
-    <div className="flex min-w-[64px] shrink-0 items-center justify-center gap-2 rounded-lg bg-panel-3 px-3 py-2">
-      <div className="h-6 w-6 animate-pulse rounded-full bg-chalk-faint/30" />
-      <div className="h-5 w-5 animate-pulse rounded bg-chalk-faint/30" />
+    <div className="flex min-w-[92px] shrink-0 items-center justify-center gap-2.5 rounded-lg bg-panel-3 px-4 py-3">
+      <div className="h-9 w-9 animate-pulse rounded-full bg-chalk-faint/30" />
+      <div className="h-7 w-7 animate-pulse rounded bg-chalk-faint/30" />
     </div>
   );
 }
