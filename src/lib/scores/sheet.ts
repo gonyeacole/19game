@@ -10,11 +10,17 @@ import type {
 // We read its published CSV export directly (no API key) — Google's own
 // servers do the actual scraping, which sidesteps the bot-filtering that
 // blocks server-originated requests straight to ESPN (see espn.ts).
-const SHEET_ID = "13I01yScA6Hg-lind-KX7ZAykk38eiSYVJxj4YZ2Afro";
+//
+// This is our own independent copy of the original template (a separate
+// Google account so its own refresh trigger draws from its own daily
+// UrlFetchApp quota) — swap this if that copy's quota ever runs dry and a
+// fresher copy takes over.
+const SHEET_ID = "1jXPHR9cN3CBlZg4MJjceqYx7USz4YfjQMF5xG5ENaPs";
 // This is the sheet's raw unfiltered data tab (all 18 weeks, ~330+ rows) —
 // not the "Week Filter" tab, which only shows whichever single week a
 // dropdown cell is currently set to (shared state we can't control per
-// request).
+// request). Google Sheets preserves each tab's gid across "Make a copy",
+// so this is unchanged from the original template.
 const SHEET_GID = "1227961915";
 const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
