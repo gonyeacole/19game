@@ -63,98 +63,113 @@ function rowHighlight(score: number, status: GameDTO["status"]): "win" | "hit-li
   return null;
 }
 
-const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
-  win: "text-win",
-  "hit-live": "text-led",
-  watch: "text-live",
+// A glowing ring around whichever team chip actually hit the highlight —
+// win reuses the same box-shadow pulse as the Pot tab's "you won" moment.
+const RING_COLOR: Record<"win" | "hit-live" | "watch", string> = {
+  win: "ring-2 ring-win",
+  "hit-live": "ring-2 ring-led",
+  watch: "ring-2 ring-live",
 };
-
-const BORDER_COLOR: Record<"win" | "hit-live" | "watch", string> = {
-  win: "border-win",
-  "hit-live": "border-led",
-  watch: "border-live",
-};
-
-// If both teams somehow trigger a highlight at once, a win/hit-19 takes
-// priority over a watch score for which color outlines the card.
-function cardHighlight(
-  a: "win" | "hit-live" | "watch" | null,
-  b: "win" | "hit-live" | "watch" | null
-): "win" | "hit-live" | "watch" | null {
-  for (const h of [a, b]) {
-    if (h === "win" || h === "hit-live") return h;
-  }
-  return a ?? b;
-}
 
 // A confirmed final win gets the strongest treatment (matches the winner
 // badge style used on the Pot tab); still-live "hit 19" gets a lighter
 // nudge; a plain "watch" score (12/16) doesn't color the owner name at
-// all — that's just a hint on the score number itself.
+// all — that's just a hint on the chip's ring.
 function ownerNameClass(highlight: "win" | "hit-live" | "watch" | null): string {
   if (highlight === "win") return "font-semibold text-win";
   if (highlight === "hit-live") return "font-semibold text-led";
   return "text-chalk-faint";
 }
 
-// The team-color chip anchored to each end of the scorebug — deliberately
-// fixed dark colors/white content regardless of the app's light/dark theme,
-// since this is meant to read like a broadcast overlay, not a themed panel.
-function TeamColorBlock({ team, side }: { team: TeamDTO; side: "left" | "right" }) {
+// Each team's logo and score sit together inside one solid team-color
+// chip (like a broadcast scorebug), with the logo anchored to the outer
+// edge and the score toward the center. Score text stays white no matter
+// the team's own color, so it's always legible; the highlight shows as a
+// glowing ring around the chip instead of changing the text color.
+function TeamChip({
+  team,
+  score,
+  showScore,
+  highlight,
+  side,
+}: {
+  team: TeamDTO;
+  score: number;
+  showScore: boolean;
+  highlight: "win" | "hit-live" | "watch" | null;
+  side: "left" | "right";
+}) {
+  const ring = highlight ? RING_COLOR[highlight] : "";
+  const logo = team.logoUrl ? (
+    <Image src={team.logoUrl} alt="" width={24} height={24} unoptimized />
+  ) : (
+    <div className="h-6 w-6 shrink-0 rounded-full bg-white/25" />
+  );
+  const scoreEl = showScore && (
+    <span
+      className={`${leagueGothic.className} text-[22px] leading-none tabular-nums text-white`}
+      style={{ fontWeight: 700 }}
+    >
+      {score}
+    </span>
+  );
+
   return (
     <div
-      className={`flex w-16 shrink-0 flex-col items-center justify-center gap-1 py-2 ${
-        side === "left" ? "rounded-l-lg" : "rounded-r-lg"
+      className={`flex min-w-[64px] shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2 ${ring} ${
+        highlight === "win" ? "animate-win-glow" : ""
       }`}
       style={{ backgroundColor: teamColor(team.abbreviation) }}
     >
-      {team.logoUrl ? (
-        <Image src={team.logoUrl} alt="" width={26} height={26} unoptimized />
+      {side === "left" ? (
+        <>
+          {logo}
+          {scoreEl}
+        </>
       ) : (
-        <div className="h-6 w-6 rounded-full bg-white/20" />
+        <>
+          {scoreEl}
+          {logo}
+        </>
       )}
-      <span className="text-[10px] font-extrabold uppercase leading-none text-white">
-        {team.abbreviation}
-      </span>
     </div>
   );
 }
 
-function ScoreCell({
-  score,
-  highlight,
-  hasBall,
-}: {
-  score: number;
-  highlight: "win" | "hit-live" | "watch" | null;
-  hasBall: boolean;
-}) {
-  const color = highlight ? TEXT_COLOR[highlight] : "text-white";
+function PossessionArrow({ direction }: { direction: "left" | "right" }) {
   return (
-    <div className="flex w-14 shrink-0 items-center justify-center gap-1">
-      {hasBall && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />}
-      <span
-        className={`${leagueGothic.className} text-[26px] leading-none tabular-nums ${color}`}
-        style={{ fontWeight: 700 }}
-      >
-        {score}
-      </span>
-    </div>
+    <span
+      className={`inline-block h-0 w-0 shrink-0 border-y-[5px] border-y-transparent ${
+        direction === "left" ? "border-r-[7px] border-r-live" : "border-l-[7px] border-l-live"
+      }`}
+    />
   );
 }
 
-function CenterCell({ game }: { game: GameDTO }) {
+function CenterInfo({
+  game,
+  awayHasBall,
+  homeHasBall,
+}: {
+  game: GameDTO;
+  awayHasBall: boolean;
+  homeHasBall: boolean;
+}) {
   const { line1, line2 } = centerLines(game);
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-0.5 px-2 text-center">
-      <div className="whitespace-nowrap text-[12px] font-bold leading-tight text-white">
-        {line1}
-      </div>
-      {line2 && (
-        <div className="max-w-full truncate text-[10px] leading-tight text-white/60">
-          {line2}
+    <div className="flex flex-1 items-center justify-center gap-1.5 px-1">
+      {awayHasBall && <PossessionArrow direction="left" />}
+      <div className="flex min-w-0 flex-col items-center text-center">
+        <div className="whitespace-nowrap text-[12px] font-bold leading-tight text-chalk">
+          {line1}
         </div>
-      )}
+        {line2 && (
+          <div className="max-w-full truncate text-[10px] leading-tight text-chalk-faint">
+            {line2}
+          </div>
+        )}
+      </div>
+      {homeHasBall && <PossessionArrow direction="right" />}
     </div>
   );
 }
@@ -188,24 +203,16 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
   };
 }
 
-// Mirrors GameCard's shape (color chip / score / center / score / color
-// chip, plus the owner-name row underneath) so the skeleton's height
-// matches the real card — a flatter skeleton here previously rendered
-// noticeably shorter than loaded content, causing a layout jump even when
-// the placeholder count was right.
-function SkeletonColorBlock() {
+// Mirrors GameCard's shape (team chip / center info / team chip, plus the
+// owner-name row underneath) so the skeleton's height matches the real
+// card — a flatter skeleton here previously rendered noticeably shorter
+// than loaded content, causing a layout jump even when the placeholder
+// count was right.
+function SkeletonChip() {
   return (
-    <div className="flex w-16 shrink-0 flex-col items-center justify-center gap-1 py-2">
-      <div className="h-6 w-6 animate-pulse rounded-full bg-white/15" />
-      <div className="h-2 w-6 animate-pulse rounded bg-white/15" />
-    </div>
-  );
-}
-
-function SkeletonScoreCell() {
-  return (
-    <div className="flex w-14 shrink-0 items-center justify-center">
-      <div className="h-6 w-5 animate-pulse rounded bg-white/15" />
+    <div className="flex min-w-[64px] shrink-0 items-center justify-center gap-2 rounded-lg bg-panel-3 px-3 py-2">
+      <div className="h-6 w-6 animate-pulse rounded-full bg-chalk-faint/30" />
+      <div className="h-5 w-5 animate-pulse rounded bg-chalk-faint/30" />
     </div>
   );
 }
@@ -213,15 +220,13 @@ function SkeletonScoreCell() {
 function GameCardSkeleton() {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-stretch overflow-hidden rounded-lg border border-line bg-[#0b0b0c]">
-        <SkeletonColorBlock />
-        <SkeletonScoreCell />
-        <div className="flex flex-1 flex-col items-center justify-center gap-1 px-2">
-          <div className="h-3 w-16 animate-pulse rounded bg-white/15" />
-          <div className="h-2 w-20 animate-pulse rounded bg-white/10" />
+      <div className="flex items-center gap-2">
+        <SkeletonChip />
+        <div className="flex flex-1 flex-col items-center gap-1 px-1">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-2.5 w-20" />
         </div>
-        <SkeletonScoreCell />
-        <SkeletonColorBlock />
+        <SkeletonChip />
       </div>
       <div className="flex items-center justify-between px-1">
         <Skeleton className="h-2.5 w-16" />
@@ -236,33 +241,33 @@ function GameCard({ game }: { game: GameDTO }) {
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const awayHighlight = rowHighlight(game.awayScore, game.status);
   const homeHighlight = rowHighlight(game.homeScore, game.status);
-  const highlight = cardHighlight(awayHighlight, homeHighlight);
-  const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
   const showScores = game.status !== "SCHEDULED";
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div
-        className={`flex items-stretch overflow-hidden rounded-lg border bg-[#0b0b0c] ${borderColor} ${
-          highlight === "win" ? "animate-win-glow" : ""
-        }`}
-      >
-        <TeamColorBlock team={game.awayTeam} side="left" />
-        {showScores && (
-          <ScoreCell score={game.awayScore} highlight={awayHighlight} hasBall={awayHasBall} />
-        )}
-        <CenterCell game={game} />
-        {showScores && (
-          <ScoreCell score={game.homeScore} highlight={homeHighlight} hasBall={homeHasBall} />
-        )}
-        <TeamColorBlock team={game.homeTeam} side="right" />
+      <div className="flex items-center gap-2">
+        <TeamChip
+          team={game.awayTeam}
+          score={game.awayScore}
+          showScore={showScores}
+          highlight={awayHighlight}
+          side="left"
+        />
+        <CenterInfo game={game} awayHasBall={awayHasBall} homeHasBall={homeHasBall} />
+        <TeamChip
+          team={game.homeTeam}
+          score={game.homeScore}
+          showScore={showScores}
+          highlight={homeHighlight}
+          side="right"
+        />
       </div>
       <div className="flex items-center justify-between px-1 text-[11px]">
         <span className={ownerNameClass(awayHighlight)}>
-          {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
+          {game.awayTeam.abbreviation} · {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
         </span>
         <span className={ownerNameClass(homeHighlight)}>
-          {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
+          {game.homeTeam.abbreviation} · {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
         </span>
       </div>
     </div>
