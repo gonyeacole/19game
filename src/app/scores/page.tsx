@@ -6,6 +6,7 @@ import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
 import { leagueGothic } from "@/lib/fonts";
+import { teamColor } from "@/lib/teamColors";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -86,73 +87,72 @@ function cardHighlight(
   return a ?? b;
 }
 
-function PossessionTriangle({ side }: { side: "left" | "right" }) {
+// A confirmed final win gets the strongest treatment (matches the winner
+// badge style used on the Pot tab); still-live "hit 19" gets a lighter
+// nudge; a plain "watch" score (12/16) doesn't color the owner name at
+// all — that's just a hint on the score number itself.
+function ownerNameClass(highlight: "win" | "hit-live" | "watch" | null): string {
+  if (highlight === "win") return "font-semibold text-win";
+  if (highlight === "hit-live") return "font-semibold text-led";
+  return "text-chalk-faint";
+}
+
+// The team-color chip anchored to each end of the scorebug — deliberately
+// fixed dark colors/white content regardless of the app's light/dark theme,
+// since this is meant to read like a broadcast overlay, not a themed panel.
+function TeamColorBlock({ team, side }: { team: TeamDTO; side: "left" | "right" }) {
   return (
-    <span
-      className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-y-transparent ${
-        side === "left"
-          ? "-left-1.5 border-r-[7px] border-r-chalk"
-          : "-right-1.5 border-l-[7px] border-l-chalk"
+    <div
+      className={`flex w-16 shrink-0 flex-col items-center justify-center gap-1 py-2 ${
+        side === "left" ? "rounded-l-lg" : "rounded-r-lg"
       }`}
-    />
+      style={{ backgroundColor: teamColor(team.abbreviation) }}
+    >
+      {team.logoUrl ? (
+        <Image src={team.logoUrl} alt="" width={26} height={26} unoptimized />
+      ) : (
+        <div className="h-6 w-6 rounded-full bg-white/20" />
+      )}
+      <span className="text-[10px] font-extrabold uppercase leading-none text-white">
+        {team.abbreviation}
+      </span>
+    </div>
   );
 }
 
-function TickerSide({
-  team,
+function ScoreCell({
   score,
-  status,
-  reverse,
+  highlight,
+  hasBall,
 }: {
-  team: TeamDTO;
   score: number;
-  status: GameDTO["status"];
-  reverse?: boolean;
+  highlight: "win" | "hit-live" | "watch" | null;
+  hasBall: boolean;
 }) {
-  const highlight = rowHighlight(score, status);
-  const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  // The team name and owner pill pick up the score's own color too, but
-  // only for actually being at 19 (win/hit-live) — not the "watch" 12/16
-  // scores, which just nudge the score number itself, not the whole row.
-  const hitNineteen = highlight === "win" || highlight === "hit-live";
-  const nameColor = hitNineteen ? scoreColor : "text-chalk";
-  // A confirmed final win goes a step further than the live "hit-live"
-  // case (still just colored text) — the owner pill matches the winner
-  // badge style on the Pot tab (bg-win-bg + text-win), since the game is
-  // actually over and this is the same "you won" result shown there.
-  const ownerPillClass =
-    highlight === "win"
-      ? "bg-win-bg text-win"
-      : `bg-panel-3 ${hitNineteen ? nameColor : "text-chalk-faint"}`;
-
+  const color = highlight ? TEXT_COLOR[highlight] : "text-white";
   return (
-    <div
-      className={`flex min-w-0 flex-1 items-center justify-start gap-2 ${reverse ? "flex-row-reverse" : ""}`}
-    >
-      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
-        {team.logoUrl ? (
-          <Image src={team.logoUrl} alt="" width={36} height={36} unoptimized />
-        ) : (
-          <div className="h-9 w-9 rounded-full bg-panel-3" />
-        )}
-        <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${nameColor}`}
-          style={{ fontWeight: 700 }}
-        >
-          {team.name.split(" ").at(-1)}
-        </span>
-        <span
-          className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
-        >
-          {team.player ? team.player.name : "Unassigned"}
-        </span>
+    <div className="flex w-14 shrink-0 items-center justify-center gap-1">
+      {hasBall && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-live" />}
+      <span
+        className={`${leagueGothic.className} text-[26px] leading-none tabular-nums ${color}`}
+        style={{ fontWeight: 700 }}
+      >
+        {score}
+      </span>
+    </div>
+  );
+}
+
+function CenterCell({ game }: { game: GameDTO }) {
+  const { line1, line2 } = centerLines(game);
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-0.5 px-2 text-center">
+      <div className="whitespace-nowrap text-[12px] font-bold leading-tight text-white">
+        {line1}
       </div>
-      {status !== "SCHEDULED" && (
-        <div
-          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
-          style={{ fontWeight: 700 }}
-        >
-          {score}
+      {line2 && (
+        <div className="max-w-full truncate text-[10px] leading-tight text-white/60">
+          {line2}
         </div>
       )}
     </div>
@@ -188,34 +188,45 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
   };
 }
 
-// Mirrors TickerSide's stacked logo/name/player-name column plus the score
-// box so the skeleton's height matches the real card — a flatter skeleton
-// here previously rendered noticeably shorter than loaded content, causing
-// a layout jump even when the placeholder count was right.
-function SkeletonSide({ reverse }: { reverse?: boolean }) {
+// Mirrors GameCard's shape (color chip / score / center / score / color
+// chip, plus the owner-name row underneath) so the skeleton's height
+// matches the real card — a flatter skeleton here previously rendered
+// noticeably shorter than loaded content, causing a layout jump even when
+// the placeholder count was right.
+function SkeletonColorBlock() {
   return (
-    <div
-      className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
-    >
-      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
-        <Skeleton className="h-9 w-9" rounded="rounded-full" />
-        <Skeleton className="h-3 w-14" />
-        <Skeleton className="mt-0.5 h-[14px] w-16" rounded="rounded-full" />
-      </div>
-      <Skeleton className="h-10 w-6" />
+    <div className="flex w-16 shrink-0 flex-col items-center justify-center gap-1 py-2">
+      <div className="h-6 w-6 animate-pulse rounded-full bg-white/15" />
+      <div className="h-2 w-6 animate-pulse rounded bg-white/15" />
+    </div>
+  );
+}
+
+function SkeletonScoreCell() {
+  return (
+    <div className="flex w-14 shrink-0 items-center justify-center">
+      <div className="h-6 w-5 animate-pulse rounded bg-white/15" />
     </div>
   );
 }
 
 function GameCardSkeleton() {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
-      <SkeletonSide />
-      <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
-        <Skeleton className="h-3.5 w-16" />
-        <Skeleton className="h-2.5 w-20" />
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-stretch overflow-hidden rounded-lg border border-line bg-[#0b0b0c]">
+        <SkeletonColorBlock />
+        <SkeletonScoreCell />
+        <div className="flex flex-1 flex-col items-center justify-center gap-1 px-2">
+          <div className="h-3 w-16 animate-pulse rounded bg-white/15" />
+          <div className="h-2 w-20 animate-pulse rounded bg-white/10" />
+        </div>
+        <SkeletonScoreCell />
+        <SkeletonColorBlock />
       </div>
-      <SkeletonSide reverse />
+      <div className="flex items-center justify-between px-1">
+        <Skeleton className="h-2.5 w-16" />
+        <Skeleton className="h-2.5 w-16" />
+      </div>
     </div>
   );
 }
@@ -223,29 +234,37 @@ function GameCardSkeleton() {
 function GameCard({ game }: { game: GameDTO }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
-  const { line1, line2 } = centerLines(game);
-  const highlight = cardHighlight(
-    rowHighlight(game.awayScore, game.status),
-    rowHighlight(game.homeScore, game.status)
-  );
+  const awayHighlight = rowHighlight(game.awayScore, game.status);
+  const homeHighlight = rowHighlight(game.homeScore, game.status);
+  const highlight = cardHighlight(awayHighlight, homeHighlight);
   const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
+  const showScores = game.status !== "SCHEDULED";
 
   return (
-    <div
-      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor} ${
-        highlight === "win" ? "animate-win-glow" : ""
-      }`}
-    >
-      <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
-      <div className="relative w-28 shrink-0 text-center">
-        {awayHasBall && <PossessionTriangle side="left" />}
-        {homeHasBall && <PossessionTriangle side="right" />}
-        <div className="whitespace-nowrap text-sm font-extrabold leading-tight text-chalk">
-          {line1}
-        </div>
-        {line2 && <div className="truncate text-[10px] leading-tight text-chalk">{line2}</div>}
+    <div className="flex flex-col gap-1.5">
+      <div
+        className={`flex items-stretch overflow-hidden rounded-lg border bg-[#0b0b0c] ${borderColor} ${
+          highlight === "win" ? "animate-win-glow" : ""
+        }`}
+      >
+        <TeamColorBlock team={game.awayTeam} side="left" />
+        {showScores && (
+          <ScoreCell score={game.awayScore} highlight={awayHighlight} hasBall={awayHasBall} />
+        )}
+        <CenterCell game={game} />
+        {showScores && (
+          <ScoreCell score={game.homeScore} highlight={homeHighlight} hasBall={homeHasBall} />
+        )}
+        <TeamColorBlock team={game.homeTeam} side="right" />
       </div>
-      <TickerSide team={game.homeTeam} score={game.homeScore} status={game.status} reverse />
+      <div className="flex items-center justify-between px-1 text-[11px]">
+        <span className={ownerNameClass(awayHighlight)}>
+          {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
+        </span>
+        <span className={ownerNameClass(homeHighlight)}>
+          {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
+        </span>
+      </div>
     </div>
   );
 }
