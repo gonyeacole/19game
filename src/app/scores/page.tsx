@@ -62,6 +62,16 @@ function rowHighlight(score: number, status: GameDTO["status"]): "win" | "hit-li
   return null;
 }
 
+// A game is "on watch" once either team is one score away from 19 (12 or
+// 16) while live — surfaced as its own callout section above Live so it's
+// not buried in the full list of in-progress games.
+function isWatchGame(game: GameDTO): boolean {
+  return (
+    rowHighlight(game.awayScore, game.status) === "watch" ||
+    rowHighlight(game.homeScore, game.status) === "watch"
+  );
+}
+
 const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   win: "text-win",
   "hit-live": "text-led",
@@ -378,6 +388,20 @@ export default function ScoresPage() {
         <div
           className={`flex flex-col gap-3 transition-opacity duration-150 ${loading ? "opacity-50" : ""}`}
         >
+          {(() => {
+            const watchGames = filteredGames?.filter(isWatchGame);
+            if (!watchGames || watchGames.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-3">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-live">
+                  19 Watch
+                </div>
+                {watchGames.map((g) => (
+                  <GameCard key={g.id} game={g} />
+                ))}
+              </div>
+            );
+          })()}
           {(["IN_PROGRESS", "SCHEDULED", "FINAL"] as const).map((status) => {
             const gamesForStatus = filteredGames?.filter((g) => g.status === status);
             if (!gamesForStatus || gamesForStatus.length === 0) return null;
