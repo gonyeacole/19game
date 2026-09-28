@@ -1,87 +1,90 @@
 @import "tailwindcss";
 
 /*
-  RETRO WEEK — CRT terminal reskin. Temporary, applied over the normal
+  RETRO WEEK — Ceefax/teletext reskin. Temporary, applied over the normal
   "scoreboard" theme at the user's request; revert to the block in git
   history (before this comment) to restore the standard palette.
 
-  Dark mode: green phosphor monitor. Light mode: amber phosphor monitor —
-  a genuinely light CRT doesn't have a historical precedent, so instead of
-  breaking the retro mood, the toggle switches phosphor color rather than
-  brightness (both stay dark-background); it still gives ThemeToggle two
-  distinct, real looks. Plain @theme (not @theme inline) so utilities
+  Real teletext (Ceefax's football/vidiprinter pages especially) is: pure
+  black background, a strict 8-color palette used completely flat (no
+  gradient, no blur/glow — CRT phosphor bloom was a side effect of the
+  hardware, not the graphic design), a monospace low-res character grid,
+  and every box a hard, unrounded rectangle. Dark mode uses the classic
+  green-primary Ceefax scheme; light mode swaps to a blue/cyan-primary one
+  (teletext itself has no real "light mode," so the toggle switches which
+  page's palette you're on instead of switching brightness) — still two
+  distinct, on-brand looks. Plain @theme (not @theme inline) so utilities
   reference these as CSS variables rather than baking in literal values —
   required for the light-mode override below to work at runtime via the
   [data-theme] toggle instead of only at build time.
 */
 @theme {
-  --color-field: #010a04;
-  --color-panel: #04150a;
-  --color-panel-2: #071f0f;
-  --color-panel-3: #0c2c17;
-  --color-line: #1d5c37;
-  --color-chalk: #b9ffce;
-  --color-chalk-dim: #7fd89c;
-  --color-chalk-faint: #4d8f66;
-  --color-placeholder: #3f7754;
-  --color-led: #39ff8c;
-  --color-led-bg: #08240f;
-  --color-win: #29ff6a;
-  --color-win-bg: #072b12;
-  --color-caution: #ffcf33;
-  --color-caution-bg: #2b2205;
-  --color-live: #ff3b4e;
-  --color-live-bg: #2c0810;
-  --color-venmo: #33e0ff;
-  --color-search-bg: #071f0f;
-  --color-pill-text: #010a04;
-  --color-icon: #4d8f66;
-  --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #b3b3b3;
+  --color-chalk-faint: #6b6b6b;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00cc66;
+  --color-led-bg: #001a0d;
+  --color-win: #00ff00;
+  --color-win-bg: #001a00;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff0000;
+  --color-live-bg: #1a0000;
+  --color-venmo: #00ffff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
+  --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 /* Light theme — same token names, overridden when the toggle picks it. */
 :root[data-theme="light"] {
-  --color-field: #0a0600;
-  --color-panel: #170f02;
-  --color-panel-2: #211505;
-  --color-panel-3: #2d1d08;
-  --color-line: #5c4318;
-  --color-chalk: #ffe4a8;
-  --color-chalk-dim: #dcab5e;
-  --color-chalk-faint: #96733a;
-  --color-placeholder: #7a5d2e;
-  --color-led: #ffb000;
-  --color-led-bg: #2b1f04;
-  --color-win: #ffcf3d;
-  --color-win-bg: #2b2205;
-  --color-caution: #ff8c1a;
-  --color-caution-bg: #2b1704;
-  --color-live: #ff4d3d;
-  --color-live-bg: #2c0c08;
-  --color-venmo: #4dd0e8;
-  --color-search-bg: #211505;
-  --color-pill-text: #0a0600;
-  --color-icon: #96733a;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #99ccff;
+  --color-chalk-faint: #4d6b80;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00e5ff;
+  --color-led-bg: #001a1a;
+  --color-win: #00ffff;
+  --color-win-bg: #001a1a;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff00ff;
+  --color-live-bg: #1a001a;
+  --color-venmo: #3d95ff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
 }
 
 body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+  letter-spacing: 0.01em;
 }
 
 /*
-  Glow the app's own semantic status colors (already applied throughout via
-  text-led/text-win/text-live/text-caution — scores, live indicators, pot
-  totals, alerts) like lit phosphor rather than flat colored text. Reusing
-  those existing utility classes means every page picks this up without
-  being touched individually.
+  Teletext graphics are built entirely from hard rectangular character
+  cells — there's no such thing as a rounded corner on a real teletext
+  page. Forcing every corner square (rather than editing each component's
+  rounded-* utility class individually) is what actually reads as
+  "teletext" rather than just "a recolored version of the normal app" —
+  it's the single biggest visual tell, more than the palette.
 */
-.text-led,
-.text-win,
-.text-live,
-.text-caution {
-  text-shadow: 0 0 6px currentColor, 0 0 1px currentColor;
+* {
+  border-radius: 0 !important;
 }
 
 /*
