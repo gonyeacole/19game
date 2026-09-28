@@ -148,11 +148,23 @@ function TickerSide({
         </span>
       </div>
       {status !== "SCHEDULED" && (
-        <div
-          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
-          style={{ fontWeight: 700 }}
-        >
-          {score}
+        <div className="relative flex h-14 min-w-[52px] shrink-0 items-center justify-center">
+          {team.logoUrl && (
+            <Image
+              src={team.logoUrl}
+              alt=""
+              width={56}
+              height={56}
+              unoptimized
+              className="pointer-events-none absolute inset-0 m-auto opacity-20"
+            />
+          )}
+          <div
+            className={`${leagueGothic.className} relative text-[40px] leading-none tabular-nums ${scoreColor}`}
+            style={{ fontWeight: 700 }}
+          >
+            {score}
+          </div>
         </div>
       )}
     </div>
