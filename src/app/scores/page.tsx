@@ -119,10 +119,12 @@ function TickerSide({
       </div>
       {status !== "SCHEDULED" &&
         (highlight ? (
-          <div className={`rounded-full p-[2px] shine-border shine-${highlight}`}>
-            <div className="flex items-center justify-center rounded-full bg-panel px-3 py-1">
+          <div
+            className={`h-14 w-14 shrink-0 rounded-full p-[2px] shine-border shine-${highlight}`}
+          >
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-panel">
               <div
-                className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${TEXT_COLOR[highlight]}`}
+                className={`${leagueGothic.className} text-[36px] leading-none tabular-nums ${TEXT_COLOR[highlight]}`}
                 style={{ fontWeight: 700 }}
               >
                 {score}
