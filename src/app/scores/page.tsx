@@ -68,6 +68,18 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   watch: "text-live",
 };
 
+// If both teams somehow trigger a highlight at once, a win/hit-19 takes
+// priority over a watch score for which color the card's shine matches.
+function cardHighlight(
+  a: "win" | "hit-live" | "watch" | null,
+  b: "win" | "hit-live" | "watch" | null
+): "win" | "hit-live" | "watch" | null {
+  for (const h of [a, b]) {
+    if (h === "win" || h === "hit-live") return h;
+  }
+  return a ?? b;
+}
+
 function PossessionTriangle({ side }: { side: "left" | "right" }) {
   return (
     <span
@@ -117,28 +129,16 @@ function TickerSide({
           </span>
         )}
       </div>
-      {status !== "SCHEDULED" &&
-        (highlight ? (
-          <div
-            className={`h-14 w-14 shrink-0 rounded-full p-[2px] shine-border shine-${highlight}`}
-          >
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-panel">
-              <div
-                className={`${leagueGothic.className} text-[36px] leading-none tabular-nums ${TEXT_COLOR[highlight]}`}
-                style={{ fontWeight: 700 }}
-              >
-                {score}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            className={`${leagueGothic.className} text-[40px] leading-none tabular-nums text-chalk`}
-            style={{ fontWeight: 700 }}
-          >
-            {score}
-          </div>
-        ))}
+      {status !== "SCHEDULED" && (
+        <div
+          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${
+            highlight ? TEXT_COLOR[highlight] : "text-chalk"
+          }`}
+          style={{ fontWeight: 700 }}
+        >
+          {score}
+        </div>
+      )}
     </div>
   );
 }
@@ -208,9 +208,17 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const { line1, line2 } = centerLines(game);
+  const highlight = cardHighlight(
+    rowHighlight(game.awayScore, game.status),
+    rowHighlight(game.homeScore, game.status)
+  );
 
-  return (
-    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
+  const card = (
+    <div
+      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${
+        highlight ? "border-transparent" : "border-line"
+      }`}
+    >
       <TickerSide
         team={game.awayTeam}
         score={game.awayScore}
@@ -234,6 +242,10 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
       />
     </div>
   );
+
+  if (!highlight) return card;
+
+  return <div className={`rounded-xl p-[2px] shine-border shine-${highlight}`}>{card}</div>;
 }
 
 export default function ScoresPage() {

@@ -165,42 +165,43 @@ html[data-standalone="true"] .chat-viewport {
 }
 
 /*
-  A shine that continuously sweeps around a score bubble's border on
-  ScoresPage (TickerSide) once that team's number is worth calling out —
-  hit 19, or is one score away at 12/16. Scoped to just the number itself,
-  not the whole card, so it doesn't imply the *team* or *owner* did
-  anything, only that this particular score is notable right now.
+  A shine that continuously sweeps around a game card's border on
+  ScoresPage once one of its teams' scores is worth calling out — hit 19,
+  or is one score away at 12/16. Applied via the padding-box trick: this
+  class sits on an outer wrapper with a 2px padding, an oversized
+  diagonal gradient as its background, and the real card (opaque bg-panel)
+  inside covering everything except that 2px ring, so only the border
+  itself shows the moving shine.
 
-  The conic-gradient's rotation is driven by a registered custom property
-  (--shine-angle) rather than animating `background-position` or rotating
-  the element itself, since a rotated element would also rotate the score
-  digits sitting inside it.
+  A conic-gradient (sweeping by angle from a center point) only traces a
+  border evenly on a circle or square — on a card this wide and short it
+  would look like the shine orbits the center rather than following the
+  actual rectangle edge. Panning a diagonal linear-gradient's background
+  position instead works correctly at any aspect ratio.
 */
-@property --shine-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes shine-spin {
-  to {
-    --shine-angle: 360deg;
+@keyframes shine-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
   }
 }
 
 .shine-border {
-  animation: shine-spin 2.4s linear infinite;
+  background-size: 300% 300%;
+  animation: shine-pan 3s linear infinite;
 }
 
 .shine-win {
-  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-win) 20%, transparent 40%);
+  background-image: linear-gradient(120deg, transparent 30%, var(--color-win) 50%, transparent 70%);
 }
 
 .shine-hit-live {
-  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-led) 20%, transparent 40%);
+  background-image: linear-gradient(120deg, transparent 30%, var(--color-led) 50%, transparent 70%);
 }
 
 .shine-watch {
-  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-live) 20%, transparent 40%);
+  background-image: linear-gradient(120deg, transparent 30%, var(--color-live) 50%, transparent 70%);
 }
 
