@@ -103,11 +103,13 @@ function TickerSide({
   score,
   status,
   reverse,
+  showNames,
 }: {
   team: TeamDTO;
   score: number;
   status: GameDTO["status"];
   reverse?: boolean;
+  showNames: boolean;
 }) {
   const highlight = rowHighlight(score, status);
   const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
@@ -141,11 +143,13 @@ function TickerSide({
         >
           {team.name.split(" ").at(-1)}
         </span>
-        <span
-          className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
-        >
-          {team.player ? team.player.name : "Unassigned"}
-        </span>
+        {showNames && (
+          <span
+            className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
+          >
+            {team.player ? team.player.name : "Unassigned"}
+          </span>
+        )}
       </div>
       {status !== "SCHEDULED" && (
         <div
@@ -220,7 +224,7 @@ function GameCardSkeleton() {
   );
 }
 
-function GameCard({ game }: { game: GameDTO }) {
+function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const { line1, line2 } = centerLines(game);
@@ -236,7 +240,12 @@ function GameCard({ game }: { game: GameDTO }) {
         highlight === "win" ? "animate-win-glow" : ""
       }`}
     >
-      <TickerSide team={game.awayTeam} score={game.awayScore} status={game.status} />
+      <TickerSide
+        team={game.awayTeam}
+        score={game.awayScore}
+        status={game.status}
+        showNames={showNames}
+      />
       <div className="relative w-28 shrink-0 text-center">
         {awayHasBall && <PossessionTriangle side="left" />}
         {homeHasBall && <PossessionTriangle side="right" />}
@@ -245,7 +254,13 @@ function GameCard({ game }: { game: GameDTO }) {
         </div>
         {line2 && <div className="truncate text-[10px] leading-tight text-chalk">{line2}</div>}
       </div>
-      <TickerSide team={game.homeTeam} score={game.homeScore} status={game.status} reverse />
+      <TickerSide
+        team={game.homeTeam}
+        score={game.homeScore}
+        status={game.status}
+        reverse
+        showNames={showNames}
+      />
     </div>
   );
 }
@@ -258,6 +273,7 @@ export default function ScoresPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
+  const [showNames, setShowNames] = useState(true);
   const inFlight = useRef(false);
   const gamesRef = useRef<GameDTO[] | null>(null);
   useEffect(() => {
@@ -342,6 +358,12 @@ export default function ScoresPage() {
   const filteredGames = games?.filter(
     (g) => !q || matchesTeam(g.homeTeam) || matchesTeam(g.awayTeam)
   );
+  // Whichever status section renders first (usually "Live") gets the
+  // names toggle tacked onto its header row, so there's only one control
+  // rather than repeating it per section.
+  const firstVisibleStatus = (["IN_PROGRESS", "SCHEDULED", "FINAL"] as const).find(
+    (status) => filteredGames?.some((g) => g.status === status)
+  );
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
@@ -384,14 +406,40 @@ export default function ScoresPage() {
             return (
               <div key={status} className="flex flex-col gap-3">
                 <div
-                  className={`text-[11px] font-bold uppercase tracking-wide text-chalk-faint ${
+                  className={`flex items-center justify-between ${
                     status === "IN_PROGRESS" ? "" : "mt-2"
                   }`}
                 >
-                  {STATUS_SECTION_LABEL[status]}
+                  <div className="text-[11px] font-bold uppercase tracking-wide text-chalk-faint">
+                    {STATUS_SECTION_LABEL[status]}
+                  </div>
+                  {status === firstVisibleStatus && (
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={showNames}
+                      onClick={() => setShowNames((v) => !v)}
+                      className="flex items-center gap-1.5"
+                    >
+                      <span className="text-[11px] font-semibold text-chalk/50">
+                        Show names
+                      </span>
+                      <span
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                          showNames ? "bg-win" : "bg-panel-3"
+                        }`}
+                      >
+                        <span
+                          className={`absolute left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                            showNames ? "translate-x-4" : "translate-x-0"
+                          }`}
+                        />
+                      </span>
+                    </button>
+                  )}
                 </div>
                 {gamesForStatus.map((g) => (
-                  <GameCard key={g.id} game={g} />
+                  <GameCard key={g.id} game={g} showNames={showNames} />
                 ))}
               </div>
             );
