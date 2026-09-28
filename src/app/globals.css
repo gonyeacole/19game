@@ -165,20 +165,42 @@ html[data-standalone="true"] .chat-viewport {
 }
 
 /*
-  Ongoing celebration for a final score card that hit the winning number
-  (ScoresPage's GameCard): the green border keeps gently pulsing with a
-  glow for as long as the card is mounted in this "win" state.
+  A shine that continuously sweeps around a score bubble's border on
+  ScoresPage (TickerSide) once that team's number is worth calling out —
+  hit 19, or is one score away at 12/16. Scoped to just the number itself,
+  not the whole card, so it doesn't imply the *team* or *owner* did
+  anything, only that this particular score is notable right now.
+
+  The conic-gradient's rotation is driven by a registered custom property
+  (--shine-angle) rather than animating `background-position` or rotating
+  the element itself, since a rotated element would also rotate the score
+  digits sitting inside it.
 */
-@keyframes win-glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
-  50% {
-    box-shadow: 0 0 18px 3px color-mix(in srgb, var(--color-win) 55%, transparent);
+@property --shine-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes shine-spin {
+  to {
+    --shine-angle: 360deg;
   }
 }
-.animate-win-glow {
-  animation: win-glow-pulse 1.8s ease-in-out infinite;
+
+.shine-border {
+  animation: shine-spin 2.4s linear infinite;
+}
+
+.shine-win {
+  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-win) 20%, transparent 40%);
+}
+
+.shine-hit-live {
+  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-led) 20%, transparent 40%);
+}
+
+.shine-watch {
+  background: conic-gradient(from var(--shine-angle), transparent 0%, var(--color-live) 20%, transparent 40%);
 }
 

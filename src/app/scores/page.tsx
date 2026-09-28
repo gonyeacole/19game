@@ -68,24 +68,6 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   watch: "text-live",
 };
 
-const BORDER_COLOR: Record<"win" | "hit-live" | "watch", string> = {
-  win: "border-win",
-  "hit-live": "border-led",
-  watch: "border-live",
-};
-
-// If both teams somehow trigger a highlight at once, a win/hit-19 takes
-// priority over a watch score for which color outlines the card.
-function cardHighlight(
-  a: "win" | "hit-live" | "watch" | null,
-  b: "win" | "hit-live" | "watch" | null
-): "win" | "hit-live" | "watch" | null {
-  for (const h of [a, b]) {
-    if (h === "win" || h === "hit-live") return h;
-  }
-  return a ?? b;
-}
-
 function PossessionTriangle({ side }: { side: "left" | "right" }) {
   return (
     <span
@@ -112,20 +94,6 @@ function TickerSide({
   showNames: boolean;
 }) {
   const highlight = rowHighlight(score, status);
-  const scoreColor = highlight ? TEXT_COLOR[highlight] : "text-chalk";
-  // The team name and owner pill pick up the score's own color too, but
-  // only for actually being at 19 (win/hit-live) — not the "watch" 12/16
-  // scores, which just nudge the score number itself, not the whole row.
-  const hitNineteen = highlight === "win" || highlight === "hit-live";
-  const nameColor = hitNineteen ? scoreColor : "text-chalk";
-  // A confirmed final win goes a step further than the live "hit-live"
-  // case (still just colored text) — the owner pill matches the winner
-  // badge style on the Pot tab (bg-win-bg + text-win), since the game is
-  // actually over and this is the same "you won" result shown there.
-  const ownerPillClass =
-    highlight === "win"
-      ? "bg-win-bg text-win"
-      : `bg-panel-3 ${hitNineteen ? nameColor : "text-chalk-faint"}`;
 
   return (
     <div
@@ -138,27 +106,37 @@ function TickerSide({
           <div className="h-9 w-9 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none ${nameColor}`}
+          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none text-chalk`}
           style={{ fontWeight: 700 }}
         >
           {team.name.split(" ").at(-1)}
         </span>
         {showNames && (
-          <span
-            className={`mt-0.5 max-w-full truncate rounded-full px-2 py-0.5 text-[10px] leading-none ${ownerPillClass}`}
-          >
+          <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
             {team.player ? team.player.name : "Unassigned"}
           </span>
         )}
       </div>
-      {status !== "SCHEDULED" && (
-        <div
-          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${scoreColor}`}
-          style={{ fontWeight: 700 }}
-        >
-          {score}
-        </div>
-      )}
+      {status !== "SCHEDULED" &&
+        (highlight ? (
+          <div className={`rounded-full p-[2px] shine-border shine-${highlight}`}>
+            <div className="flex items-center justify-center rounded-full bg-panel px-3 py-1">
+              <div
+                className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${TEXT_COLOR[highlight]}`}
+                style={{ fontWeight: 700 }}
+              >
+                {score}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={`${leagueGothic.className} text-[40px] leading-none tabular-nums text-chalk`}
+            style={{ fontWeight: 700 }}
+          >
+            {score}
+          </div>
+        ))}
     </div>
   );
 }
@@ -228,18 +206,9 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const { line1, line2 } = centerLines(game);
-  const highlight = cardHighlight(
-    rowHighlight(game.awayScore, game.status),
-    rowHighlight(game.homeScore, game.status)
-  );
-  const borderColor = highlight ? BORDER_COLOR[highlight] : "border-line";
 
   return (
-    <div
-      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${borderColor} ${
-        highlight === "win" ? "animate-win-glow" : ""
-      }`}
-    >
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
       <TickerSide
         team={game.awayTeam}
         score={game.awayScore}
