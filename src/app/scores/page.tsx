@@ -148,15 +148,15 @@ function TickerSide({
         </span>
       </div>
       {status !== "SCHEDULED" && (
-        <div className="relative flex h-14 min-w-[52px] shrink-0 items-center justify-center">
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
           {team.logoUrl && (
             <Image
               src={team.logoUrl}
               alt=""
-              width={56}
-              height={56}
+              width={92}
+              height={92}
               unoptimized
-              className="pointer-events-none absolute inset-0 m-auto opacity-20"
+              className="pointer-events-none absolute inset-0 m-auto opacity-30"
             />
           )}
           <div
