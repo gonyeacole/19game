@@ -185,6 +185,12 @@ html[data-standalone="true"] .chat-viewport {
   restart happens while nothing is showing but transparent — no jump or
   flicker where earlier ranges left the band still partway visible when
   the animation reset.
+
+  background-color (rather than leaving the ring bare) fills in behind the
+  gradient's own transparent stops, so the ring reads as the same plain
+  grey border every other card has the rest of the time, with the colored
+  shine passing over it — instead of the border disappearing entirely
+  whenever the moving band isn't currently over a given edge.
 */
 @keyframes shine-pan {
   from {
@@ -196,6 +202,7 @@ html[data-standalone="true"] .chat-viewport {
 }
 
 .shine-border {
+  background-color: var(--color-line);
   background-size: 200% 100%;
   animation: shine-pan 2.4s linear infinite;
 }
