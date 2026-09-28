@@ -5,7 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import AnnouncementBell from "@/components/AnnouncementBell";
-import { inter, leagueGothic } from "@/lib/fonts";
+import { inter, teletext } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -86,29 +86,67 @@ const SPLASH_INIT_SCRIPT = `
 })();
 `;
 
+// Retro week — a teletext page header always carries a page number and a
+// live clock (e.g. Ceefax's "300 ... Wed 17 Sep 15:05:35"). Computed here in
+// the (server-only) root layout rather than a client component: it's the
+// same string in the initial server HTML and React's first client render
+// (nothing re-renders it with a ticking clock), so there's no hydration
+// mismatch to worry about — it's just whatever time the page happened to
+// render, like a real teletext page only updates when you turn to it.
+function pageDateStamp(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Chicago",
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .format(new Date())
+    .toUpperCase();
+}
+
+// Splits into per-letter spans so globals.css's .rainbow-title rule can
+// color each one — a space becomes a non-breaking space so it still takes
+// up width once it's its own inline span.
+function RainbowTitle({ text }: { text: string }) {
+  return (
+    <span className="rainbow-title">
+      {[...text].map((ch, i) => (
+        <span key={i}>{ch === " " ? " " : ch}</span>
+      ))}
+    </span>
+  );
+}
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+    <html lang="en" className={`h-full antialiased ${inter.variable} ${teletext.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SPLASH_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
-        <header className="safe-top sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
-          <div className="flex items-center justify-self-start gap-2">
-            <AddToHomeScreen />
-            <ThemeToggle />
+        <header className="safe-top sticky top-0 z-10 bg-field">
+          <div className="flex items-center justify-between border-b border-line px-4 pb-1 text-xs text-chalk-dim">
+            <span>PAGE 301</span>
+            <span>{pageDateStamp()}</span>
           </div>
-          <span
-            className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
-            style={{ fontWeight: 700 }}
-          >
-            19League
-          </span>
-          <div className="flex items-center justify-self-end gap-2">
-            <RefreshButton />
-            <AnnouncementBell />
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-line px-4 pb-3 pt-2">
+            <div className="flex items-center justify-self-start gap-2">
+              <AddToHomeScreen />
+              <ThemeToggle />
+            </div>
+            <span className="justify-self-center text-3xl leading-none tracking-wide" style={{ fontWeight: 700 }}>
+              <RainbowTitle text="19League" />
+            </span>
+            <div className="flex items-center justify-self-end gap-2">
+              <RefreshButton />
+              <AnnouncementBell />
+            </div>
           </div>
         </header>
         {/*
@@ -132,6 +170,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
         <TabNav />
         <SplashScreen />
+        <div className="crt-overlay" aria-hidden="true" />
       </body>
     </html>
   );
