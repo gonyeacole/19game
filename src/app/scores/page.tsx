@@ -274,6 +274,20 @@ export default function ScoresPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
   const [showNames, setShowNames] = useState(true);
+  // All three sections start expanded; collapsing one just hides its list
+  // of games below the header, same idea as the Pot tab's payment-status
+  // disclosure.
+  const [expandedStatuses, setExpandedStatuses] = useState<Set<GameDTO["status"]>>(
+    new Set(["IN_PROGRESS", "SCHEDULED", "FINAL"])
+  );
+  const toggleSection = (status: GameDTO["status"]) => {
+    setExpandedStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) next.delete(status);
+      else next.add(status);
+      return next;
+    });
+  };
   const inFlight = useRef(false);
   const gamesRef = useRef<GameDTO[] | null>(null);
   useEffect(() => {
@@ -403,6 +417,7 @@ export default function ScoresPage() {
           {(["IN_PROGRESS", "SCHEDULED", "FINAL"] as const).map((status) => {
             const gamesForStatus = filteredGames?.filter((g) => g.status === status);
             if (!gamesForStatus || gamesForStatus.length === 0) return null;
+            const expanded = expandedStatuses.has(status);
             return (
               <div key={status} className="flex flex-col gap-3">
                 <div
@@ -410,9 +425,26 @@ export default function ScoresPage() {
                     status === "IN_PROGRESS" ? "" : "mt-2"
                   }`}
                 >
-                  <div className="text-[11px] font-bold uppercase tracking-wide text-chalk-faint">
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(status)}
+                    className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-chalk-faint"
+                  >
                     {STATUS_SECTION_LABEL[status]}
-                  </div>
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`h-3 w-3 transition-transform duration-200 ${
+                        expanded ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path d="M5 8l5 5 5-5" />
+                    </svg>
+                  </button>
                   {status === firstVisibleStatus && (
                     <button
                       type="button"
@@ -438,9 +470,10 @@ export default function ScoresPage() {
                     </button>
                   )}
                 </div>
-                {gamesForStatus.map((g) => (
-                  <GameCard key={g.id} game={g} showNames={showNames} />
-                ))}
+                {expanded &&
+                  gamesForStatus.map((g) => (
+                    <GameCard key={g.id} game={g} showNames={showNames} />
+                  ))}
               </div>
             );
           })}
