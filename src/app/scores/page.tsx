@@ -254,7 +254,6 @@ export default function ScoresPage() {
   const [games, setGames] = useState<GameDTO[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
   // Off by default; once someone flips it on, remember that choice across
   // refreshes and future visits.
@@ -306,7 +305,6 @@ export default function ScoresPage() {
       setSeasonYear(data.seasonYear);
       setWeekNumber(data.weekNumber);
       setGames(data.week?.games ?? []);
-      setLastUpdated(new Date());
       setError(
         data.synced
           ? null
@@ -476,11 +474,6 @@ export default function ScoresPage() {
         </div>
       )}
 
-      {lastUpdated && (
-        <div className="mt-4 text-center text-[11px] text-chalk-faint">
-          Updated {lastUpdated.toLocaleTimeString()}
-        </div>
-      )}
     </div>
   );
 }
