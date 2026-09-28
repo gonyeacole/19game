@@ -176,32 +176,39 @@ html[data-standalone="true"] .chat-viewport {
   A conic-gradient (sweeping by angle from a center point) only traces a
   border evenly on a circle or square — on a card this wide and short it
   would look like the shine orbits the center rather than following the
-  actual rectangle edge. Panning a diagonal linear-gradient's background
-  position instead works correctly at any aspect ratio.
+  actual rectangle edge. Panning a linear-gradient's background position
+  instead works correctly at any aspect ratio.
+
+  The pan range (-100% to 100% against a 200%-wide background) is the
+  standard seamless-shimmer trick: at both endpoints the gradient's bright
+  band sits fully outside the visible box (off to one side), so the loop
+  restart happens while nothing is showing but transparent — no jump or
+  flicker where earlier ranges left the band still partway visible when
+  the animation reset.
 */
 @keyframes shine-pan {
-  0% {
-    background-position: 0% 50%;
+  from {
+    background-position: -100% 0;
   }
-  100% {
-    background-position: 200% 50%;
+  to {
+    background-position: 100% 0;
   }
 }
 
 .shine-border {
-  background-size: 300% 300%;
-  animation: shine-pan 3s linear infinite;
+  background-size: 200% 100%;
+  animation: shine-pan 2.4s linear infinite;
 }
 
 .shine-win {
-  background-image: linear-gradient(120deg, transparent 30%, var(--color-win) 50%, transparent 70%);
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-win) 50%, transparent 65%);
 }
 
 .shine-hit-live {
-  background-image: linear-gradient(120deg, transparent 30%, var(--color-led) 50%, transparent 70%);
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-led) 50%, transparent 65%);
 }
 
 .shine-watch {
-  background-image: linear-gradient(120deg, transparent 30%, var(--color-live) 50%, transparent 70%);
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
 }
 
