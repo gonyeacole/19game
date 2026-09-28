@@ -416,10 +416,25 @@ export default function ScoresPage() {
                   {status === firstVisibleStatus && (
                     <button
                       type="button"
+                      role="switch"
+                      aria-checked={showNames}
                       onClick={() => setShowNames((v) => !v)}
-                      className="text-[11px] font-semibold text-chalk-faint"
+                      className="flex items-center gap-1.5"
                     >
-                      {showNames ? "Hide names" : "Show names"}
+                      <span className="text-[11px] font-semibold text-chalk/50">
+                        Show names
+                      </span>
+                      <span
+                        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                          showNames ? "bg-win" : "bg-panel-3"
+                        }`}
+                      >
+                        <span
+                          className={`absolute left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                            showNames ? "translate-x-4" : "translate-x-0"
+                          }`}
+                        />
+                      </span>
                     </button>
                   )}
                 </div>
