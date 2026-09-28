@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { POT_VENMO_USERNAME } from "@/lib/pool";
 import Skeleton from "@/components/Skeleton";
-import { leagueGothic } from "@/lib/fonts";
+import { teletext } from "@/lib/fonts";
 
 interface WinnerDTO {
   player: { id: string; name: string };
@@ -171,7 +171,7 @@ export default function PotPage() {
         <div className="text-xs font-semibold uppercase tracking-widest text-led">
           Current Pot
         </div>
-        <div className={`${leagueGothic.className} text-6xl leading-none tracking-wide tabular-nums text-led`}>
+        <div className={`${teletext.className} text-6xl leading-none tracking-wide tabular-nums text-led`}>
           {data ? (
             money(data.summary.currentPot)
           ) : (

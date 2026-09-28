@@ -5,7 +5,7 @@ import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
-import { leagueGothic } from "@/lib/fonts";
+import { teletext } from "@/lib/fonts";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -118,7 +118,7 @@ function TickerSide({
           <div className="h-9 w-9 rounded-full bg-panel-3" />
         )}
         <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none text-chalk`}
+          className={`${teletext.className} block w-20 truncate text-center text-xs uppercase leading-none text-chalk`}
           style={{ fontWeight: 700 }}
         >
           {team.name.split(" ").at(-1)}
@@ -131,7 +131,7 @@ function TickerSide({
       </div>
       {status !== "SCHEDULED" && (
         <div
-          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${
+          className={`${teletext.className} text-[40px] leading-none tabular-nums ${
             highlight ? TEXT_COLOR[highlight] : "text-chalk"
           }`}
           style={{ fontWeight: 700 }}
