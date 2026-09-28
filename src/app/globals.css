@@ -165,20 +165,50 @@ html[data-standalone="true"] .chat-viewport {
 }
 
 /*
-  Ongoing celebration for a final score card that hit the winning number
-  (ScoresPage's GameCard): the green border keeps gently pulsing with a
-  glow for as long as the card is mounted in this "win" state.
+  A shine that continuously sweeps around a game card's border on
+  ScoresPage once one of its teams' scores is worth calling out — hit 19,
+  or is one score away at 12/16. Applied via the padding-box trick: this
+  class sits on an outer wrapper with a 2px padding, an oversized
+  diagonal gradient as its background, and the real card (opaque bg-panel)
+  inside covering everything except that 2px ring, so only the border
+  itself shows the moving shine.
+
+  A conic-gradient (sweeping by angle from a center point) only traces a
+  border evenly on a circle or square — on a card this wide and short it
+  would look like the shine orbits the center rather than following the
+  actual rectangle edge. Panning a linear-gradient's background position
+  instead works correctly at any aspect ratio.
+
+  The pan range (-100% to 100% against a 200%-wide background) is the
+  standard seamless-shimmer trick: at both endpoints the gradient's bright
+  band sits fully outside the visible box (off to one side), so the loop
+  restart happens while nothing is showing but transparent — no jump or
+  flicker where earlier ranges left the band still partway visible when
+  the animation reset.
 */
-@keyframes win-glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 transparent;
+@keyframes shine-pan {
+  from {
+    background-position: -100% 0;
   }
-  50% {
-    box-shadow: 0 0 18px 3px color-mix(in srgb, var(--color-win) 55%, transparent);
+  to {
+    background-position: 100% 0;
   }
 }
-.animate-win-glow {
-  animation: win-glow-pulse 1.8s ease-in-out infinite;
+
+.shine-border {
+  background-size: 200% 100%;
+  animation: shine-pan 2.4s linear infinite;
+}
+
+.shine-win {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-win) 50%, transparent 65%);
+}
+
+.shine-hit-live {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-led) 50%, transparent 65%);
+}
+
+.shine-watch {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
 }
 
