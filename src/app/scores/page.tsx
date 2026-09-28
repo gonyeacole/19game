@@ -245,7 +245,7 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   if (!highlight) return card;
 
-  return <div className={`rounded-xl p-[2px] shine-border shine-${highlight}`}>{card}</div>;
+  return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
 }
 
 export default function ScoresPage() {

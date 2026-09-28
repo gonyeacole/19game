@@ -168,10 +168,11 @@ html[data-standalone="true"] .chat-viewport {
   A shine that continuously sweeps around a game card's border on
   ScoresPage once one of its teams' scores is worth calling out — hit 19,
   or is one score away at 12/16. Applied via the padding-box trick: this
-  class sits on an outer wrapper with a 2px padding, an oversized
-  diagonal gradient as its background, and the real card (opaque bg-panel)
-  inside covering everything except that 2px ring, so only the border
-  itself shows the moving shine.
+  class sits on an outer wrapper with a 1px padding (matching every other
+  card's plain 1px border, so a highlighted card isn't visibly thicker
+  than the rest), an oversized diagonal gradient as its background, and
+  the real card (opaque bg-panel) inside covering everything except that
+  1px ring, so only the border itself shows the moving shine.
 
   A conic-gradient (sweeping by angle from a center point) only traces a
   border evenly on a circle or square — on a card this wide and short it
