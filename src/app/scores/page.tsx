@@ -273,7 +273,20 @@ export default function ScoresPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [query, setQuery] = useState("");
-  const [showNames, setShowNames] = useState(true);
+  // Off by default; once someone flips it on, remember that choice across
+  // refreshes and future visits.
+  const [showNames, setShowNames] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage, not derivable during render
+    setShowNames(localStorage.getItem("scoresShowNames") === "true");
+  }, []);
+  const toggleShowNames = () => {
+    setShowNames((v) => {
+      const next = !v;
+      localStorage.setItem("scoresShowNames", String(next));
+      return next;
+    });
+  };
   // All three sections start expanded; collapsing one just hides its list
   // of games below the header, same idea as the Pot tab's payment-status
   // disclosure.
@@ -450,7 +463,7 @@ export default function ScoresPage() {
                       type="button"
                       role="switch"
                       aria-checked={showNames}
-                      onClick={() => setShowNames((v) => !v)}
+                      onClick={toggleShowNames}
                       className="flex items-center gap-1.5"
                     >
                       <span className="text-[11px] font-semibold text-chalk/50">
