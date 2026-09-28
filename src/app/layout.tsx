@@ -170,7 +170,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
         <TabNav />
         <SplashScreen />
-        <div className="crt-overlay" aria-hidden="true" />
       </body>
     </html>
   );
