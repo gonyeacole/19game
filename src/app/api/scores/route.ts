@@ -56,23 +56,36 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid year or week" }, { status: 400 });
   }
 
+  let synced = true;
+  let syncError: string | null = null;
+  const trySync = async (week: number, options?: { force?: boolean }) => {
+    try {
+      await syncWeekScores(seasonYear, week, options);
+    } catch (err) {
+      console.error("Score sync failed:", err);
+      synced = false;
+      syncError = err instanceof Error ? err.message : String(err);
+      // Fall through and serve whatever is already in the DB — the UI can
+      // still show stale data with a "couldn't refresh" indicator.
+    }
+  };
+
   // Only auto-roll when the client asked for "the current week" (no
   // explicit week param, i.e. a fresh app open) — manually browsing to an
   // old, fully-final week should still show that week, not bounce forward.
   if (searchParams.get("week") == null) {
-    weekNumber = await rollPastFinishedWeek(seasonYear, weekNumber);
-  }
-
-  let synced = true;
-  let syncError: string | null = null;
-  try {
-    await syncWeekScores(seasonYear, weekNumber);
-  } catch (err) {
-    console.error("Score sync failed:", err);
-    synced = false;
-    syncError = err instanceof Error ? err.message : String(err);
-    // Fall through and serve whatever is already in the DB — the UI can
-    // still show stale data with a "couldn't refresh" indicator.
+    // Force-refresh before trusting the DB's "every game FINAL" enough to
+    // roll forward — syncWeekScores normally stops re-checking a week once
+    // it looks done, which would otherwise let a stale/wrong FINAL status
+    // roll the default past a week whose game is actually still live.
+    await trySync(weekNumber, { force: true });
+    const rolled = await rollPastFinishedWeek(seasonYear, weekNumber);
+    if (rolled !== weekNumber) {
+      weekNumber = rolled;
+      await trySync(weekNumber);
+    }
+  } else {
+    await trySync(weekNumber);
   }
 
   const week = await prisma.week.findUnique({
