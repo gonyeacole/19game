@@ -330,7 +330,7 @@ function ScoreBugTeamLine({
           }}
         >
           {hasBall && <span className="mr-1 not-italic text-live">●</span>}
-          {team.name}
+          {team.name.split(" ").at(-1)}
         </span>
         {showNames && (
           <span className="block truncate text-[10px] leading-tight text-chalk-faint">
