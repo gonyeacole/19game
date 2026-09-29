@@ -1,9 +1,65 @@
 @import "tailwindcss";
 
 /*
-  RETRO WEEK — Ceefax/teletext reskin. Temporary, applied over the normal
-  "scoreboard" theme at the user's request; revert to the block in git
-  history (before this comment) to restore the standard palette.
+  Dark "scoreboard" theme — the default. Plain @theme (not @theme inline)
+  so utilities reference these as CSS variables rather than baking in
+  literal values — required for the light-mode override below (and the
+  retro-mode override further down) to work at runtime via attribute
+  toggles instead of only at build time.
+*/
+@theme {
+  --color-field: #0a0a0a;
+  --color-panel: #151515;
+  --color-panel-2: #1d1d1d;
+  --color-panel-3: #262626;
+  --color-line: #363636;
+  --color-chalk: #f0f0ee;
+  --color-chalk-dim: #f0f0ee;
+  --color-chalk-faint: #f0f0ee;
+  --color-placeholder: #727270;
+  --color-led: #00dd94;
+  --color-led-bg: #132420;
+  --color-win: #4ecb8c;
+  --color-win-bg: #17281f;
+  --color-caution: #e08a3c;
+  --color-caution-bg: #2c2318;
+  --color-live: #ff5c4d;
+  --color-live-bg: #2e1a16;
+  --color-venmo: #3d95ce;
+  --color-search-bg: #1d1d1d;
+  --color-pill-text: #08150e;
+  --color-icon: #727270;
+  --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Light theme — same token names, overridden when the toggle picks it. */
+:root[data-theme="light"] {
+  --color-field: #f5f5f4;
+  --color-panel: #ffffff;
+  --color-panel-2: #f2f1ef;
+  --color-panel-3: #e7e5e2;
+  --color-line: #d9d7d3;
+  --color-chalk: #19181a;
+  --color-chalk-dim: #19181a;
+  --color-chalk-faint: #19181a;
+  --color-placeholder: #85827c;
+  --color-led: #00b67a;
+  --color-led-bg: #e3f9f1;
+  --color-win: #1f9d5c;
+  --color-win-bg: #e3f7ec;
+  --color-caution: #b4610f;
+  --color-caution-bg: #fdefdf;
+  --color-live: #d9392a;
+  --color-live-bg: #fdeceb;
+  --color-venmo: #2f83bb;
+  --color-search-bg: #ffffff;
+  --color-pill-text: #ffffff;
+  --color-icon: #85827c;
+}
+
+/*
+  Retro mode — Ceefax/teletext reskin, flipped on at runtime via RetroToggle
+  (see src/lib/retroMode.tsx) rather than being a separate deployment.
 
   Real teletext (Ceefax's football tables and vidiprinter especially) is:
   pure black background, a strict 8-color palette used completely flat (no
@@ -13,12 +69,9 @@
   green-primary Ceefax scheme; light mode swaps to a blue/cyan-primary one
   (teletext itself has no real "light mode," so the toggle switches which
   page's palette you're on instead of switching brightness) — still two
-  distinct, on-brand looks. Plain @theme (not @theme inline) so utilities
-  reference these as CSS variables rather than baking in literal values —
-  required for the light-mode override below to work at runtime via the
-  [data-theme] toggle instead of only at build time.
+  distinct, on-brand looks.
 */
-@theme {
+html[data-retro="true"] {
   --color-field: #000000;
   --color-panel: #000000;
   --color-panel-2: #0a0a0a;
@@ -43,8 +96,7 @@
   --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
-/* Light theme — same token names, overridden when the toggle picks it. */
-:root[data-theme="light"] {
+html[data-retro="true"][data-theme="light"] {
   --color-field: #000000;
   --color-panel: #000000;
   --color-panel-2: #0a0a0a;
@@ -72,19 +124,22 @@ body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+}
+
+html[data-retro="true"] body {
   letter-spacing: 0.01em;
 }
 
 /*
   VT323 (the retro theme's font) has a much smaller x-height than the
-  fonts it replaced, so the same declared sizes read noticeably smaller
+  fonts it replaces, so the same declared sizes read noticeably smaller
   everywhere. Scaling the root font-size up ~12% rather than hunting down
   every text-* utility in every component scales the whole UI together —
   Tailwind's spacing and sizing utilities are rem-based by default, so
   paddings/gaps/icon sizes grow right along with the text instead of the
   text outgrowing its own boxes.
 */
-html {
+html[data-retro="true"] {
   font-size: 112.5%;
 }
 
@@ -96,16 +151,16 @@ html {
   "teletext" rather than just "a recolored version of the normal app" —
   it's the single biggest visual tell, more than the palette.
 */
-* {
+html[data-retro="true"] * {
   border-radius: 0 !important;
 }
 
 /*
   Teletext's classic "rainbow title" lettering (each letter of a masthead
-  in a different color) — used on the "19League" brand text. nth-child
-  cycles through the app's own existing status colors (rather than
-  hardcoding hex values of its own), so it stays in sync with whatever the
-  light/dark toggle currently has those tokens set to.
+  in a different color) — used on the "19League" brand text in retro mode.
+  nth-child cycles through the app's own existing status colors (rather
+  than hardcoding hex values of its own), so it stays in sync with whatever
+  the light/dark toggle currently has those tokens set to.
 */
 .rainbow-title span:nth-child(8n + 1) {
   color: var(--color-live);
@@ -245,4 +300,58 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
+/*
+  A shine that continuously sweeps around a game card's border on
+  ScoresPage once one of its teams' scores is worth calling out — hit 19,
+  or is one score away at 12/16. Applied via the padding-box trick: this
+  class sits on an outer wrapper with a 1px padding (matching every other
+  card's plain 1px border, so a highlighted card isn't visibly thicker
+  than the rest), an oversized diagonal gradient as its background, and
+  the real card (opaque bg-panel) inside covering everything except that
+  1px ring, so only the border itself shows the moving shine.
 
+  A conic-gradient (sweeping by angle from a center point) only traces a
+  border evenly on a circle or square — on a card this wide and short it
+  would look like the shine orbits the center rather than following the
+  actual rectangle edge. Panning a linear-gradient's background position
+  instead works correctly at any aspect ratio.
+
+  The pan range (-100% to 100% against a 200%-wide background) is the
+  standard seamless-shimmer trick: at both endpoints the gradient's bright
+  band sits fully outside the visible box (off to one side), so the loop
+  restart happens while nothing is showing but transparent — no jump or
+  flicker where earlier ranges left the band still partway visible when
+  the animation reset.
+
+  background-color (rather than leaving the ring bare) fills in behind the
+  gradient's own transparent stops, so the ring reads as the same plain
+  grey border every other card has the rest of the time, with the colored
+  shine passing over it — instead of the border disappearing entirely
+  whenever the moving band isn't currently over a given edge.
+*/
+@keyframes shine-pan {
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+
+.shine-border {
+  background-color: var(--color-line);
+  background-size: 200% 100%;
+  animation: shine-pan 2.4s linear infinite;
+}
+
+.shine-win {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-win) 50%, transparent 65%);
+}
+
+.shine-hit-live {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-led) 50%, transparent 65%);
+}
+
+.shine-watch {
+  background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
+}

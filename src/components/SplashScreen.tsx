@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { teletext } from "@/lib/fonts";
+import { leagueGothic, teletext } from "@/lib/fonts";
+import { useRetroMode } from "@/lib/retroMode";
 
 // Matches the app icon's green/near-black — literal hex rather than the
 // theme's --color-* tokens so the splash looks the same in light or dark
@@ -67,6 +68,7 @@ function charStyle(delay: number, visible: boolean): React.CSSProperties {
 // once per real page load — client-side tab navigation never remounts it,
 // so switching tabs never re-triggers it).
 export default function SplashScreen() {
+  const retro = useRetroMode();
   const [phase, setPhase] = useState<Phase>("pre");
   const leagueRef = useRef<HTMLSpanElement>(null);
   const nineteenRef = useRef<HTMLSpanElement>(null);
@@ -153,7 +155,7 @@ export default function SplashScreen() {
       }}
     >
       <div
-        className={`${teletext.className} flex whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
+        className={`${retro ? teletext.className : leagueGothic.className} flex whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
         style={{ fontWeight: 700 }}
       >
         <span ref={nineteenRef} className="inline-block">

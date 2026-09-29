@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { POT_VENMO_USERNAME } from "@/lib/pool";
 import Skeleton from "@/components/Skeleton";
-import { teletext } from "@/lib/fonts";
+import { leagueGothic, teletext } from "@/lib/fonts";
+import { useRetroMode } from "@/lib/retroMode";
 
 interface WinnerDTO {
   player: { id: string; name: string };
@@ -157,6 +158,7 @@ function WeekCard({ week }: { week: WeekSummaryDTO }) {
 export default function PotPage() {
   const [data, setData] = useState<PotResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const retro = useRetroMode();
 
   useEffect(() => {
     fetch("/api/pot", { cache: "no-store" })
@@ -171,7 +173,9 @@ export default function PotPage() {
         <div className="text-xs font-semibold uppercase tracking-widest text-led">
           Current Pot
         </div>
-        <div className={`${teletext.className} text-6xl leading-none tracking-wide tabular-nums text-led`}>
+        <div
+          className={`${retro ? teletext.className : leagueGothic.className} text-6xl leading-none tracking-wide tabular-nums text-led`}
+        >
           {data ? (
             money(data.summary.currentPot)
           ) : (

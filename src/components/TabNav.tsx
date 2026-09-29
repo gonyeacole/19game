@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
+import { useRetroMode } from "@/lib/retroMode";
 
 export const TABS = [
   {
@@ -418,6 +419,7 @@ function ChatSheet({
 export default function TabNav() {
   const pathname = usePathname();
   const [chatExpanded, setChatExpanded] = useState(false);
+  const retro = useRetroMode();
 
   return (
     <nav
@@ -440,16 +442,21 @@ export default function TabNav() {
           <ul className="mx-auto grid max-w-lg grid-cols-4">
             {TABS.map((tab) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              // Text-only, unlike the main app's tab bar — the retro theme
-              // drops the icons, but otherwise this matches the main app's
-              // own tab bar exactly (single dark background, the active
-              // tab picked out in the app's one accent color).
-              const className = `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                active ? "text-led" : "text-icon"
-              }`;
+              // Retro drops the icons and centers the label, text-only —
+              // otherwise this matches the main app's own tab bar exactly
+              // (single dark background, the active tab picked out in the
+              // app's one accent color).
+              const className = retro
+                ? `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                    active ? "text-led" : "text-icon"
+                  }`
+                : `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
+                    active ? "text-led" : "text-icon"
+                  }`;
               return (
                 <li key={tab.href}>
                   <Link href={tab.href} className={className}>
+                    {!retro && <span className="h-6 w-6">{tab.icon}</span>}
                     {tab.label}
                   </Link>
                 </li>

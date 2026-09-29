@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
-import { teletext } from "@/lib/fonts";
+import { leagueGothic, teletext } from "@/lib/fonts";
+import { useRetroMode } from "@/lib/retroMode";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -67,6 +69,190 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   watch: "text-live",
 };
 
+// The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
+// "at" for a middot to match the compact ticker style.
+function formatSituation(situation: string): string {
+  return situation.replace(/ at /i, " · ");
+}
+
+/* ---------- Normal theme: card-based layout ---------- */
+
+// If both teams somehow trigger a highlight at once, a win/hit-19 takes
+// priority over a watch score for which color the card's shine matches.
+function cardHighlight(
+  a: "win" | "hit-live" | "watch" | null,
+  b: "win" | "hit-live" | "watch" | null
+): "win" | "hit-live" | "watch" | null {
+  for (const h of [a, b]) {
+    if (h === "win" || h === "hit-live") return h;
+  }
+  return a ?? b;
+}
+
+function PossessionTriangle({ side }: { side: "left" | "right" }) {
+  return (
+    <span
+      className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-y-transparent ${
+        side === "left"
+          ? "-left-1.5 border-r-[7px] border-r-chalk"
+          : "-right-1.5 border-l-[7px] border-l-chalk"
+      }`}
+    />
+  );
+}
+
+function TickerSide({
+  team,
+  score,
+  status,
+  reverse,
+  showNames,
+}: {
+  team: TeamDTO;
+  score: number;
+  status: GameDTO["status"];
+  reverse?: boolean;
+  showNames: boolean;
+}) {
+  const highlight = rowHighlight(score, status);
+
+  return (
+    <div
+      className={`flex min-w-0 flex-1 items-center justify-start gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+    >
+      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
+        {team.logoUrl ? (
+          <Image src={team.logoUrl} alt="" width={36} height={36} unoptimized />
+        ) : (
+          <div className="h-9 w-9 rounded-full bg-panel-3" />
+        )}
+        <span
+          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none text-chalk`}
+          style={{ fontWeight: 700 }}
+        >
+          {team.name.split(" ").at(-1)}
+        </span>
+        {showNames && (
+          <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
+            {team.player ? team.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
+      {status !== "SCHEDULED" && (
+        <div
+          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${
+            highlight ? TEXT_COLOR[highlight] : "text-chalk"
+          }`}
+          style={{ fontWeight: 700 }}
+        >
+          {score}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function centerLines(game: GameDTO): { line1: string; line2: string | null } {
+  if (game.status === "SCHEDULED" && game.startTime) {
+    const date = new Date(game.startTime);
+    const timeZone = "America/Chicago";
+    return {
+      line1: date.toLocaleString(undefined, { weekday: "short", timeZone }),
+      line2: date.toLocaleString(undefined, {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+        timeZone,
+      }),
+    };
+  }
+  // The sheet's own situation text for a finished game (e.g. "Game Over")
+  // varies and isn't ours to control — show a consistent label instead.
+  if (game.status === "FINAL") return { line1: "Final", line2: null };
+  return {
+    line1: game.statusDetail || game.status,
+    line2: game.situation ? formatSituation(game.situation) : null,
+  };
+}
+
+// Mirrors TickerSide's stacked logo/name/player-name column plus the score
+// box so the skeleton's height matches the real card — a flatter skeleton
+// here previously rendered noticeably shorter than loaded content, causing
+// a layout jump even when the placeholder count was right.
+function SkeletonSide({ reverse }: { reverse?: boolean }) {
+  return (
+    <div
+      className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
+    >
+      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
+        <Skeleton className="h-9 w-9" rounded="rounded-full" />
+        <Skeleton className="h-3 w-14" />
+        <Skeleton className="mt-0.5 h-[14px] w-16" rounded="rounded-full" />
+      </div>
+      <Skeleton className="h-10 w-6" />
+    </div>
+  );
+}
+
+function GameCardSkeleton() {
+  return (
+    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
+      <SkeletonSide />
+      <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
+        <Skeleton className="h-3.5 w-16" />
+        <Skeleton className="h-2.5 w-20" />
+      </div>
+      <SkeletonSide reverse />
+    </div>
+  );
+}
+
+function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
+  const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
+  const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
+  const { line1, line2 } = centerLines(game);
+  const highlight = cardHighlight(
+    rowHighlight(game.awayScore, game.status),
+    rowHighlight(game.homeScore, game.status)
+  );
+
+  const card = (
+    <div
+      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${
+        highlight ? "border-transparent" : "border-line"
+      }`}
+    >
+      <TickerSide
+        team={game.awayTeam}
+        score={game.awayScore}
+        status={game.status}
+        showNames={showNames}
+      />
+      <div className="relative w-28 shrink-0 text-center">
+        {awayHasBall && <PossessionTriangle side="left" />}
+        {homeHasBall && <PossessionTriangle side="right" />}
+        <div className="whitespace-nowrap text-sm font-extrabold leading-tight text-chalk">
+          {line1}
+        </div>
+        {line2 && <div className="truncate text-[10px] leading-tight text-chalk">{line2}</div>}
+      </div>
+      <TickerSide
+        team={game.homeTeam}
+        score={game.homeScore}
+        status={game.status}
+        reverse
+        showNames={showNames}
+      />
+    </div>
+  );
+
+  if (!highlight) return card;
+
+  return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
+}
+
+/* ---------- Retro theme: flat teletext table ---------- */
+
 // A small "on the ball" marker — teletext vidiprinter tables have no room
 // for a logo or a floating triangle, so this rides inline with the team
 // name text instead, pointing toward the scoreboard in the middle.
@@ -74,15 +260,8 @@ function PossessionMark({ side }: { side: "left" | "right" }) {
   return <span className={`text-chalk-faint ${side === "left" ? "mr-1" : "ml-1"}`}>{side === "left" ? "▸" : "◂"}</span>;
 }
 
-// The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
-// "at" for a middot to match the compact ticker style, kept for a title
-// attribute on live rows since there's no second line to show it on.
-function formatSituation(situation: string): string {
-  return situation.replace(/ at /i, " · ");
-}
-
 // A single line of status text per game — a teletext scores table has one
-// column for this, not the two-line stack the old card format used.
+// column for this, not the two-line stack the card format used.
 function statusText(game: GameDTO): string {
   if (game.status === "SCHEDULED" && game.startTime) {
     const date = new Date(game.startTime);
@@ -170,6 +349,7 @@ function GameRow({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 }
 
 export default function ScoresPage() {
+  const retro = useRetroMode();
   const [seasonYear, setSeasonYear] = useState<number | null>(null);
   const [weekNumber, setWeekNumber] = useState<number | null>(null);
   const [games, setGames] = useState<GameDTO[] | null>(null);
@@ -313,13 +493,13 @@ export default function ScoresPage() {
       )}
 
       {loading && !games ? (
-        <div className="flex flex-col">
+        <div className={retro ? "flex flex-col" : "flex flex-col gap-3"}>
           {/* A full NFL week has 16 games (fewer once bye weeks start) —
               matching that count avoids the large layout shift a smaller
               placeholder count would cause once real data loads. */}
-          {Array.from({ length: 16 }).map((_, i) => (
-            <GameRowSkeleton key={i} />
-          ))}
+          {Array.from({ length: 16 }).map((_, i) =>
+            retro ? <GameRowSkeleton key={i} /> : <GameCardSkeleton key={i} />
+          )}
         </div>
       ) : filteredGames && filteredGames.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">
@@ -336,16 +516,18 @@ export default function ScoresPage() {
             if (!gamesForStatus || gamesForStatus.length === 0) return null;
             const expanded = expandedStatuses.has(status);
             return (
-              <div key={status} className="flex flex-col gap-1.5">
+              <div key={status} className={`flex flex-col ${retro ? "gap-1.5" : "gap-3"}`}>
                 <div
                   className={`flex items-center justify-between ${
-                    status === "IN_PROGRESS" ? "" : "mt-3"
+                    status === "IN_PROGRESS" ? "" : retro ? "mt-3" : "mt-2"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggleSection(status)}
-                    className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-win"
+                    className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide ${
+                      retro ? "text-win" : "text-chalk-faint"
+                    }`}
                   >
                     {STATUS_SECTION_LABEL[status]}
                     <svg
@@ -387,13 +569,18 @@ export default function ScoresPage() {
                     </button>
                   )}
                 </div>
-                {expanded && (
-                  <div className="flex flex-col">
-                    {gamesForStatus.map((g) => (
-                      <GameRow key={g.id} game={g} showNames={showNames} />
-                    ))}
-                  </div>
-                )}
+                {expanded &&
+                  (retro ? (
+                    <div className="flex flex-col">
+                      {gamesForStatus.map((g) => (
+                        <GameRow key={g.id} game={g} showNames={showNames} />
+                      ))}
+                    </div>
+                  ) : (
+                    gamesForStatus.map((g) => (
+                      <GameCard key={g.id} game={g} showNames={showNames} />
+                    ))
+                  ))}
               </div>
             );
           })}
