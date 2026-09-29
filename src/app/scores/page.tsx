@@ -321,11 +321,12 @@ function ScoreBugTeamLine({
       )}
       <div className="min-w-0 flex-1">
         <span
-          className="block truncate text-xl uppercase leading-none tracking-tight text-caution"
+          className="block truncate text-xl uppercase leading-none tracking-wide"
           style={{
             fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontStyle: "italic",
             fontWeight: 700,
+            color: "#ffe873",
           }}
         >
           {hasBall && <span className="mr-1 not-italic text-live">●</span>}
@@ -339,10 +340,14 @@ function ScoreBugTeamLine({
       </div>
       {showScore && (
         <span
-          className={`${leagueGothic.className} shrink-0 text-2xl leading-none tabular-nums ${
+          className={`shrink-0 text-2xl leading-none tabular-nums ${
             highlight ? TEXT_COLOR[highlight] : "text-chalk"
           }`}
-          style={{ fontStyle: "italic", fontWeight: 700 }}
+          style={{
+            fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontStyle: "italic",
+            fontWeight: 700,
+          }}
         >
           {score}
         </span>
@@ -353,9 +358,9 @@ function ScoreBugTeamLine({
 
 // The two teams stacked on top of each other on the left (logo + name +
 // score per line) rather than split to opposite sides — a sports
-// broadcast's lower-third score bug, not a teletext vidiprinter row. A red
-// rule (the reference graphic's own underline accent) divides the two
-// teams instead of running under just one line of text.
+// broadcast's lower-third score bug, not a teletext vidiprinter row. A
+// dotted rule divides the two teams instead of running under just one
+// line of text.
 function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHighlight = rowHighlight(game.awayScore, game.status);
   const homeHighlight = rowHighlight(game.homeScore, game.status);
@@ -376,7 +381,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         highlight={awayHighlight}
         showNames={showNames}
       />
-      <div className="mx-3 h-0.5 bg-live" />
+      <div className="mx-3 border-t-2 border-dotted border-chalk" />
       <ScoreBugTeamLine
         team={game.homeTeam}
         score={game.homeScore}

@@ -78,7 +78,7 @@ html[data-retro="true"] {
   --color-panel-3: #141414;
   --color-line: #4d4d4d;
   --color-chalk: #ffffff;
-  --color-chalk-dim: #00ffff;
+  --color-chalk-dim: #ffffff;
   --color-chalk-faint: #6b6b6b;
   --color-placeholder: #5a5a5a;
   --color-led: #00cc66;
@@ -103,7 +103,7 @@ html[data-retro="true"][data-theme="light"] {
   --color-panel-3: #141414;
   --color-line: #4d4d4d;
   --color-chalk: #ffffff;
-  --color-chalk-dim: #99ccff;
+  --color-chalk-dim: #ffffff;
   --color-chalk-faint: #4d6b80;
   --color-placeholder: #5a5a5a;
   --color-led: #00e5ff;
