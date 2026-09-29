@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import AnnouncementBell from "@/components/AnnouncementBell";
+import SectionBadge from "@/components/SectionBadge";
 import { inter, teletext } from "@/lib/fonts";
 import "./globals.css";
 
@@ -148,6 +149,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <AnnouncementBell />
             </div>
           </div>
+          <SectionBadge />
         </header>
         {/*
           min-h forces every page to be at least a little taller than the

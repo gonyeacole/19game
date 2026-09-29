@@ -116,6 +116,17 @@ body {
 }
 
 /*
+  A hard offset drop shadow (no blur) for that teletext-masthead "poster
+  lettering" pop — e.g. Ceefax's colored section boxes ("FOOTBALL",
+  "NFL"). A fixed dark shadow rather than one of the theme's own colors so
+  it reads against any of the section badge's four background colors,
+  instead of one variant of it disappearing against a same-hued box.
+*/
+.teletext-3d-text {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+}
+
+/*
   A normal Safari tab already reserves its own space around the home
   indicator, so env(safe-area-inset-*) padding on top of that just adds an
   oversized gap. Only add it when actually running standalone (added to the
@@ -215,61 +226,5 @@ html[data-standalone="true"] .chat-viewport {
     100dvh - 3.5rem - var(--tabnav-clearance) - var(--keyboard-inset, 0px) -
       env(safe-area-inset-top)
   );
-}
-
-/*
-  A shine that continuously sweeps around a game card's border on
-  ScoresPage once one of its teams' scores is worth calling out — hit 19,
-  or is one score away at 12/16. Applied via the padding-box trick: this
-  class sits on an outer wrapper with a 1px padding (matching every other
-  card's plain 1px border, so a highlighted card isn't visibly thicker
-  than the rest), an oversized diagonal gradient as its background, and
-  the real card (opaque bg-panel) inside covering everything except that
-  1px ring, so only the border itself shows the moving shine.
-
-  A conic-gradient (sweeping by angle from a center point) only traces a
-  border evenly on a circle or square — on a card this wide and short it
-  would look like the shine orbits the center rather than following the
-  actual rectangle edge. Panning a linear-gradient's background position
-  instead works correctly at any aspect ratio.
-
-  The pan range (-100% to 100% against a 200%-wide background) is the
-  standard seamless-shimmer trick: at both endpoints the gradient's bright
-  band sits fully outside the visible box (off to one side), so the loop
-  restart happens while nothing is showing but transparent — no jump or
-  flicker where earlier ranges left the band still partway visible when
-  the animation reset.
-
-  background-color (rather than leaving the ring bare) fills in behind the
-  gradient's own transparent stops, so the ring reads as the same plain
-  grey border every other card has the rest of the time, with the colored
-  shine passing over it — instead of the border disappearing entirely
-  whenever the moving band isn't currently over a given edge.
-*/
-@keyframes shine-pan {
-  from {
-    background-position: -100% 0;
-  }
-  to {
-    background-position: 100% 0;
-  }
-}
-
-.shine-border {
-  background-color: var(--color-line);
-  background-size: 200% 100%;
-  animation: shine-pan 2.4s linear infinite;
-}
-
-.shine-win {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-win) 50%, transparent 65%);
-}
-
-.shine-hit-live {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-led) 50%, transparent 65%);
-}
-
-.shine-watch {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
 }
 

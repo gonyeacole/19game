@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
 
-const TABS = [
+export const TABS = [
   {
     href: "/scores",
     label: "Scores",
@@ -75,7 +75,7 @@ const TABS = [
 // CRICKET/GAMES as four flat colored bars) rather than one accent color
 // applied to whichever tab is active. Spelled out as literal class names
 // (not built from tab.color at runtime) so Tailwind's scanner can see them.
-const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
+export const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
   live: "bg-live",
   win: "bg-win",
   caution: "bg-caution",
@@ -84,7 +84,7 @@ const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
 
 // White label text reads fine on the red/green/cyan blocks but not on the
 // caution block's bright yellow — that one needs dark text instead.
-const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
+export const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
   live: "text-white",
   win: "text-white",
   caution: "text-pill-text",
