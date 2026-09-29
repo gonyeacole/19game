@@ -436,13 +436,18 @@ export default function TabNav() {
         no leftover gap for anything (real page or otherwise) to occupy.
       */}
       {!chatExpanded && (
-        <div className="safe-bottom">
+        <div className="safe-bottom border-t border-line bg-field">
           <ul className="mx-auto grid max-w-lg grid-cols-4">
             {TABS.map((tab) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              const className = `flex flex-col items-center justify-center gap-0.5 border-t-2 py-2.5 text-xs font-bold uppercase tracking-wide ${
-                TAB_BG[tab.color]
-              } ${TAB_TEXT[tab.color]} ${active ? "border-white" : "border-transparent"}`;
+              // Text-only, unlike the main app's tab bar — the retro theme
+              // drops the icons, but otherwise this matches the main app's
+              // own tab bar exactly (single dark background, the active
+              // tab picked out in the app's one accent color) rather than
+              // the four-color Ceefax-style block bar tried earlier.
+              const className = `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                active ? "text-led" : "text-icon"
+              }`;
               return (
                 <li key={tab.href}>
                   <Link href={tab.href} className={className}>
