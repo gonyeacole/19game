@@ -321,8 +321,12 @@ function ScoreBugTeamLine({
       )}
       <div className="min-w-0 flex-1">
         <span
-          className={`${leagueGothic.className} block truncate text-xl uppercase leading-none tracking-tight text-caution`}
-          style={{ fontStyle: "italic", fontWeight: 700 }}
+          className="block truncate text-xl uppercase leading-none tracking-tight text-caution"
+          style={{
+            fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontStyle: "italic",
+            fontWeight: 700,
+          }}
         >
           {hasBall && <span className="mr-1 not-italic text-live">●</span>}
           {team.name}
