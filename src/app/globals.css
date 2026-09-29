@@ -64,6 +64,19 @@
   --color-icon: #85827c;
 }
 
+/*
+  VT323 (the retro theme's font) has a much smaller x-height than the
+  fonts it replaced, so the same declared sizes read noticeably smaller
+  everywhere. Scaling the root font-size up ~12% rather than hunting down
+  every text-* utility in every component scales the whole UI together —
+  Tailwind's spacing and sizing utilities are rem-based by default, so
+  paddings/gaps/icon sizes grow right along with the text instead of the
+  text outgrowing its own boxes.
+*/
+html {
+  font-size: 112.5%;
+}
+
 body {
   background: var(--color-field);
   color: var(--color-chalk);
