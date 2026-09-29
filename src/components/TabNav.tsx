@@ -440,9 +440,9 @@ export default function TabNav() {
           <ul className="mx-auto grid max-w-lg grid-cols-4">
             {TABS.map((tab) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              const className = `flex flex-col items-center justify-center gap-0.5 border-t-2 py-2.5 text-xs font-bold uppercase tracking-wide transition-opacity ${
+              const className = `flex flex-col items-center justify-center gap-0.5 border-t-2 py-2.5 text-xs font-bold uppercase tracking-wide ${
                 TAB_BG[tab.color]
-              } ${TAB_TEXT[tab.color]} ${active ? "border-white opacity-100" : "border-transparent opacity-60"}`;
+              } ${TAB_TEXT[tab.color]} ${active ? "border-white" : "border-transparent"}`;
               return (
                 <li key={tab.href}>
                   <Link href={tab.href} className={className}>
