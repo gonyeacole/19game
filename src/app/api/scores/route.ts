@@ -56,23 +56,60 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid year or week" }, { status: 400 });
   }
 
-  // Only auto-roll when the client asked for "the current week" (no
-  // explicit week param, i.e. a fresh app open) — manually browsing to an
-  // old, fully-final week should still show that week, not bounce forward.
-  if (searchParams.get("week") == null) {
-    weekNumber = await rollPastFinishedWeek(seasonYear, weekNumber);
-  }
-
   let synced = true;
   let syncError: string | null = null;
-  try {
-    await syncWeekScores(seasonYear, weekNumber);
-  } catch (err) {
-    console.error("Score sync failed:", err);
-    synced = false;
-    syncError = err instanceof Error ? err.message : String(err);
-    // Fall through and serve whatever is already in the DB — the UI can
-    // still show stale data with a "couldn't refresh" indicator.
+  const trySync = async (week: number, options?: { force?: boolean }) => {
+    try {
+      await syncWeekScores(seasonYear, week, options);
+    } catch (err) {
+      console.error("Score sync failed:", err);
+      synced = false;
+      syncError = err instanceof Error ? err.message : String(err);
+      // Fall through and serve whatever is already in the DB — the UI can
+      // still show stale data with a "couldn't refresh" indicator.
+    }
+  };
+
+  // Only auto-adjust when the client asked for "the current week" (no
+  // explicit week param, i.e. a fresh app open) — manually browsing to a
+  // specific week should always show exactly that week.
+  if (searchParams.get("week") == null) {
+    const naiveWeek = weekNumber;
+    let heldBack = false;
+
+    // getDefaultSeasonAndWeek() picks a week purely from the calendar date
+    // (Tue/Wed already count as the next week, by design — see its own
+    // comment) — it has no idea whether the previous week's slate actually
+    // finished. Force a fresh check of that previous week first: if it's
+    // got a game that isn't FINAL yet (a delayed/rescheduled game pushed
+    // past the usual Monday-night cutoff, say), stay there instead of
+    // skipping ahead of a week that's still actually live.
+    if (naiveWeek > 1) {
+      await trySync(naiveWeek - 1, { force: true });
+      const prevGames = await prisma.game.findMany({
+        where: { week: { seasonYear, weekNumber: naiveWeek - 1 } },
+        select: { status: true },
+      });
+      if (prevGames.length > 0 && !prevGames.every((g) => g.status === "FINAL")) {
+        weekNumber = naiveWeek - 1;
+        heldBack = true;
+      }
+    }
+
+    if (!heldBack) {
+      // The previous week's done (or has no synced data yet) — separately,
+      // the naive week itself might already be fully done extra early;
+      // force-refresh and nudge forward a week in that case rather than
+      // waiting for the calendar to catch up.
+      await trySync(weekNumber, { force: true });
+      const rolled = await rollPastFinishedWeek(seasonYear, weekNumber);
+      if (rolled !== weekNumber) {
+        weekNumber = rolled;
+        await trySync(weekNumber);
+      }
+    }
+  } else {
+    await trySync(weekNumber);
   }
 
   const week = await prisma.week.findUnique({

@@ -16,8 +16,20 @@ const LIVE_SYNC_INTERVAL_MS = 20 * 1000;
  * upserts the Week + Game rows in the DB. Safe to call repeatedly (e.g. on a
  * polling interval) — it's idempotent per provider game id, and throttled
  * against the provider itself so frequent polling doesn't burn API quota.
+ *
+ * `force` skips the "every game already FINAL" shortcut below (still
+ * subject to the normal time throttle) — for the one caller that can't
+ * afford to trust a week that looks done: deciding whether to roll the
+ * default week forward past it. Without this, a game whose status was
+ * ever wrongly/prematurely reported FINAL (a provider hiccup, a delayed or
+ * rescheduled game) stays stuck that way forever, since a fully-FINAL week
+ * is exactly the case this shortcut exists to stop re-fetching.
  */
-export async function syncWeekScores(seasonYear: number, weekNumber: number) {
+export async function syncWeekScores(
+  seasonYear: number,
+  weekNumber: number,
+  options: { force?: boolean } = {}
+) {
   const existing = await prisma.week.findUnique({
     where: { seasonYear_weekNumber: { seasonYear, weekNumber } },
     include: { games: true },
@@ -40,7 +52,8 @@ export async function syncWeekScores(seasonYear: number, weekNumber: number) {
     existing.lastSyncedAt != null &&
     Date.now() - existing.lastSyncedAt.getTime() < syncInterval;
 
-  if (existing && (allGamesFinal || syncedRecently)) {
+  const skip = options.force ? syncedRecently : allGamesFinal || syncedRecently;
+  if (existing && skip) {
     return { week: existing, games: existing.games };
   }
 
