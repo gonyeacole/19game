@@ -1,65 +1,146 @@
 @import "tailwindcss";
 
 /*
-  Dark "scoreboard" theme — the default. Plain @theme (not @theme inline)
-  so utilities reference these as CSS variables rather than baking in
-  literal values — required for the light-mode override below to work at
-  runtime via the [data-theme] toggle instead of only at build time.
+  RETRO WEEK — Ceefax/teletext reskin. Temporary, applied over the normal
+  "scoreboard" theme at the user's request; revert to the block in git
+  history (before this comment) to restore the standard palette.
+
+  Real teletext (Ceefax's football tables and vidiprinter especially) is:
+  pure black background, a strict 8-color palette used completely flat (no
+  gradient, no blur/glow — CRT phosphor bloom was a side effect of the
+  hardware, not the graphic design), a monospace low-res character grid,
+  and every box a hard, unrounded rectangle. Dark mode uses the classic
+  green-primary Ceefax scheme; light mode swaps to a blue/cyan-primary one
+  (teletext itself has no real "light mode," so the toggle switches which
+  page's palette you're on instead of switching brightness) — still two
+  distinct, on-brand looks. Plain @theme (not @theme inline) so utilities
+  reference these as CSS variables rather than baking in literal values —
+  required for the light-mode override below to work at runtime via the
+  [data-theme] toggle instead of only at build time.
 */
 @theme {
-  --color-field: #0a0a0a;
-  --color-panel: #151515;
-  --color-panel-2: #1d1d1d;
-  --color-panel-3: #262626;
-  --color-line: #363636;
-  --color-chalk: #f0f0ee;
-  --color-chalk-dim: #f0f0ee;
-  --color-chalk-faint: #f0f0ee;
-  --color-placeholder: #727270;
-  --color-led: #00dd94;
-  --color-led-bg: #132420;
-  --color-win: #4ecb8c;
-  --color-win-bg: #17281f;
-  --color-caution: #e08a3c;
-  --color-caution-bg: #2c2318;
-  --color-live: #ff5c4d;
-  --color-live-bg: #2e1a16;
-  --color-venmo: #3d95ce;
-  --color-search-bg: #1d1d1d;
-  --color-pill-text: #08150e;
-  --color-icon: #727270;
-  --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #00ffff;
+  --color-chalk-faint: #6b6b6b;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00cc66;
+  --color-led-bg: #001a0d;
+  --color-win: #00ff00;
+  --color-win-bg: #001a00;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff0000;
+  --color-live-bg: #1a0000;
+  --color-venmo: #00ffff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
+  --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 /* Light theme — same token names, overridden when the toggle picks it. */
 :root[data-theme="light"] {
-  --color-field: #f5f5f4;
-  --color-panel: #ffffff;
-  --color-panel-2: #f2f1ef;
-  --color-panel-3: #e7e5e2;
-  --color-line: #d9d7d3;
-  --color-chalk: #19181a;
-  --color-chalk-dim: #19181a;
-  --color-chalk-faint: #19181a;
-  --color-placeholder: #85827c;
-  --color-led: #00b67a;
-  --color-led-bg: #e3f9f1;
-  --color-win: #1f9d5c;
-  --color-win-bg: #e3f7ec;
-  --color-caution: #b4610f;
-  --color-caution-bg: #fdefdf;
-  --color-live: #d9392a;
-  --color-live-bg: #fdeceb;
-  --color-venmo: #2f83bb;
-  --color-search-bg: #ffffff;
-  --color-pill-text: #ffffff;
-  --color-icon: #85827c;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #99ccff;
+  --color-chalk-faint: #4d6b80;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00e5ff;
+  --color-led-bg: #001a1a;
+  --color-win: #00ffff;
+  --color-win-bg: #001a1a;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff00ff;
+  --color-live-bg: #1a001a;
+  --color-venmo: #3d95ff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
 }
 
 body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+  letter-spacing: 0.01em;
+}
+
+/*
+  VT323 (the retro theme's font) has a much smaller x-height than the
+  fonts it replaced, so the same declared sizes read noticeably smaller
+  everywhere. Scaling the root font-size up ~12% rather than hunting down
+  every text-* utility in every component scales the whole UI together —
+  Tailwind's spacing and sizing utilities are rem-based by default, so
+  paddings/gaps/icon sizes grow right along with the text instead of the
+  text outgrowing its own boxes.
+*/
+html {
+  font-size: 112.5%;
+}
+
+/*
+  Teletext graphics are built entirely from hard rectangular character
+  cells — there's no such thing as a rounded corner on a real teletext
+  page. Forcing every corner square (rather than editing each component's
+  rounded-* utility class individually) is what actually reads as
+  "teletext" rather than just "a recolored version of the normal app" —
+  it's the single biggest visual tell, more than the palette.
+*/
+* {
+  border-radius: 0 !important;
+}
+
+/*
+  Teletext's classic "rainbow title" lettering (each letter of a masthead
+  in a different color) — used on the "19League" brand text. nth-child
+  cycles through the app's own existing status colors (rather than
+  hardcoding hex values of its own), so it stays in sync with whatever the
+  light/dark toggle currently has those tokens set to.
+*/
+.rainbow-title span:nth-child(8n + 1) {
+  color: var(--color-live);
+}
+.rainbow-title span:nth-child(8n + 2) {
+  color: var(--color-caution);
+}
+.rainbow-title span:nth-child(8n + 3) {
+  color: var(--color-win);
+}
+.rainbow-title span:nth-child(8n + 4) {
+  color: var(--color-led);
+}
+.rainbow-title span:nth-child(8n + 5) {
+  color: var(--color-chalk-dim);
+}
+.rainbow-title span:nth-child(8n + 6) {
+  color: var(--color-venmo);
+}
+.rainbow-title span:nth-child(8n + 7) {
+  color: var(--color-chalk);
+}
+.rainbow-title span:nth-child(8n + 8) {
+  color: var(--color-caution);
+}
+
+/*
+  A hard offset drop shadow (no blur) for that teletext-masthead "poster
+  lettering" pop — e.g. Ceefax's colored section boxes ("FOOTBALL",
+  "NFL"). A fixed dark shadow rather than one of the theme's own colors so
+  it reads against any of the section badge's four background colors,
+  instead of one variant of it disappearing against a same-hued box.
+*/
+.teletext-3d-text {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
 }
 
 /*
@@ -164,59 +245,4 @@ html[data-standalone="true"] .chat-viewport {
   );
 }
 
-/*
-  A shine that continuously sweeps around a game card's border on
-  ScoresPage once one of its teams' scores is worth calling out — hit 19,
-  or is one score away at 12/16. Applied via the padding-box trick: this
-  class sits on an outer wrapper with a 1px padding (matching every other
-  card's plain 1px border, so a highlighted card isn't visibly thicker
-  than the rest), an oversized diagonal gradient as its background, and
-  the real card (opaque bg-panel) inside covering everything except that
-  1px ring, so only the border itself shows the moving shine.
-
-  A conic-gradient (sweeping by angle from a center point) only traces a
-  border evenly on a circle or square — on a card this wide and short it
-  would look like the shine orbits the center rather than following the
-  actual rectangle edge. Panning a linear-gradient's background position
-  instead works correctly at any aspect ratio.
-
-  The pan range (-100% to 100% against a 200%-wide background) is the
-  standard seamless-shimmer trick: at both endpoints the gradient's bright
-  band sits fully outside the visible box (off to one side), so the loop
-  restart happens while nothing is showing but transparent — no jump or
-  flicker where earlier ranges left the band still partway visible when
-  the animation reset.
-
-  background-color (rather than leaving the ring bare) fills in behind the
-  gradient's own transparent stops, so the ring reads as the same plain
-  grey border every other card has the rest of the time, with the colored
-  shine passing over it — instead of the border disappearing entirely
-  whenever the moving band isn't currently over a given edge.
-*/
-@keyframes shine-pan {
-  from {
-    background-position: -100% 0;
-  }
-  to {
-    background-position: 100% 0;
-  }
-}
-
-.shine-border {
-  background-color: var(--color-line);
-  background-size: 200% 100%;
-  animation: shine-pan 2.4s linear infinite;
-}
-
-.shine-win {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-win) 50%, transparent 65%);
-}
-
-.shine-hit-live {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-led) 50%, transparent 65%);
-}
-
-.shine-watch {
-  background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
-}
 

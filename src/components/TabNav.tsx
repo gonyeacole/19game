@@ -6,10 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
 
-const TABS = [
+export const TABS = [
   {
     href: "/scores",
     label: "Scores",
+    color: "live",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="16" height="10" rx="1.5" />
@@ -24,6 +25,7 @@ const TABS = [
   {
     href: "/teams",
     label: "Teams",
+    color: "win",
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor">
         <path d="M6.5 2.3 3 4.4 1.4 8l2.5 1.5 1.6-1.2V17a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8.3l1.6 1.2L18.6 8 17 4.4l-3.5-2.1-1.7 1.2a2.3 2.3 0 0 1-3.6 0Z" />
@@ -36,6 +38,7 @@ const TABS = [
   {
     href: "/pot",
     label: "Pot",
+    color: "caution",
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor">
         <path d="M6 6 L7.2 3.5 L12.8 3.5 L14 6 Q17 9.5 17 13 Q17 17.5 10 17.5 Q3 17.5 3 13 Q3 9.5 6 6 Z" />
@@ -48,6 +51,7 @@ const TABS = [
   {
     href: "/admin",
     label: "Admin",
+    color: "venmo",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
         <circle cx="10" cy="10" r="4.8" />
@@ -66,6 +70,26 @@ const TABS = [
     ),
   },
 ] as const;
+
+// Used by SectionBadge (the header's colored section banner) — kept even
+// though the tab bar itself renders as a single accent color rather than
+// four distinct blocks, so the header and footer at least agree on which
+// color names which section.
+export const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
+  live: "bg-live",
+  win: "bg-win",
+  caution: "bg-caution",
+  venmo: "bg-venmo",
+};
+
+// White label text reads fine on the red/green/cyan blocks but not on the
+// caution block's bright yellow — that one needs dark text instead.
+export const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
+  live: "text-white",
+  win: "text-white",
+  caution: "text-pill-text",
+  venmo: "text-white",
+};
 
 interface MessageDTO {
   id: string;
@@ -416,13 +440,16 @@ export default function TabNav() {
           <ul className="mx-auto grid max-w-lg grid-cols-4">
             {TABS.map((tab) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
+              // Text-only, unlike the main app's tab bar — the retro theme
+              // drops the icons, but otherwise this matches the main app's
+              // own tab bar exactly (single dark background, the active
+              // tab picked out in the app's one accent color).
+              const className = `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
                 active ? "text-led" : "text-icon"
               }`;
               return (
                 <li key={tab.href}>
                   <Link href={tab.href} className={className}>
-                    <span className="h-6 w-6">{tab.icon}</span>
                     {tab.label}
                   </Link>
                 </li>

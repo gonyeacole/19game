@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { leagueGothic } from "@/lib/fonts";
+import { teletext } from "@/lib/fonts";
 
 // Matches the app icon's green/near-black — literal hex rather than the
 // theme's --color-* tokens so the splash looks the same in light or dark
@@ -153,7 +153,7 @@ export default function SplashScreen() {
       }}
     >
       <div
-        className={`${leagueGothic.className} flex whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
+        className={`${teletext.className} flex whitespace-nowrap text-6xl uppercase leading-none tracking-wide`}
         style={{ fontWeight: 700 }}
       >
         <span ref={nineteenRef} className="inline-block">
