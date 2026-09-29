@@ -5,7 +5,7 @@ import Image from "next/image";
 import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
-import { leagueGothic, teletext } from "@/lib/fonts";
+import { leagueGothic } from "@/lib/fonts";
 import { useRetroMode } from "@/lib/retroMode";
 
 const WINNING_SCORE = 19;
@@ -251,17 +251,9 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
 }
 
-/* ---------- Retro theme: flat teletext table ---------- */
+/* ---------- Retro theme: broadcast-style stacked score bug ---------- */
 
-// A small "on the ball" marker — teletext vidiprinter tables have no room
-// for a logo or a floating triangle, so this rides inline with the team
-// name text instead, pointing toward the scoreboard in the middle.
-function PossessionMark({ side }: { side: "left" | "right" }) {
-  return <span className={`text-chalk-faint ${side === "left" ? "mr-1" : "ml-1"}`}>{side === "left" ? "▸" : "◂"}</span>;
-}
-
-// A single line of status text per game — a teletext scores table has one
-// column for this, not the two-line stack the card format used.
+// A single line of status text per game.
 function statusText(game: GameDTO): string {
   if (game.status === "SCHEDULED" && game.startTime) {
     const date = new Date(game.startTime);
@@ -277,71 +269,119 @@ function statusText(game: GameDTO): string {
   return game.statusDetail || game.status;
 }
 
-function GameRowSkeleton() {
+function ScoreBugSkeleton() {
   return (
-    <div className="flex items-center gap-2 border-b border-line py-2.5">
-      <Skeleton className="h-3.5 flex-1" />
-      <Skeleton className="h-4 w-14 shrink-0" />
-      <Skeleton className="h-3.5 flex-1" />
-      <Skeleton className="h-3 w-10 shrink-0" />
+    <div className="mb-2 flex flex-col gap-1.5 border-l-4 border-line bg-panel-2 px-3 py-2 last:mb-0">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
+        <Skeleton className="h-5 flex-1" />
+        <Skeleton className="h-6 w-8 shrink-0" />
+      </div>
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
+        <Skeleton className="h-5 flex-1" />
+        <Skeleton className="h-6 w-8 shrink-0" />
+      </div>
     </div>
   );
 }
 
-function GameRow({ game, showNames }: { game: GameDTO; showNames: boolean }) {
+// One team's logo/name/score line inside a ScoreBug — a broadcast lower-
+// third's bold italic condensed lettering, in the app's existing "caution"
+// (yellow) and "chalk" (white) tokens rather than the reference image's own
+// literal hex values, so it still tracks the light/dark toggle.
+function ScoreBugTeamLine({
+  team,
+  score,
+  showScore,
+  hasBall,
+  highlight,
+  showNames,
+}: {
+  team: TeamDTO;
+  score: number;
+  showScore: boolean;
+  hasBall: boolean;
+  highlight: "win" | "hit-live" | "watch" | null;
+  showNames: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5">
+      {team.logoUrl ? (
+        <Image
+          src={team.logoUrl}
+          alt=""
+          width={28}
+          height={28}
+          unoptimized
+          className="h-7 w-7 shrink-0 object-contain"
+        />
+      ) : (
+        <div className="h-7 w-7 shrink-0 rounded-full bg-panel-3" />
+      )}
+      <div className="min-w-0 flex-1">
+        <span
+          className={`${leagueGothic.className} block truncate text-xl uppercase leading-none tracking-tight text-caution`}
+          style={{ fontStyle: "italic", fontWeight: 700 }}
+        >
+          {hasBall && <span className="mr-1 not-italic text-live">●</span>}
+          {team.name}
+        </span>
+        {showNames && (
+          <span className="block truncate text-[10px] leading-tight text-chalk-faint">
+            {team.player ? team.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
+      {showScore && (
+        <span
+          className={`${leagueGothic.className} shrink-0 text-2xl leading-none tabular-nums ${
+            highlight ? TEXT_COLOR[highlight] : "text-chalk"
+          }`}
+          style={{ fontStyle: "italic", fontWeight: 700 }}
+        >
+          {score}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// The two teams stacked on top of each other on the left (logo + name +
+// score per line) rather than split to opposite sides — a sports
+// broadcast's lower-third score bug, not a teletext vidiprinter row. A red
+// rule (the reference graphic's own underline accent) divides the two
+// teams instead of running under just one line of text.
+function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHighlight = rowHighlight(game.awayScore, game.status);
   const homeHighlight = rowHighlight(game.homeScore, game.status);
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
+  const showScore = game.status !== "SCHEDULED";
 
   return (
     <div
-      className="flex items-center gap-2 border-b border-line py-2.5 text-sm"
+      className="mb-2 border-l-4 border-live bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className={`${teletext.className} truncate font-bold uppercase text-venmo`}>
-          {awayHasBall && <PossessionMark side="left" />}
-          {game.awayTeam.name}
-        </span>
-        {showNames && (
-          <span className="truncate text-[10px] leading-tight text-chalk-faint">
-            {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
-          </span>
-        )}
-      </div>
-
-      <div
-        className={`${teletext.className} flex w-16 shrink-0 items-center justify-center gap-1 text-lg font-bold tabular-nums`}
-      >
-        {game.status === "SCHEDULED" ? (
-          <span className="text-chalk-faint">@</span>
-        ) : (
-          <>
-            <span className={awayHighlight ? TEXT_COLOR[awayHighlight] : "text-chalk"}>
-              {game.awayScore}
-            </span>
-            <span className="text-chalk-faint">-</span>
-            <span className={homeHighlight ? TEXT_COLOR[homeHighlight] : "text-chalk"}>
-              {game.homeScore}
-            </span>
-          </>
-        )}
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col items-end">
-        <span className={`${teletext.className} truncate font-bold uppercase text-venmo`}>
-          {game.homeTeam.name}
-          {homeHasBall && <PossessionMark side="right" />}
-        </span>
-        {showNames && (
-          <span className="truncate text-[10px] leading-tight text-chalk-faint">
-            {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
-          </span>
-        )}
-      </div>
-
-      <div className="w-14 shrink-0 truncate text-right text-[11px] uppercase text-chalk-faint">
+      <ScoreBugTeamLine
+        team={game.awayTeam}
+        score={game.awayScore}
+        showScore={showScore}
+        hasBall={awayHasBall}
+        highlight={awayHighlight}
+        showNames={showNames}
+      />
+      <div className="mx-3 h-0.5 bg-live" />
+      <ScoreBugTeamLine
+        team={game.homeTeam}
+        score={game.homeScore}
+        showScore={showScore}
+        hasBall={homeHasBall}
+        highlight={homeHighlight}
+        showNames={showNames}
+      />
+      <div className="border-t border-line px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk-faint">
         {statusText(game)}
       </div>
     </div>
@@ -498,7 +538,7 @@ export default function ScoresPage() {
               matching that count avoids the large layout shift a smaller
               placeholder count would cause once real data loads. */}
           {Array.from({ length: 16 }).map((_, i) =>
-            retro ? <GameRowSkeleton key={i} /> : <GameCardSkeleton key={i} />
+            retro ? <ScoreBugSkeleton key={i} /> : <GameCardSkeleton key={i} />
           )}
         </div>
       ) : filteredGames && filteredGames.length === 0 ? (
@@ -573,7 +613,7 @@ export default function ScoresPage() {
                   (retro ? (
                     <div className="flex flex-col">
                       {gamesForStatus.map((g) => (
-                        <GameRow key={g.id} game={g} showNames={showNames} />
+                        <ScoreBug key={g.id} game={g} showNames={showNames} />
                       ))}
                     </div>
                   ) : (
