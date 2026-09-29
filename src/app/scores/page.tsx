@@ -369,7 +369,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   return (
     <div
-      className="mb-2 border-l-4 border-live bg-panel-2 last:mb-0"
+      className="mb-2 bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
       <ScoreBugTeamLine
