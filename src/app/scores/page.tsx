@@ -80,82 +80,25 @@ function cardHighlight(
   return a ?? b;
 }
 
-function PossessionTriangle({ side }: { side: "left" | "right" }) {
-  return (
-    <span
-      className={`absolute top-1/2 h-0 w-0 -translate-y-1/2 border-y-[5px] border-y-transparent ${
-        side === "left"
-          ? "-left-1.5 border-r-[7px] border-r-chalk"
-          : "-right-1.5 border-l-[7px] border-l-chalk"
-      }`}
-    />
-  );
-}
-
-function TickerSide({
-  team,
-  score,
-  status,
-  reverse,
-  showNames,
-}: {
-  team: TeamDTO;
-  score: number;
-  status: GameDTO["status"];
-  reverse?: boolean;
-  showNames: boolean;
-}) {
-  const highlight = rowHighlight(score, status);
-
-  return (
-    <div
-      className={`flex min-w-0 flex-1 items-center justify-start gap-2 ${reverse ? "flex-row-reverse" : ""}`}
-    >
-      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
-        {team.logoUrl ? (
-          <Image src={team.logoUrl} alt="" width={36} height={36} unoptimized />
-        ) : (
-          <div className="h-9 w-9 rounded-full bg-panel-3" />
-        )}
-        <span
-          className={`${leagueGothic.className} block w-20 truncate text-center text-xs uppercase leading-none text-chalk`}
-          style={{ fontWeight: 700 }}
-        >
-          {team.name.split(" ").at(-1)}
-        </span>
-        {showNames && (
-          <span className="mt-0.5 max-w-full truncate rounded-full bg-panel-3 px-2 py-0.5 text-[10px] leading-none text-chalk-faint">
-            {team.player ? team.player.name : "Unassigned"}
-          </span>
-        )}
-      </div>
-      {status !== "SCHEDULED" && (
-        <div
-          className={`${leagueGothic.className} text-[40px] leading-none tabular-nums ${
-            highlight ? TEXT_COLOR[highlight] : "text-chalk"
-          }`}
-          style={{ fontWeight: 700 }}
-        >
-          {score}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
-// "at" for a middot to match the compact two-part ticker style.
+// "at" for a middot to match the compact broadcast-bug style.
 function formatSituation(situation: string): string {
   return situation.replace(/ at /i, " · ");
 }
 
-function centerLines(game: GameDTO): { line1: string; line2: string | null } {
+// The scorebug's two center pills: a colored "down & distance" (or
+// day/status) pill on top, a white clock/time pill underneath. Unlike the
+// old two-line center column, the bottom pill is dropped entirely once
+// there's nothing meaningful to put in it (FINAL, or a live game with no
+// situation data yet) rather than leaving it visually empty.
+function scorebugPills(game: GameDTO): { top: string; bottom: string | null } {
+  if (game.status === "FINAL") return { top: "FINAL", bottom: null };
   if (game.status === "SCHEDULED" && game.startTime) {
     const date = new Date(game.startTime);
     const timeZone = "America/Chicago";
     return {
-      line1: date.toLocaleString(undefined, { weekday: "short", timeZone }),
-      line2: date.toLocaleString(undefined, {
+      top: date.toLocaleString(undefined, { weekday: "short", timeZone }).toUpperCase(),
+      bottom: date.toLocaleString(undefined, {
         hour: "numeric",
         minute: "2-digit",
         timeZoneName: "short",
@@ -163,43 +106,101 @@ function centerLines(game: GameDTO): { line1: string; line2: string | null } {
       }),
     };
   }
-  // The sheet's own situation text for a finished game (e.g. "Game Over")
-  // varies and isn't ours to control — show a consistent label instead.
-  if (game.status === "FINAL") return { line1: "Final", line2: null };
   return {
-    line1: game.statusDetail || game.status,
-    line2: game.situation ? formatSituation(game.situation) : null,
+    top: game.situation ? formatSituation(game.situation) : game.statusDetail || "LIVE",
+    bottom: game.situation ? game.statusDetail || null : null,
   };
 }
 
-// Mirrors TickerSide's stacked logo/name/player-name column plus the score
-// box so the skeleton's height matches the real card — a flatter skeleton
-// here previously rendered noticeably shorter than loaded content, causing
-// a layout jump even when the placeholder count was right.
+// Mirrors ScorebugSide's logo-panel + score + optional name-pill so the
+// skeleton's height matches the real bar — a flatter skeleton here
+// previously rendered noticeably shorter than loaded content, causing a
+// layout jump even when the placeholder count was right.
 function SkeletonSide({ reverse }: { reverse?: boolean }) {
   return (
-    <div
-      className={`flex min-w-0 flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}
-    >
-      <div className="flex w-20 shrink-0 flex-col items-center gap-1">
-        <Skeleton className="h-9 w-9" rounded="rounded-full" />
-        <Skeleton className="h-3 w-14" />
-        <Skeleton className="mt-0.5 h-[14px] w-16" rounded="rounded-full" />
-      </div>
-      <Skeleton className="h-10 w-6" />
+    <div className={`flex flex-1 items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
+      <Skeleton className="h-12 w-12 shrink-0" rounded="rounded-lg" />
+      <Skeleton className="h-9 w-10" />
     </div>
   );
 }
 
 function GameCardSkeleton() {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-line bg-panel p-3">
+    <div className="flex items-center gap-2 rounded-lg border border-line bg-panel p-2.5">
       <SkeletonSide />
-      <div className="flex w-28 shrink-0 flex-col items-center gap-1.5">
-        <Skeleton className="h-3.5 w-16" />
-        <Skeleton className="h-2.5 w-20" />
-      </div>
+      <Skeleton className="h-10 w-20 shrink-0" rounded="rounded-full" />
       <SkeletonSide reverse />
+    </div>
+  );
+}
+
+// A broadcast score bug is always a dark graphic overlay, regardless of
+// whether the game itself is being watched in a bright room or a dark
+// one — there's no "light mode" version of it. This card (and its
+// ScorebugSide halves) intentionally use fixed dark hex values rather
+// than the theme's panel/chalk tokens, the same way SplashScreen uses a
+// fixed brand color instead of theme tokens: the app's light/dark toggle
+// switches the rest of the UI, but this one component stays a dark bug
+// either way, so its white score digits and light labels always have
+// something dark to sit on.
+function ScorebugSide({
+  team,
+  score,
+  status,
+  highlight,
+  hasBall,
+  showNames,
+  reverse,
+}: {
+  team: TeamDTO;
+  score: number;
+  status: GameDTO["status"];
+  highlight: "win" | "hit-live" | "watch" | null;
+  hasBall: boolean;
+  showNames: boolean;
+  reverse?: boolean;
+}) {
+  return (
+    <div className={`flex min-w-0 flex-1 items-center gap-2.5 ${reverse ? "flex-row-reverse" : ""}`}>
+      <div
+        className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-[#262626] to-[#151515] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${
+          hasBall ? "ring-2 ring-[#e08a3c]" : ""
+        }`}
+      >
+        {team.logoUrl ? (
+          <Image
+            src={team.logoUrl}
+            alt=""
+            width={40}
+            height={40}
+            unoptimized
+            className="h-8 w-8 object-contain drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
+          />
+        ) : (
+          <div className="h-7 w-7 rounded-full bg-[#1d1d1d]" />
+        )}
+      </div>
+      <div className={`flex min-w-0 flex-col ${reverse ? "items-end" : "items-start"}`}>
+        {status !== "SCHEDULED" && (
+          <div
+            className={`${leagueGothic.className} text-[34px] leading-none tabular-nums drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] ${
+              highlight ? TEXT_COLOR[highlight] : "text-white"
+            }`}
+            style={{ fontWeight: 700 }}
+          >
+            {score}
+          </div>
+        )}
+        <span className={`${leagueGothic.className} truncate text-[10px] uppercase leading-none text-[#9c9c98]`}>
+          {team.abbreviation}
+        </span>
+        {showNames && (
+          <span className="mt-0.5 max-w-full truncate rounded-full bg-[#262626] px-2 py-0.5 text-[10px] leading-none text-[#b8b8b5]">
+            {team.player ? team.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -207,45 +208,59 @@ function GameCardSkeleton() {
 function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
-  const { line1, line2 } = centerLines(game);
-  const highlight = cardHighlight(
-    rowHighlight(game.awayScore, game.status),
-    rowHighlight(game.homeScore, game.status)
-  );
+  const awayHighlight = rowHighlight(game.awayScore, game.status);
+  const homeHighlight = rowHighlight(game.homeScore, game.status);
+  const highlight = cardHighlight(awayHighlight, homeHighlight);
+  const { top, bottom } = scorebugPills(game);
 
   const card = (
     <div
-      className={`flex items-center gap-4 rounded-xl border bg-panel p-3 ${
-        highlight ? "border-transparent" : "border-line"
+      className={`relative flex items-center gap-2 overflow-hidden rounded-lg border bg-gradient-to-b from-[#1d1d1d] via-[#151515] to-[#1d1d1d] p-2.5 ${
+        highlight ? "border-transparent" : "border-[#363636]"
       }`}
     >
-      <TickerSide
+      {/* A faint diagonal gloss streak — the one bit of the broadcast-bug's
+          reflective sheen worth keeping at this size; the full logo-panel
+          bevels and chamfered corners didn't survive being shrunk down to
+          a mobile list row, so this is a simplified take rather than a
+          literal recreation. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
+
+      <ScorebugSide
         team={game.awayTeam}
         score={game.awayScore}
         status={game.status}
+        highlight={awayHighlight}
+        hasBall={awayHasBall}
         showNames={showNames}
       />
-      <div className="relative w-28 shrink-0 text-center">
-        {awayHasBall && <PossessionTriangle side="left" />}
-        {homeHasBall && <PossessionTriangle side="right" />}
-        <div className="whitespace-nowrap text-sm font-extrabold leading-tight text-chalk">
-          {line1}
+
+      <div className="relative z-10 flex w-24 shrink-0 flex-col items-center gap-1">
+        <div className="whitespace-nowrap rounded-full bg-live px-2.5 py-0.5 text-[11px] font-bold uppercase leading-tight text-white shadow-sm">
+          {top}
         </div>
-        {line2 && <div className="truncate text-[10px] leading-tight text-chalk">{line2}</div>}
+        {bottom && (
+          <div className="whitespace-nowrap rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold leading-tight text-[#111] shadow-sm">
+            {bottom}
+          </div>
+        )}
       </div>
-      <TickerSide
+
+      <ScorebugSide
         team={game.homeTeam}
         score={game.homeScore}
         status={game.status}
-        reverse
+        highlight={homeHighlight}
+        hasBall={homeHasBall}
         showNames={showNames}
+        reverse
       />
     </div>
   );
 
   if (!highlight) return card;
 
-  return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
+  return <div className={`rounded-lg p-px shine-border shine-${highlight}`}>{card}</div>;
 }
 
 export default function ScoresPage() {
