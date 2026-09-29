@@ -321,12 +321,11 @@ function ScoreBugTeamLine({
       )}
       <div className="min-w-0 flex-1">
         <span
-          className="block truncate text-xl uppercase leading-none tracking-wide"
+          className="block truncate text-xl uppercase leading-none tracking-wide text-caution"
           style={{
             fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontStyle: "italic",
             fontWeight: 700,
-            color: "#ffe873",
           }}
         >
           {hasBall && <span className="mr-1 not-italic text-live">●</span>}

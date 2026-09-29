@@ -61,41 +61,23 @@
   Retro mode — Ceefax/teletext reskin, flipped on at runtime via RetroToggle
   (see src/lib/retroMode.tsx) rather than being a separate deployment.
 
-  Real teletext (Ceefax's football tables and vidiprinter especially) is:
-  pure black background, a strict 8-color palette used completely flat (no
-  gradient, no blur/glow — CRT phosphor bloom was a side effect of the
-  hardware, not the graphic design), a monospace low-res character grid,
-  and every box a hard, unrounded rectangle. Dark mode uses the classic
-  green-primary Ceefax scheme; light mode swaps to a blue/cyan-primary one
-  (teletext itself has no real "light mode," so the toggle switches which
-  page's palette you're on instead of switching brightness) — still two
-  distinct, on-brand looks.
+  A deliberately narrow palette — black, white, and just two accent hues
+  (yellow and red) — rather than a distinct color per status token the way
+  the normal theme uses. "Hit 19" (led/win/caution) is always yellow;
+  "still climbing, watch this" (live/venmo) is always red. One consistent
+  look regardless of the light/dark toggle: real teletext has no actual
+  "light mode" to begin with, and switching hues between the two only made
+  the theme read as busier, not as two coherent looks.
 */
-html[data-retro="true"] {
-  --color-field: #000000;
-  --color-panel: #000000;
-  --color-panel-2: #0a0a0a;
-  --color-panel-3: #141414;
-  --color-line: #4d4d4d;
-  --color-chalk: #ffffff;
-  --color-chalk-dim: #ffffff;
-  --color-chalk-faint: #6b6b6b;
-  --color-placeholder: #5a5a5a;
-  --color-led: #00cc66;
-  --color-led-bg: #001a0d;
-  --color-win: #00ff00;
-  --color-win-bg: #001a00;
-  --color-caution: #ffff00;
-  --color-caution-bg: #1a1a00;
-  --color-live: #ff0000;
-  --color-live-bg: #1a0000;
-  --color-venmo: #00ffff;
-  --color-search-bg: #0a0a0a;
-  --color-pill-text: #000000;
-  --color-icon: #808080;
-  --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-}
-
+/*
+  Also matched with the extra [data-theme="light"] attribute, not just
+  [data-retro="true"] alone: :root[data-theme="light"] above has two
+  attribute/pseudo-class selectors to this rule's one attribute plus the
+  html element, so without this second selector CSS specificity would let
+  the light theme's own overrides win whenever both are active, and retro
+  would silently revert to the normal theme's light palette.
+*/
+html[data-retro="true"],
 html[data-retro="true"][data-theme="light"] {
   --color-field: #000000;
   --color-panel: #000000;
@@ -104,20 +86,21 @@ html[data-retro="true"][data-theme="light"] {
   --color-line: #4d4d4d;
   --color-chalk: #ffffff;
   --color-chalk-dim: #ffffff;
-  --color-chalk-faint: #4d6b80;
+  --color-chalk-faint: #808080;
   --color-placeholder: #5a5a5a;
-  --color-led: #00e5ff;
-  --color-led-bg: #001a1a;
-  --color-win: #00ffff;
-  --color-win-bg: #001a1a;
-  --color-caution: #ffff00;
-  --color-caution-bg: #1a1a00;
-  --color-live: #ff00ff;
-  --color-live-bg: #1a001a;
-  --color-venmo: #3d95ff;
+  --color-led: #ffe873;
+  --color-led-bg: #332b00;
+  --color-win: #ffe873;
+  --color-win-bg: #332b00;
+  --color-caution: #ffe873;
+  --color-caution-bg: #332b00;
+  --color-live: #ff2b2b;
+  --color-live-bg: #330000;
+  --color-venmo: #ff2b2b;
   --color-search-bg: #0a0a0a;
   --color-pill-text: #000000;
   --color-icon: #808080;
+  --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 body {

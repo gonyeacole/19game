@@ -83,11 +83,11 @@ export const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
   venmo: "bg-venmo",
 };
 
-// White label text reads fine on the red/green/cyan blocks but not on the
-// caution block's bright yellow — that one needs dark text instead.
+// White label text reads fine on the red blocks but not on the yellow
+// ones (win, caution) — those need dark text instead.
 export const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
   live: "text-white",
-  win: "text-white",
+  win: "text-pill-text",
   caution: "text-pill-text",
   venmo: "text-white",
 };
