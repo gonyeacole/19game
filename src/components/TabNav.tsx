@@ -6,64 +6,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
 
+// October theme — Halloween-flavored stand-ins for the tab bar's usual
+// SVG icons (a football diagram, a jersey, a money bag, a gear). Plain
+// emoji rather than custom art, matching the same lightweight-flourish
+// approach as FallWeather.
 const TABS = [
   {
     href: "/scores",
     label: "Scores",
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="16" height="10" rx="1.5" />
-        <line x1="10" y1="3" x2="10" y2="13" />
-        <circle cx="6" cy="8" r="1" fill="currentColor" stroke="none" />
-        <circle cx="14" cy="8" r="1" fill="currentColor" stroke="none" />
-        <line x1="6" y1="16" x2="6" y2="18" />
-        <line x1="14" y1="16" x2="14" y2="18" />
-      </svg>
-    ),
+    icon: <span aria-hidden="true">🎃</span>,
   },
   {
     href: "/teams",
     label: "Teams",
-    icon: (
-      <svg viewBox="0 0 20 20" fill="currentColor">
-        <path d="M6.5 2.3 3 4.4 1.4 8l2.5 1.5 1.6-1.2V17a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8.3l1.6 1.2L18.6 8 17 4.4l-3.5-2.1-1.7 1.2a2.3 2.3 0 0 1-3.6 0Z" />
-        <text x="10" y="14.2" textAnchor="middle" fontSize="6.5" fontWeight="700" fill="var(--color-panel-2)">
-          7
-        </text>
-      </svg>
-    ),
+    icon: <span aria-hidden="true">👻</span>,
   },
   {
     href: "/pot",
     label: "Pot",
-    icon: (
-      <svg viewBox="0 0 20 20" fill="currentColor">
-        <path d="M6 6 L7.2 3.5 L12.8 3.5 L14 6 Q17 9.5 17 13 Q17 17.5 10 17.5 Q3 17.5 3 13 Q3 9.5 6 6 Z" />
-        <text x="10" y="13.3" textAnchor="middle" fontSize="7.2" fontWeight="700" fill="var(--color-panel-2)">
-          $
-        </text>
-      </svg>
-    ),
+    icon: <span aria-hidden="true">🍬</span>,
   },
   {
     href: "/admin",
     label: "Admin",
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-        <circle cx="10" cy="10" r="4.8" />
-        <circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none" />
-        <g fill="currentColor" stroke="none">
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(0 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(45 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(90 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(135 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(180 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(225 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(270 10 10)" />
-          <rect x="8.5" y="3.7" width="3" height="3.3" rx="0.7" transform="rotate(315 10 10)" />
-        </g>
-      </svg>
-    ),
+    icon: <span aria-hidden="true">🦇</span>,
   },
 ] as const;
 
@@ -422,7 +388,9 @@ export default function TabNav() {
               return (
                 <li key={tab.href}>
                   <Link href={tab.href} className={className}>
-                    <span className="h-6 w-6">{tab.icon}</span>
+                    <span className="flex h-6 w-6 items-center justify-center text-lg leading-none">
+                      {tab.icon}
+                    </span>
                     {tab.label}
                   </Link>
                 </li>

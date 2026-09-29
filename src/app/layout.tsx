@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import AnnouncementBell from "@/components/AnnouncementBell";
+import FallWeather from "@/components/FallWeather";
 import { inter, leagueGothic } from "@/lib/fonts";
 import "./globals.css";
 
@@ -101,10 +102,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ThemeToggle />
           </div>
           <span
-            className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
+            className={`${leagueGothic.className} flex items-center gap-1.5 justify-self-center text-3xl leading-none tracking-wide text-led`}
             style={{ fontWeight: 700 }}
           >
+            <span aria-hidden="true">🎃</span>
             19League
+            <span aria-hidden="true">👻</span>
           </span>
           <div className="flex items-center justify-self-end gap-2">
             <RefreshButton />
@@ -132,6 +135,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
         <TabNav />
         <SplashScreen />
+        <FallWeather />
       </body>
     </html>
   );

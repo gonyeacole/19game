@@ -1,65 +1,105 @@
 @import "tailwindcss";
 
 /*
-  Dark "scoreboard" theme — the default. Plain @theme (not @theme inline)
-  so utilities reference these as CSS variables rather than baking in
+  OCTOBER THEME — a Halloween reskin for later in the month. Temporary;
+  revert to the block in git history (before this comment) to restore the
+  standard palette.
+
+  Dark mode: black-and-jack-o'-lantern-orange, with a witchy purple and a
+  toxic-slime green standing in for the normal accent colors. Light mode:
+  a washed-out "haunted daylight" version — same hues, much less
+  saturated, so it still reads as October without just being the dark
+  palette on a paler background. Plain @theme (not @theme inline) so
+  utilities reference these as CSS variables rather than baking in
   literal values — required for the light-mode override below to work at
   runtime via the [data-theme] toggle instead of only at build time.
 */
 @theme {
-  --color-field: #0a0a0a;
-  --color-panel: #151515;
-  --color-panel-2: #1d1d1d;
-  --color-panel-3: #262626;
-  --color-line: #363636;
-  --color-chalk: #f0f0ee;
-  --color-chalk-dim: #f0f0ee;
-  --color-chalk-faint: #f0f0ee;
-  --color-placeholder: #727270;
-  --color-led: #00dd94;
-  --color-led-bg: #132420;
-  --color-win: #4ecb8c;
-  --color-win-bg: #17281f;
-  --color-caution: #e08a3c;
-  --color-caution-bg: #2c2318;
-  --color-live: #ff5c4d;
-  --color-live-bg: #2e1a16;
-  --color-venmo: #3d95ce;
-  --color-search-bg: #1d1d1d;
-  --color-pill-text: #08150e;
-  --color-icon: #727270;
+  --color-field: #0d0704;
+  --color-panel: #1a0f08;
+  --color-panel-2: #24160c;
+  --color-panel-3: #301d10;
+  --color-line: #4d2e12;
+  --color-chalk: #fff2e0;
+  --color-chalk-dim: #e8c9a0;
+  --color-chalk-faint: #8a6a45;
+  --color-placeholder: #7a5c3a;
+  --color-led: #7cff3d;
+  --color-led-bg: #14260a;
+  --color-win: #a3ff5c;
+  --color-win-bg: #182b0c;
+  --color-caution: #ff8c1a;
+  --color-caution-bg: #2e1a05;
+  --color-live: #ff3b3b;
+  --color-live-bg: #2c0808;
+  --color-venmo: #b565f5;
+  --color-search-bg: #24160c;
+  --color-pill-text: #1a0f08;
+  --color-icon: #a06a2e;
   --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 /* Light theme — same token names, overridden when the toggle picks it. */
 :root[data-theme="light"] {
-  --color-field: #f5f5f4;
+  --color-field: #fbf1e2;
   --color-panel: #ffffff;
-  --color-panel-2: #f2f1ef;
-  --color-panel-3: #e7e5e2;
-  --color-line: #d9d7d3;
-  --color-chalk: #19181a;
-  --color-chalk-dim: #19181a;
-  --color-chalk-faint: #19181a;
-  --color-placeholder: #85827c;
-  --color-led: #00b67a;
-  --color-led-bg: #e3f9f1;
-  --color-win: #1f9d5c;
-  --color-win-bg: #e3f7ec;
-  --color-caution: #b4610f;
-  --color-caution-bg: #fdefdf;
-  --color-live: #d9392a;
-  --color-live-bg: #fdeceb;
-  --color-venmo: #2f83bb;
+  --color-panel-2: #f7e9d4;
+  --color-panel-3: #f0dcbe;
+  --color-line: #e0be8c;
+  --color-chalk: #3a2410;
+  --color-chalk-dim: #6b4a24;
+  --color-chalk-faint: #9c7c4e;
+  --color-placeholder: #a3835a;
+  --color-led: #4c9c1e;
+  --color-led-bg: #e6f5da;
+  --color-win: #3c8a14;
+  --color-win-bg: #e2f2d6;
+  --color-caution: #c9660c;
+  --color-caution-bg: #fbe6cc;
+  --color-live: #c92a2a;
+  --color-live-bg: #fbe0e0;
+  --color-venmo: #8536c9;
   --color-search-bg: #ffffff;
   --color-pill-text: #ffffff;
-  --color-icon: #85827c;
+  --color-icon: #a3835a;
 }
 
 body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+}
+
+/*
+  A handful of jack-o'-lanterns, ghosts and falling leaves drifting slowly
+  down the screen — "fall weather" as a light, occasional flourish rather
+  than a constant texture (a busy overlay across every page was the one
+  thing that got explicit pushback on the last seasonal theme). Mounted
+  once in RootLayout; pointer-events: none keeps it purely visual, and a
+  low opacity plus a slow (18s+) fall keeps it from competing with the
+  actual content or feeling like screen clutter.
+*/
+.fall-weather {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fall-weather span {
+  position: absolute;
+  top: -10%;
+  font-size: 1.4rem;
+  opacity: 0.5;
+  animation: fall-drift linear infinite;
+}
+@keyframes fall-drift {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+  to {
+    transform: translateY(115vh) rotate(50deg);
+  }
 }
 
 /*
