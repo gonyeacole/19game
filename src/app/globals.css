@@ -5,63 +5,67 @@
   "scoreboard" theme at the user's request; revert to the block in git
   history (before this comment) to restore the standard palette.
 
-  The teletext shape (monospace font, square corners everywhere, the
-  colored-block nav) stays, but the color values themselves are the
-  original app's own palette rather than a flat 8-color teletext one —
-  the user asked for the original colors back after seeing the full
-  black/green/cyan reskin. Plain @theme (not @theme inline) so utilities
+  Real teletext (Ceefax's football tables and vidiprinter especially) is:
+  pure black background, a strict 8-color palette used completely flat (no
+  gradient, no blur/glow — CRT phosphor bloom was a side effect of the
+  hardware, not the graphic design), a monospace low-res character grid,
+  and every box a hard, unrounded rectangle. Dark mode uses the classic
+  green-primary Ceefax scheme; light mode swaps to a blue/cyan-primary one
+  (teletext itself has no real "light mode," so the toggle switches which
+  page's palette you're on instead of switching brightness) — still two
+  distinct, on-brand looks. Plain @theme (not @theme inline) so utilities
   reference these as CSS variables rather than baking in literal values —
   required for the light-mode override below to work at runtime via the
   [data-theme] toggle instead of only at build time.
 */
 @theme {
-  --color-field: #0a0a0a;
-  --color-panel: #151515;
-  --color-panel-2: #1d1d1d;
-  --color-panel-3: #262626;
-  --color-line: #363636;
-  --color-chalk: #f0f0ee;
-  --color-chalk-dim: #f0f0ee;
-  --color-chalk-faint: #f0f0ee;
-  --color-placeholder: #727270;
-  --color-led: #00dd94;
-  --color-led-bg: #132420;
-  --color-win: #4ecb8c;
-  --color-win-bg: #17281f;
-  --color-caution: #e08a3c;
-  --color-caution-bg: #2c2318;
-  --color-live: #ff5c4d;
-  --color-live-bg: #2e1a16;
-  --color-venmo: #3d95ce;
-  --color-search-bg: #1d1d1d;
-  --color-pill-text: #08150e;
-  --color-icon: #727270;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #00ffff;
+  --color-chalk-faint: #6b6b6b;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00cc66;
+  --color-led-bg: #001a0d;
+  --color-win: #00ff00;
+  --color-win-bg: #001a00;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff0000;
+  --color-live-bg: #1a0000;
+  --color-venmo: #00ffff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
   --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 /* Light theme — same token names, overridden when the toggle picks it. */
 :root[data-theme="light"] {
-  --color-field: #f5f5f4;
-  --color-panel: #ffffff;
-  --color-panel-2: #f2f1ef;
-  --color-panel-3: #e7e5e2;
-  --color-line: #d9d7d3;
-  --color-chalk: #19181a;
-  --color-chalk-dim: #19181a;
-  --color-chalk-faint: #19181a;
-  --color-placeholder: #85827c;
-  --color-led: #00b67a;
-  --color-led-bg: #e3f9f1;
-  --color-win: #1f9d5c;
-  --color-win-bg: #e3f7ec;
-  --color-caution: #b4610f;
-  --color-caution-bg: #fdefdf;
-  --color-live: #d9392a;
-  --color-live-bg: #fdeceb;
-  --color-venmo: #2f83bb;
-  --color-search-bg: #ffffff;
-  --color-pill-text: #ffffff;
-  --color-icon: #85827c;
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #4d4d4d;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #99ccff;
+  --color-chalk-faint: #4d6b80;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00e5ff;
+  --color-led-bg: #001a1a;
+  --color-win: #00ffff;
+  --color-win-bg: #001a1a;
+  --color-caution: #ffff00;
+  --color-caution-bg: #1a1a00;
+  --color-live: #ff00ff;
+  --color-live-bg: #1a001a;
+  --color-venmo: #3d95ff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
 }
 
 /*
