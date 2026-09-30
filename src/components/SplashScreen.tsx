@@ -18,8 +18,8 @@ const SPLASH_BLACK = "#0a0a0a";
 const RETRO_BLUE = "#00ffff";
 const RETRO_LINE_1 = "19 LEAGUE";
 const RETRO_LINE_2 = "RETRO WEEK";
-const RETRO_CHAR_MS = 120; // per-character typing speed
-const RETRO_ENTER_PAUSE_MS = 550; // extra pause simulating pressing Enter between lines
+const RETRO_CHAR_MS = 190; // per-character typing speed
+const RETRO_ENTER_PAUSE_MS = 800; // extra pause simulating pressing Enter between lines
 const RETRO_TOTAL_CHARS = RETRO_LINE_1.length + RETRO_LINE_2.length;
 const RETRO_REVEAL_DONE_MS = RETRO_TOTAL_CHARS * RETRO_CHAR_MS + RETRO_ENTER_PAUSE_MS;
 
