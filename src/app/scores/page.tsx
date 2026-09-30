@@ -301,19 +301,26 @@ function GameRow({
         )}
       </div>
 
-      <div className="flex shrink-0 items-center justify-center gap-1 tabular-nums">
-        {showScore ? (
-          <>
-            <span className={`${awayHighlight ? TEXT_COLOR[awayHighlight] : "text-chalk"} ${awayFlash ? "score-flash" : ""}`}>
-              {game.awayScore}
-            </span>
-            <span className="text-chalk-faint">-</span>
-            <span className={`${homeHighlight ? TEXT_COLOR[homeHighlight] : "text-chalk"} ${homeFlash ? "score-flash" : ""}`}>
-              {game.homeScore}
-            </span>
-          </>
-        ) : (
-          <span className="text-chalk">@</span>
+      <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 tabular-nums">
+        <div className="flex items-center gap-1">
+          {showScore ? (
+            <>
+              <span className={`${awayHighlight ? TEXT_COLOR[awayHighlight] : "text-chalk"} ${awayFlash ? "score-flash" : ""}`}>
+                {game.awayScore}
+              </span>
+              <span className="text-chalk-faint">-</span>
+              <span className={`${homeHighlight ? TEXT_COLOR[homeHighlight] : "text-chalk"} ${homeFlash ? "score-flash" : ""}`}>
+                {game.homeScore}
+              </span>
+            </>
+          ) : (
+            <span className="text-chalk">@</span>
+          )}
+        </div>
+        {game.status === "IN_PROGRESS" && game.statusDetail && (
+          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-chalk-faint">
+            {game.statusDetail}
+          </span>
         )}
       </div>
 
