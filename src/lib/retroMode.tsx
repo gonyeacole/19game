@@ -70,4 +70,4 @@ export function useRetroToggle(): () => void {
 // of its normal icon-button form, so the underlying state/logic isn't
 // duplicated.
 export const RETRO_TAB_CLASS =
-  "flex flex-1 items-center justify-center border-r border-line px-1 py-2 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-chalk last:border-r-0 active:bg-panel-3";
+  "flex flex-1 items-center justify-center px-1 py-2 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-chalk active:bg-panel-3";

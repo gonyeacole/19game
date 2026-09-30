@@ -11,9 +11,11 @@ import { leagueGothic } from "@/lib/fonts";
 // Fixed literal colors, not theme tokens — matching a specific reference
 // screen's own white/black and blue/green masthead exactly, the same
 // "brand color, not themed UI" reasoning SplashScreen uses for its fixed
-// green. "19" sits in its own white/black cells; "League" is one solid
-// blue block with green cutout text, the same two-part treatment the
-// reference gives its own name and its "FOOTBALL" tag.
+// green. "19" sits in its own white/black cells on the left, fixed width;
+// "League" is one solid blue block with green cutout text that grows
+// (flex-1) to fill the rest of the header's width, the same "name cell
+// plus a banner stretching to the edge" layout the reference uses for its
+// own name and "FOOTBALL" tag.
 function CultTitle() {
   const cellStyle = { backgroundColor: "#ffffff", color: "#000000" };
   return (
@@ -28,7 +30,7 @@ function CultTitle() {
         9
       </span>
       <span
-        className="flex items-center px-3 uppercase"
+        className="flex flex-1 items-center px-3 uppercase"
         style={{ backgroundColor: "#0000ff", color: "#00ff00" }}
       >
         League
@@ -49,7 +51,7 @@ export default function AppHeader() {
           <RefreshButton variant="tab" />
           <AnnouncementBell variant="tab" />
         </div>
-        <div className="flex items-center justify-center py-3">
+        <div className="py-3">
           <CultTitle />
         </div>
       </header>

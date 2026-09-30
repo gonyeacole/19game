@@ -346,11 +346,7 @@ function ScoreBugTeamLine({
       <div className="min-w-0 flex-1">
         <span
           className="block truncate text-xl uppercase leading-none tracking-wide text-tan"
-          style={{
-            fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            fontStyle: "italic",
-            fontWeight: 700,
-          }}
+          style={{ fontStyle: "italic", fontWeight: 700 }}
         >
           {team.name.split(" ").at(-1)}
           {hasBall && <PixelFootball />}
@@ -366,11 +362,7 @@ function ScoreBugTeamLine({
           className={`shrink-0 text-2xl leading-none tabular-nums ${
             highlight ? TEXT_COLOR[highlight] : "text-chalk"
           } ${flash ? "score-flash" : ""}`}
-          style={{
-            fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-            fontStyle: "italic",
-            fontWeight: 700,
-          }}
+          style={{ fontStyle: "italic", fontWeight: 700 }}
         >
           {score}
         </span>
