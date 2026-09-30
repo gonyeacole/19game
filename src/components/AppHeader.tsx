@@ -19,24 +19,30 @@ import { bungee, leagueGothic } from "@/lib/fonts";
 function CultTitle() {
   const cellStyle = { backgroundColor: "#ffffff", color: "#000000" };
   return (
-    <div className={`${bungee.className} flex h-16 items-stretch leading-none`}>
+    <div className={`${bungee.className} flex h-20 items-stretch leading-none`}>
       <span
-        className="flex w-16 items-center justify-center border-4 border-black p-1 text-[2.75rem]"
+        className="flex w-20 items-center justify-center border-4 border-black p-1 text-[3.25rem]"
         style={cellStyle}
       >
         1
       </span>
       <span
-        className="flex w-16 items-center justify-center border-4 border-l-0 border-black p-1 text-[2.75rem]"
+        className="flex w-20 items-center justify-center border-4 border-l-0 border-black p-1 text-[3.25rem]"
         style={cellStyle}
       >
         9
       </span>
+      {/* Letters spread edge-to-edge across the rest of the header via
+          justify-between on individual character spans, rather than a
+          single string — a plain string can't stretch to fill an
+          arbitrary-width flex-1 banner on its own. */}
       <span
-        className="flex flex-1 items-center justify-start px-2 py-1 text-[2.75rem] uppercase"
+        className="flex flex-1 items-center justify-between px-3 py-1 text-[3.25rem] uppercase"
         style={{ backgroundColor: "#0000ff", color: "#00ff00", textShadow: "3px 3px 0 #000000" }}
       >
-        League
+        {"League".split("").map((ch, i) => (
+          <span key={i}>{ch}</span>
+        ))}
       </span>
     </div>
   );

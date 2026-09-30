@@ -68,6 +68,17 @@ export const TABS = [
   },
 ] as const;
 
+// Classic teletext "Fastext" nav bar — four solid, edge-to-edge colored
+// blocks (red/green/yellow/blue), each with the dark/light text color that
+// keeps it readable, matching the reference screenshot exactly rather than
+// using the app's own accent palette.
+const RETRO_TAB_STYLES = [
+  { bg: "#cc2200", fg: "#ffffff" },
+  { bg: "#4a9e3f", fg: "#000000" },
+  { bg: "#d1cc46", fg: "#000000" },
+  { bg: "#0000dd", fg: "#ffffff" },
+] as const;
+
 interface MessageDTO {
   id: string;
   authorName: string;
@@ -417,24 +428,30 @@ export default function TabNav() {
         no leftover gap for anything (real page or otherwise) to occupy.
       */}
       {!chatExpanded && (
-        <div className="safe-bottom border-t border-line bg-field">
+        <div className={`safe-bottom border-t border-line ${retro ? "" : "bg-field"}`}>
           <ul className="mx-auto grid max-w-lg grid-cols-4">
-            {TABS.map((tab) => {
+            {TABS.map((tab, i) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              // Retro drops the icons and centers the label, text-only —
-              // otherwise this matches the main app's own tab bar exactly
-              // (single dark background, the active tab picked out in the
-              // app's one accent color).
+              // Retro drops the icons for a solid Fastext-style color block
+              // per tab (see RETRO_TAB_STYLES) instead of the main app's
+              // single dark background with one accent color picking out
+              // the active tab — inactive tabs dim instead of changing hue,
+              // so the block colors stay true to the reference.
               const className = retro
-                ? `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                    active ? "text-chalk" : "text-chalk/70"
-                  }`
+                ? "flex flex-col items-center justify-center py-4 text-sm font-bold uppercase tracking-wide transition-opacity"
                 : `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
                     active ? "text-led" : "text-icon"
                   }`;
+              const style = retro
+                ? {
+                    backgroundColor: RETRO_TAB_STYLES[i].bg,
+                    color: RETRO_TAB_STYLES[i].fg,
+                    opacity: active ? 1 : 0.6,
+                  }
+                : undefined;
               return (
                 <li key={tab.href}>
-                  <Link href={tab.href} className={className}>
+                  <Link href={tab.href} className={className} style={style}>
                     {!retro && <span className="h-6 w-6">{tab.icon}</span>}
                     {tab.label}
                   </Link>
