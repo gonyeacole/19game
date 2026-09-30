@@ -11,7 +11,6 @@ export const TABS = [
   {
     href: "/scores",
     label: "Scores",
-    color: "live",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="16" height="10" rx="1.5" />
@@ -26,7 +25,6 @@ export const TABS = [
   {
     href: "/teams",
     label: "Teams",
-    color: "win",
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor">
         <path d="M6.5 2.3 3 4.4 1.4 8l2.5 1.5 1.6-1.2V17a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V8.3l1.6 1.2L18.6 8 17 4.4l-3.5-2.1-1.7 1.2a2.3 2.3 0 0 1-3.6 0Z" />
@@ -39,7 +37,6 @@ export const TABS = [
   {
     href: "/pot",
     label: "Pot",
-    color: "caution",
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor">
         <path d="M6 6 L7.2 3.5 L12.8 3.5 L14 6 Q17 9.5 17 13 Q17 17.5 10 17.5 Q3 17.5 3 13 Q3 9.5 6 6 Z" />
@@ -52,7 +49,6 @@ export const TABS = [
   {
     href: "/admin",
     label: "Admin",
-    color: "venmo",
     icon: (
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
         <circle cx="10" cy="10" r="4.8" />
@@ -71,26 +67,6 @@ export const TABS = [
     ),
   },
 ] as const;
-
-// Used by SectionBadge (the header's colored section banner) — kept even
-// though the tab bar itself renders as a single accent color rather than
-// four distinct blocks, so the header and footer at least agree on which
-// color names which section.
-export const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
-  live: "bg-live",
-  win: "bg-win",
-  caution: "bg-caution",
-  venmo: "bg-venmo",
-};
-
-// All four blocks are light pastel hues (violet, blue), so dark text reads
-// better than white across the board.
-export const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
-  live: "text-pill-text",
-  win: "text-pill-text",
-  caution: "text-pill-text",
-  venmo: "text-pill-text",
-};
 
 interface MessageDTO {
   id: string;
@@ -123,6 +99,7 @@ function ChatSheet({
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const pathname = usePathname();
+  const retro = useRetroMode();
   const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -377,7 +354,9 @@ function ChatSheet({
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="flex shrink-0 touch-none select-none items-center gap-2.5 bg-led px-4 text-pill-text"
+          className={`flex shrink-0 touch-none select-none items-center gap-2.5 px-4 text-pill-text ${
+            retro ? "bg-chalk" : "bg-led"
+          }`}
           // Fixed at COLLAPSED_HEIGHT (flex-centered) in both states, not
           // just collapsed — otherwise the header's own height (previously
           // padding-driven while expanded) didn't match its collapsed size,
@@ -448,7 +427,7 @@ export default function TabNav() {
               // app's one accent color).
               const className = retro
                 ? `flex flex-col items-center justify-center py-2.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-                    active ? "text-led" : "text-icon"
+                    active ? "text-chalk" : "text-chalk/70"
                   }`
                 : `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
                     active ? "text-led" : "text-icon"

@@ -4,9 +4,9 @@ import { useRetroMode } from "@/lib/retroMode";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
 import ThemeToggle from "@/components/ThemeToggle";
 import RetroToggle from "@/components/RetroToggle";
+import RetroMenu from "@/components/RetroMenu";
 import RefreshButton from "@/components/RefreshButton";
 import AnnouncementBell from "@/components/AnnouncementBell";
-import SectionBadge from "@/components/SectionBadge";
 import { leagueGothic } from "@/lib/fonts";
 
 // Splits into per-letter spans so globals.css's .rainbow-title rule can
@@ -28,12 +28,10 @@ export default function AppHeader() {
 
   if (retro) {
     return (
-      <header className="safe-top sticky top-0 z-10 bg-field">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-line px-4 pb-3 pt-2">
+      <header className="safe-top sticky top-0 z-10 border-b border-line bg-field">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 pb-3 pt-2">
           <div className="flex items-center justify-self-start gap-2">
-            <AddToHomeScreen />
-            <ThemeToggle />
-            <RetroToggle />
+            <RetroMenu />
           </div>
           <span
             className="justify-self-center text-3xl leading-none tracking-wide"
@@ -46,7 +44,6 @@ export default function AppHeader() {
             <AnnouncementBell />
           </div>
         </div>
-        <SectionBadge />
       </header>
     );
   }

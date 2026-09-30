@@ -111,7 +111,7 @@ body {
 }
 
 html[data-retro="true"] body {
-  letter-spacing: 0.01em;
+  letter-spacing: 0.06em;
 }
 
 /*
@@ -156,17 +156,6 @@ html[data-retro="true"] * {
 }
 .rainbow-title span:nth-child(8n + 8) {
   color: var(--color-caution);
-}
-
-/*
-  A hard offset drop shadow (no blur) for that teletext-masthead "poster
-  lettering" pop — e.g. Ceefax's colored section boxes ("FOOTBALL",
-  "NFL"). A fixed dark shadow rather than one of the theme's own colors so
-  it reads against any of the section badge's four background colors,
-  instead of one variant of it disappearing against a same-hued box.
-*/
-.teletext-3d-text {
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
 }
 
 /*
