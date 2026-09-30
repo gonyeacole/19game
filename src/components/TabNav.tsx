@@ -70,13 +70,14 @@ export const TABS = [
 
 // Classic teletext "Fastext" nav bar — four solid, edge-to-edge colored
 // blocks (red/green/yellow/blue), each with the dark/light text color that
-// keeps it readable, matching the reference screenshot exactly rather than
-// using the app's own accent palette.
+// keeps it readable. Teams' green matches the header's "League" text,
+// Admin's blue matches the header's "League" background, and Pot uses a
+// more vibrant yellow than the original reference photo's muted tone.
 const RETRO_TAB_STYLES = [
   { bg: "#cc2200", fg: "#ffffff" },
-  { bg: "#4a9e3f", fg: "#000000" },
-  { bg: "#d1cc46", fg: "#000000" },
-  { bg: "#0000dd", fg: "#ffffff" },
+  { bg: "#00ff00", fg: "#000000" },
+  { bg: "#ffee00", fg: "#000000" },
+  { bg: "#0000ff", fg: "#ffffff" },
 ] as const;
 
 interface MessageDTO {

@@ -75,6 +75,23 @@ function formatSituation(situation: string): string {
   return situation.replace(/ at /i, " · ");
 }
 
+// Day + kickoff time for a scheduled game, condensed onto one line for
+// retro's flat row (normal mode's centerLines() below splits the same
+// info across two stacked lines instead).
+function scheduledLabel(game: GameDTO): string | null {
+  if (!game.startTime) return null;
+  const date = new Date(game.startTime);
+  const timeZone = "America/Chicago";
+  const weekday = date.toLocaleString(undefined, { weekday: "short", timeZone });
+  const time = date.toLocaleString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+    timeZone,
+  });
+  return `${weekday} ${time}`;
+}
+
 /* ---------- Normal theme: card-based layout ---------- */
 
 // If both teams somehow trigger a highlight at once, a win/hit-19 takes
@@ -318,8 +335,13 @@ function GameRow({
           )}
         </div>
         {game.status === "IN_PROGRESS" && game.statusDetail && (
-          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-chalk-faint">
+          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-led">
             {game.statusDetail}
+          </span>
+        )}
+        {game.status === "SCHEDULED" && scheduledLabel(game) && (
+          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-led">
+            {scheduledLabel(game)}
           </span>
         )}
       </div>
