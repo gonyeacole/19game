@@ -83,13 +83,13 @@ export const TAB_BG: Record<(typeof TABS)[number]["color"], string> = {
   venmo: "bg-venmo",
 };
 
-// White label text reads fine on the red blocks but not on the yellow
-// ones (win, caution) — those need dark text instead.
+// All four blocks are light pastel hues (violet, blue), so dark text reads
+// better than white across the board.
 export const TAB_TEXT: Record<(typeof TABS)[number]["color"], string> = {
-  live: "text-white",
+  live: "text-pill-text",
   win: "text-pill-text",
   caution: "text-pill-text",
-  venmo: "text-white",
+  venmo: "text-pill-text",
 };
 
 interface MessageDTO {

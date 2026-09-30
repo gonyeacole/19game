@@ -62,12 +62,13 @@
   (see src/lib/retroMode.tsx) rather than being a separate deployment.
 
   A deliberately narrow palette — black, white, and just two accent hues
-  (yellow and red) — rather than a distinct color per status token the way
-  the normal theme uses. "Hit 19" (led/win/caution) is always yellow;
-  "still climbing, watch this" (live/venmo) is always red. One consistent
-  look regardless of the light/dark toggle: real teletext has no actual
-  "light mode" to begin with, and switching hues between the two only made
-  the theme read as busier, not as two coherent looks.
+  (a violet and a blue, plus a tan used only for structural borders) —
+  rather than a distinct color per status token the way the normal theme
+  uses. "Hit 19" (led/win/caution) is always violet; "still climbing,
+  watch this" (live/venmo) is always blue. One consistent look regardless
+  of the light/dark toggle: real teletext has no actual "light mode" to
+  begin with, and switching hues between the two only made the theme read
+  as busier, not as two coherent looks.
 */
 /*
   Also matched with the extra [data-theme="light"] attribute, not just
@@ -83,20 +84,20 @@ html[data-retro="true"][data-theme="light"] {
   --color-panel: #000000;
   --color-panel-2: #0a0a0a;
   --color-panel-3: #141414;
-  --color-line: #4d4d4d;
+  --color-line: #c9a876;
   --color-chalk: #ffffff;
   --color-chalk-dim: #ffffff;
   --color-chalk-faint: #808080;
   --color-placeholder: #5a5a5a;
-  --color-led: #ffe873;
-  --color-led-bg: #332b00;
-  --color-win: #ffe873;
-  --color-win-bg: #332b00;
-  --color-caution: #ffe873;
-  --color-caution-bg: #332b00;
-  --color-live: #ff2b2b;
-  --color-live-bg: #330000;
-  --color-venmo: #ff2b2b;
+  --color-led: #a78bfa;
+  --color-led-bg: #2a1f42;
+  --color-win: #a78bfa;
+  --color-win-bg: #2a1f42;
+  --color-caution: #a78bfa;
+  --color-caution-bg: #2a1f42;
+  --color-live: #7db0ff;
+  --color-live-bg: #1a2740;
+  --color-venmo: #7db0ff;
   --color-search-bg: #0a0a0a;
   --color-pill-text: #000000;
   --color-icon: #808080;
