@@ -9,9 +9,20 @@ interface RetroContextValue {
 
 const RetroContext = createContext<RetroContextValue | null>(null);
 
+const BOOT_FLICKER_MS = 450;
+
 function applyRetro(retro: boolean) {
   document.documentElement.dataset.retro = String(retro);
   localStorage.setItem("retroMode", String(retro));
+  // CRT power-on flicker, only when switching retro ON (see the
+  // .crt-boot keyframes in globals.css) — turning it off is a plain,
+  // instant switch back to the normal theme, not a "power-down" moment.
+  if (retro) {
+    document.documentElement.classList.add("crt-boot");
+    setTimeout(() => {
+      document.documentElement.classList.remove("crt-boot");
+    }, BOOT_FLICKER_MS);
+  }
 }
 
 // Several components (the header, the tab bar, Scores, Pot) need to branch

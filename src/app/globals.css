@@ -134,6 +134,62 @@ html[data-retro="true"] * {
 }
 
 /*
+  Each score bug "types itself in" the first time it appears — a stepped
+  (not smooth) clip-path wipe reads as a teletype/wire-feed printing the
+  row, rather than a normal fade. Runs once on mount only: it's a CSS
+  animation on the element itself, not driven by React state, so a later
+  re-render of the same DOM node (a live-score poll, for instance) doesn't
+  replay it — only a genuinely new row does.
+*/
+@keyframes teletype-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.teletype-reveal {
+  animation: teletype-reveal 0.5s steps(20, end);
+}
+
+/*
+  A brief CRT power-on flicker (rapid brightness/opacity jumps) the instant
+  retro mode is switched on — RetroModeProvider adds this class to <html>
+  for ~450ms and removes it again. Only fires turning retro ON, not off,
+  matching "powering up" rather than a generic transition.
+*/
+@keyframes crt-boot-flicker {
+  0% {
+    opacity: 0;
+    filter: brightness(3);
+  }
+  8% {
+    opacity: 1;
+    filter: brightness(0.4);
+  }
+  14% {
+    opacity: 0.2;
+    filter: brightness(1);
+  }
+  20% {
+    opacity: 1;
+    filter: brightness(2.2);
+  }
+  32% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+html.crt-boot body {
+  animation: crt-boot-flicker 0.45s steps(2, end);
+}
+
+/*
   Teletext's classic "rainbow title" lettering (each letter of a masthead
   in a different color) — used on the "19League" brand text in retro mode.
   nth-child cycles through the app's own existing status colors (rather

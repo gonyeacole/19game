@@ -377,6 +377,21 @@ function ScoreBugTeamLine({
   );
 }
 
+// A rule drawn from repeated block characters rather than a CSS border —
+// real teletext pages had no border-style property, only the character
+// grid itself. Repeated far past any realistic card width and clipped, so
+// it always fills the row regardless of viewport size.
+function AsciiDivider() {
+  return (
+    <div
+      aria-hidden="true"
+      className="overflow-hidden whitespace-nowrap px-3 text-[8px] leading-none text-chalk"
+    >
+      {"▓".repeat(120)}
+    </div>
+  );
+}
+
 // The two teams stacked on top of each other on the left (logo + name +
 // score per line) rather than split to opposite sides — a sports
 // broadcast's lower-third score bug, not a teletext vidiprinter row.
@@ -389,7 +404,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   return (
     <div
-      className="mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
+      className="teletype-reveal mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
       <ScoreBugTeamLine
@@ -408,7 +423,8 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         highlight={homeHighlight}
         showNames={showNames}
       />
-      <div className="border-t-2 border-dotted border-chalk px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
+      <AsciiDivider />
+      <div className="px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
         {statusText(game)}
       </div>
     </div>
@@ -592,11 +608,21 @@ export default function ScoresPage() {
                   <button
                     type="button"
                     onClick={() => toggleSection(status)}
-                    className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide ${
+                    className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide ${
                       retro ? "text-chalk" : "text-chalk-faint"
                     }`}
                   >
-                    {STATUS_SECTION_LABEL[status]}
+                    {retro ? (
+                      // Reverse video, like a real teletext category box —
+                      // a solid block with cutout (background-colored)
+                      // text, instead of plain colored text on the page's
+                      // own black background.
+                      <span className="bg-chalk px-1.5 py-0.5 text-pill-text">
+                        {STATUS_SECTION_LABEL[status]}
+                      </span>
+                    ) : (
+                      STATUS_SECTION_LABEL[status]
+                    )}
                     <svg
                       viewBox="0 0 20 20"
                       fill="none"

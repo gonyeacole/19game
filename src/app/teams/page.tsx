@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
+import AsciiSpinner from "@/components/AsciiSpinner";
 import { useRetroMode } from "@/lib/retroMode";
 
 const SEASON_WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
@@ -111,15 +112,21 @@ function TeamRow({ team }: { team: TeamDTO }) {
       >
         <div className="border-t border-line pt-2">
           {loading ? (
-            <div className="flex items-center justify-center gap-1.5 py-4">
-              <span
-                className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.3s]"
-              />
-              <span
-                className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.15s]"
-              />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint" />
-            </div>
+            retro ? (
+              <div className="flex items-center justify-center py-4 text-sm">
+                <AsciiSpinner />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-1.5 py-4">
+                <span
+                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.3s]"
+                />
+                <span
+                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint [animation-delay:-0.15s]"
+                />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-chalk-faint" />
+              </div>
+            )
           ) : (
             <div className="flex flex-col">
               {SEASON_WEEKS.map((wk) => {
