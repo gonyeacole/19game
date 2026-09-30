@@ -29,6 +29,12 @@
   --color-search-bg: #1d1d1d;
   --color-pill-text: #08150e;
   --color-icon: #727270;
+  /*
+    Retro-only accent (the score bug's team-name color) — declared here so
+    Tailwind generates the text-tan/bg-tan/etc. utilities, but only
+    actually used under html[data-retro="true"].
+  */
+  --color-tan: #c9a876;
   --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -62,13 +68,15 @@
   (see src/lib/retroMode.tsx) rather than being a separate deployment.
 
   A deliberately narrow palette — black, white, and just two accent hues
-  (a violet and a blue, plus a tan used only for structural borders) —
-  rather than a distinct color per status token the way the normal theme
-  uses. "Hit 19" (led/win/caution) is always violet; "still climbing,
-  watch this" (live/venmo) is always blue. One consistent look regardless
-  of the light/dark toggle: real teletext has no actual "light mode" to
-  begin with, and switching hues between the two only made the theme read
-  as busier, not as two coherent looks.
+  (a violet and a blue) — rather than a distinct color per status token
+  the way the normal theme uses. "Hit 19" (led/win/caution) is always
+  violet; "still climbing, watch this" (live/venmo) is always blue.
+  Structural outlines (--color-line, borders throughout the app) are
+  white; --color-tan is a separate, narrower accent reserved for the
+  score bug's own team-name text. One consistent look regardless of the
+  light/dark toggle: real teletext has no actual "light mode" to begin
+  with, and switching hues between the two only made the theme read as
+  busier, not as two coherent looks.
 */
 /*
   Also matched with the extra [data-theme="light"] attribute, not just
@@ -84,7 +92,7 @@ html[data-retro="true"][data-theme="light"] {
   --color-panel: #000000;
   --color-panel-2: #0a0a0a;
   --color-panel-3: #141414;
-  --color-line: #c9a876;
+  --color-line: #ffffff;
   --color-chalk: #ffffff;
   --color-chalk-dim: #ffffff;
   --color-chalk-faint: #808080;

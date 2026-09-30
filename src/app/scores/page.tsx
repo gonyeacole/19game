@@ -286,6 +286,27 @@ function ScoreBugSkeleton() {
   );
 }
 
+// A small pixel-art football — the possession marker. Built from a handful
+// of blocky <rect>s with crisp (non-antialiased) edges rather than a smooth
+// icon or emoji, since an emoji glyph can't be pixelated via CSS the way a
+// bitmap can.
+function PixelFootball() {
+  return (
+    <svg
+      viewBox="0 0 12 8"
+      shapeRendering="crispEdges"
+      className="ml-1 inline-block h-3 w-4 align-middle"
+    >
+      <rect x="3" y="1" width="6" height="1" fill="#c9a876" />
+      <rect x="2" y="2" width="8" height="1" fill="#c9a876" />
+      <rect x="1" y="3" width="10" height="2" fill="#c9a876" />
+      <rect x="2" y="5" width="8" height="1" fill="#c9a876" />
+      <rect x="3" y="6" width="6" height="1" fill="#c9a876" />
+      <rect x="5" y="3" width="2" height="2" fill="#ffffff" />
+    </svg>
+  );
+}
+
 // One team's logo/name/score line inside a ScoreBug — a broadcast lower-
 // third's bold italic condensed lettering, in the app's existing "caution"
 // (yellow) and "chalk" (white) tokens rather than the reference image's own
@@ -315,21 +336,22 @@ function ScoreBugTeamLine({
           height={28}
           unoptimized
           className="h-7 w-7 shrink-0 object-contain"
+          style={{ imageRendering: "pixelated" }}
         />
       ) : (
         <div className="h-7 w-7 shrink-0 rounded-full bg-panel-3" />
       )}
       <div className="min-w-0 flex-1">
         <span
-          className="block truncate text-xl uppercase leading-none tracking-wide text-line"
+          className="block truncate text-xl uppercase leading-none tracking-wide text-tan"
           style={{
             fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontStyle: "italic",
             fontWeight: 700,
           }}
         >
-          {hasBall && <span className="mr-1 not-italic text-live">●</span>}
           {team.name.split(" ").at(-1)}
+          {hasBall && <PixelFootball />}
         </span>
         {showNames && (
           <span className="block truncate text-[10px] leading-tight text-chalk-faint">
@@ -389,7 +411,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         highlight={homeHighlight}
         showNames={showNames}
       />
-      <div className="border-t border-chalk px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
+      <div className="border-t-2 border-dotted border-chalk px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
         {statusText(game)}
       </div>
     </div>
