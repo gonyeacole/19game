@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
+import { useRetroMode } from "@/lib/retroMode";
 
 const SEASON_WEEKS = Array.from({ length: 18 }, (_, i) => i + 1);
 
@@ -47,6 +48,7 @@ function TeamRowSkeleton() {
 }
 
 function TeamRow({ team }: { team: TeamDTO }) {
+  const retro = useRetroMode();
   const [expanded, setExpanded] = useState(false);
   const [results, setResults] = useState<TeamResult[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -133,7 +135,11 @@ function TeamRow({ team }: { team: TeamDTO }) {
                     {r ? (
                       <span
                         className={`flex-1 text-right ${
-                          r.hitNineteen ? "font-bold text-led" : "text-chalk-dim"
+                          r.hitNineteen
+                            ? retro
+                              ? "font-bold text-chalk-dim"
+                              : "font-bold text-led"
+                            : "text-chalk-dim"
                         }`}
                       >
                         {`${r.isHome ? "vs" : "@"} ${r.opponent.abbreviation} ${resultLabel(r)}`.trim()}
