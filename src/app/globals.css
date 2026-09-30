@@ -67,16 +67,15 @@
   Retro mode — Ceefax/teletext reskin, flipped on at runtime via RetroToggle
   (see src/lib/retroMode.tsx) rather than being a separate deployment.
 
-  A deliberately narrow palette — black, white, and just two accent hues
-  (a violet and a blue) — rather than a distinct color per status token
-  the way the normal theme uses. "Hit 19" (led/win/caution) is always
-  violet; "still climbing, watch this" (live/venmo) is always blue.
+  A deliberately narrow palette — black, white, and the normal theme's
+  own green (led/win/caution/live/venmo all share it) — rather than a
+  distinct color per status token the way the normal theme uses.
   Structural outlines (--color-line, borders throughout the app) are
   white; --color-tan is a separate, narrower accent reserved for the
-  score bug's own team-name text. One consistent look regardless of the
-  light/dark toggle: real teletext has no actual "light mode" to begin
-  with, and switching hues between the two only made the theme read as
-  busier, not as two coherent looks.
+  score bug's own team-name text and left border. One consistent look
+  regardless of the light/dark toggle: real teletext has no actual
+  "light mode" to begin with, and switching hues between the two only
+  made the theme read as busier, not as two coherent looks.
 */
 /*
   Also matched with the extra [data-theme="light"] attribute, not just
@@ -97,15 +96,15 @@ html[data-retro="true"][data-theme="light"] {
   --color-chalk-dim: #ffffff;
   --color-chalk-faint: #808080;
   --color-placeholder: #5a5a5a;
-  --color-led: #a78bfa;
-  --color-led-bg: #2a1f42;
-  --color-win: #a78bfa;
-  --color-win-bg: #2a1f42;
-  --color-caution: #a78bfa;
-  --color-caution-bg: #2a1f42;
-  --color-live: #7db0ff;
-  --color-live-bg: #1a2740;
-  --color-venmo: #7db0ff;
+  --color-led: #00dd94;
+  --color-led-bg: #0d2a20;
+  --color-win: #00dd94;
+  --color-win-bg: #0d2a20;
+  --color-caution: #00dd94;
+  --color-caution-bg: #0d2a20;
+  --color-live: #00dd94;
+  --color-live-bg: #0d2a20;
+  --color-venmo: #00dd94;
   --color-search-bg: #0a0a0a;
   --color-pill-text: #000000;
   --color-icon: #808080;

@@ -271,7 +271,7 @@ function statusText(game: GameDTO): string {
 
 function ScoreBugSkeleton() {
   return (
-    <div className="mb-2 flex flex-col gap-1.5 border-l-4 border-line bg-panel-2 px-3 py-2 last:mb-0">
+    <div className="mb-2 flex flex-col gap-1.5 border-l-4 border-tan bg-panel-2 px-3 py-2 last:mb-0">
       <div className="flex items-center gap-2">
         <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
         <Skeleton className="h-5 flex-1" />
@@ -379,9 +379,7 @@ function ScoreBugTeamLine({
 
 // The two teams stacked on top of each other on the left (logo + name +
 // score per line) rather than split to opposite sides — a sports
-// broadcast's lower-third score bug, not a teletext vidiprinter row. A
-// dotted rule divides the two teams instead of running under just one
-// line of text.
+// broadcast's lower-third score bug, not a teletext vidiprinter row.
 function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   const awayHighlight = rowHighlight(game.awayScore, game.status);
   const homeHighlight = rowHighlight(game.homeScore, game.status);
@@ -391,7 +389,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   return (
     <div
-      className="mb-2 border-l-4 border-line bg-panel-2 last:mb-0"
+      className="mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
       <ScoreBugTeamLine
@@ -402,7 +400,6 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         highlight={awayHighlight}
         showNames={showNames}
       />
-      <div className="mx-3 border-t-2 border-dotted border-chalk" />
       <ScoreBugTeamLine
         team={game.homeTeam}
         score={game.homeScore}
