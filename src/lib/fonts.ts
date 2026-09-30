@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Archivo_Black, Inter } from "next/font/google";
+import { Bungee, Inter } from "next/font/google";
 
 export const leagueGothic = localFont({
   src: "../fonts/LeagueGothic-Regular.ttf",
@@ -25,11 +25,11 @@ export const teletext = localFont({
   variable: "--font-teletext",
 });
 
-// Retro masthead only — bold, blocky, geometric sans-serif matching the
+// Retro masthead only — Bungee, a bold condensed display face matching the
 // CULTFAX reference's own logotype, deliberately different from the
 // app-wide Bedstead body font (the user explicitly OK'd a separate font
 // for just this logo).
-export const archivoBlack = Archivo_Black({
+export const bungee = Bungee({
   subsets: ["latin"],
   weight: "400",
 });
