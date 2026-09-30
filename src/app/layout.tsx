@@ -44,10 +44,16 @@ const THEME_INIT_SCRIPT = `
 // light/dark. Without this, a viewer who left retro mode on would see a
 // flash of the normal theme (and briefly, normal-mode-only markup) on every
 // reload before RetroModeProvider's own layout effect caught up.
+//
+// Retro is the default this week: anyone with no saved preference
+// (localStorage has never seen "retroMode") lands in retro. Someone who
+// explicitly switches back to the old app writes "false" via RetroToggle,
+// and that stuck choice — not this default — wins on every later visit.
 const RETRO_INIT_SCRIPT = `
 (function () {
   try {
-    var retro = localStorage.getItem("retroMode") === "true";
+    var stored = localStorage.getItem("retroMode");
+    var retro = stored === null ? true : stored === "true";
     document.documentElement.dataset.retro = String(retro);
   } catch (e) {}
 })();
