@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Inter } from "next/font/google";
+import { Archivo_Black, Inter } from "next/font/google";
 
 export const leagueGothic = localFont({
   src: "../fonts/LeagueGothic-Regular.ttf",
@@ -23,4 +23,13 @@ export const teletext = localFont({
   src: "../fonts/Bedstead.otf",
   weight: "400",
   variable: "--font-teletext",
+});
+
+// Retro masthead only — bold, blocky, geometric sans-serif matching the
+// CULTFAX reference's own logotype, deliberately different from the
+// app-wide Bedstead body font (the user explicitly OK'd a separate font
+// for just this logo).
+export const archivoBlack = Archivo_Black({
+  subsets: ["latin"],
+  weight: "400",
 });

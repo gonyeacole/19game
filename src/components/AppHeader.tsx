@@ -6,7 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RetroToggle from "@/components/RetroToggle";
 import RefreshButton from "@/components/RefreshButton";
 import AnnouncementBell from "@/components/AnnouncementBell";
-import { leagueGothic } from "@/lib/fonts";
+import { archivoBlack, leagueGothic } from "@/lib/fonts";
 
 // Fixed literal colors, not theme tokens — matching a specific reference
 // screen's own white/black and blue/green masthead exactly, the same
@@ -19,7 +19,7 @@ import { leagueGothic } from "@/lib/fonts";
 function CultTitle() {
   const cellStyle = { backgroundColor: "#ffffff", color: "#000000" };
   return (
-    <div className="flex h-16 items-stretch text-4xl" style={{ fontWeight: 700 }}>
+    <div className={`${archivoBlack.className} flex h-16 items-stretch text-4xl`}>
       <span className="flex w-16 items-center justify-center border-4 border-black" style={cellStyle}>
         1
       </span>
