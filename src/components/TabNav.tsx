@@ -435,10 +435,11 @@ export default function TabNav() {
               // Retro drops the icons for a solid Fastext-style color block
               // per tab (see RETRO_TAB_STYLES) instead of the main app's
               // single dark background with one accent color picking out
-              // the active tab — inactive tabs dim instead of changing hue,
-              // so the block colors stay true to the reference.
+              // the active tab — inactive tabs darken via a brightness
+              // filter rather than opacity, so they stay fully solid blocks
+              // instead of letting the black page show through as a fade.
               const className = retro
-                ? "flex flex-col items-center justify-center py-4 text-sm font-bold uppercase tracking-wide transition-opacity"
+                ? "flex flex-col items-center justify-center py-4 text-sm font-bold uppercase tracking-wide transition-[filter]"
                 : `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
                     active ? "text-led" : "text-icon"
                   }`;
@@ -446,7 +447,7 @@ export default function TabNav() {
                 ? {
                     backgroundColor: RETRO_TAB_STYLES[i].bg,
                     color: RETRO_TAB_STYLES[i].fg,
-                    opacity: active ? 1 : 0.6,
+                    filter: active ? "none" : "brightness(0.55)",
                   }
                 : undefined;
               return (
