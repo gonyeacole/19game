@@ -1,6 +1,8 @@
 "use client";
 
-export default function RefreshButton() {
+import { RETRO_TAB_CLASS } from "@/lib/retroMode";
+
+export default function RefreshButton({ variant = "pill" }: { variant?: "pill" | "tab" }) {
   const refresh = () => {
     // Pages fetch their data client-side, so right after reload the page is
     // briefly just the loading skeleton — much shorter than the scrolled-down
@@ -10,6 +12,14 @@ export default function RefreshButton() {
     window.scrollTo(0, 0);
     window.location.reload();
   };
+
+  if (variant === "tab") {
+    return (
+      <button onClick={refresh} aria-label="Refresh page" className={RETRO_TAB_CLASS}>
+        Refresh
+      </button>
+    );
+  }
 
   return (
     <button

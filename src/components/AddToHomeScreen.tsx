@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import { RETRO_TAB_CLASS } from "@/lib/retroMode";
 
 type Platform = "ios" | "android";
 
@@ -31,7 +32,7 @@ function detectPlatform(): Platform {
   return /iPhone|iPad|iPod/.test(navigator.userAgent) ? "ios" : "android";
 }
 
-export default function AddToHomeScreen() {
+export default function AddToHomeScreen({ variant = "icon" }: { variant?: "icon" | "tab" }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<Platform>("android");
@@ -47,21 +48,33 @@ export default function AddToHomeScreen() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="How to add to home screen"
-        aria-hidden={hidden}
-        tabIndex={hidden ? -1 : undefined}
-        className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90 ${
-          hidden ? "invisible pointer-events-none" : ""
-        }`}
-      >
-        <svg viewBox="0 0 20 20" className="h-4 w-4">
-          <rect x="3.5" y="3.5" width="11" height="11" rx="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
-          <circle cx="14.3" cy="14.3" r="3.4" className="fill-panel-3" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M14.3 12.6v3.4M12.6 14.3h3.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-        </svg>
-      </button>
+      {variant === "tab" ? (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="How to add to home screen"
+          aria-hidden={hidden}
+          tabIndex={hidden ? -1 : undefined}
+          className={`${RETRO_TAB_CLASS} ${hidden ? "invisible pointer-events-none" : ""}`}
+        >
+          + Home Screen
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="How to add to home screen"
+          aria-hidden={hidden}
+          tabIndex={hidden ? -1 : undefined}
+          className={`shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90 ${
+            hidden ? "invisible pointer-events-none" : ""
+          }`}
+        >
+          <svg viewBox="0 0 20 20" className="h-4 w-4">
+            <rect x="3.5" y="3.5" width="11" height="11" rx="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <circle cx="14.3" cy="14.3" r="3.4" className="fill-panel-3" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M14.3 12.6v3.4M12.6 14.3h3.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
 
       {open &&
         mounted &&

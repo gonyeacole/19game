@@ -62,3 +62,12 @@ export function useRetroMode(): boolean {
 export function useRetroToggle(): () => void {
   return useContext(RetroContext)?.toggle ?? (() => {});
 }
+
+// Shared styling for the retro header's top row of four tabs (Original
+// App / + Home Screen / Refresh / Announcements) — each of those buttons
+// lives in its own component (RetroToggle, AddToHomeScreen, RefreshButton,
+// AnnouncementBell) and takes a `variant="tab"` prop to render this instead
+// of its normal icon-button form, so the underlying state/logic isn't
+// duplicated.
+export const RETRO_TAB_CLASS =
+  "flex flex-1 items-center justify-center border-r border-line px-1 py-2 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-chalk last:border-r-0 active:bg-panel-3";

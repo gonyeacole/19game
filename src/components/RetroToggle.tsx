@@ -1,13 +1,23 @@
 "use client";
 
-import { useRetroMode, useRetroToggle } from "@/lib/retroMode";
+import { RETRO_TAB_CLASS, useRetroMode, useRetroToggle } from "@/lib/retroMode";
 
 // A little CRT-shaped button, mirroring ThemeToggle's own button pattern —
 // flips the whole app between the normal theme and the Ceefax/teletext
-// retro theme.
-export default function RetroToggle() {
+// retro theme. variant="tab" is only ever rendered from inside the retro
+// header itself, so it's always going "back" — the label doesn't need the
+// same retro-state branching the icon form's aria-label does.
+export default function RetroToggle({ variant = "icon" }: { variant?: "icon" | "tab" }) {
   const retro = useRetroMode();
   const toggle = useRetroToggle();
+
+  if (variant === "tab") {
+    return (
+      <button onClick={toggle} className={RETRO_TAB_CLASS}>
+        Original App
+      </button>
+    );
+  }
 
   return (
     <button

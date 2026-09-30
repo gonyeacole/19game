@@ -212,38 +212,6 @@ html.crt-boot body {
 }
 
 /*
-  Teletext's classic "rainbow title" lettering (each letter of a masthead
-  in a different color) — used on the "19League" brand text in retro mode.
-  nth-child cycles through the app's own existing status colors (rather
-  than hardcoding hex values of its own), so it stays in sync with whatever
-  the light/dark toggle currently has those tokens set to.
-*/
-.rainbow-title span:nth-child(8n + 1) {
-  color: var(--color-live);
-}
-.rainbow-title span:nth-child(8n + 2) {
-  color: var(--color-caution);
-}
-.rainbow-title span:nth-child(8n + 3) {
-  color: var(--color-win);
-}
-.rainbow-title span:nth-child(8n + 4) {
-  color: var(--color-led);
-}
-.rainbow-title span:nth-child(8n + 5) {
-  color: var(--color-chalk-dim);
-}
-.rainbow-title span:nth-child(8n + 6) {
-  color: var(--color-venmo);
-}
-.rainbow-title span:nth-child(8n + 7) {
-  color: var(--color-chalk);
-}
-.rainbow-title span:nth-child(8n + 8) {
-  color: var(--color-caution);
-}
-
-/*
   A normal Safari tab already reserves its own space around the home
   indicator, so env(safe-area-inset-*) padding on top of that just adds an
   oversized gap. Only add it when actually running standalone (added to the
