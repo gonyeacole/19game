@@ -154,6 +154,28 @@ html[data-retro="true"] * {
 }
 
 /*
+  A score bug's score briefly brightens when a live poll changes it, so an
+  update is noticeable without re-reading the whole row. A brightness pulse
+  rather than a color swap — it has to work on top of whichever color the
+  score already has (plain white, or the win/watch highlight colors), not
+  replace it.
+*/
+@keyframes score-flash {
+  0% {
+    filter: brightness(1);
+  }
+  25% {
+    filter: brightness(2.5);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+.score-flash {
+  animation: score-flash 0.7s ease-out;
+}
+
+/*
   A brief CRT power-on flicker (rapid brightness/opacity jumps) the instant
   retro mode is switched on — RetroModeProvider adds this class to <html>
   for ~450ms and removes it again. Only fires turning retro ON, not off,

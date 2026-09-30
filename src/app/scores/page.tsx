@@ -318,6 +318,7 @@ function ScoreBugTeamLine({
   hasBall,
   highlight,
   showNames,
+  flash,
 }: {
   team: TeamDTO;
   score: number;
@@ -325,6 +326,7 @@ function ScoreBugTeamLine({
   hasBall: boolean;
   highlight: "win" | "hit-live" | "watch" | null;
   showNames: boolean;
+  flash: boolean;
 }) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5">
@@ -363,7 +365,7 @@ function ScoreBugTeamLine({
         <span
           className={`shrink-0 text-2xl leading-none tabular-nums ${
             highlight ? TEXT_COLOR[highlight] : "text-chalk"
-          }`}
+          } ${flash ? "score-flash" : ""}`}
           style={{
             fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
             fontStyle: "italic",
@@ -392,10 +394,43 @@ function AsciiDivider() {
   );
 }
 
+// Small box-drawing corner marks at each edge of a ScoreBug — reinforces
+// the "terminal window" look with more character-grid drawing rather than
+// a shadow, gradient, or rounded corner.
+function CornerBrackets() {
+  const corner = "pointer-events-none absolute text-[10px] leading-none text-tan";
+  return (
+    <>
+      <span aria-hidden="true" className={`${corner} left-1 top-0.5`}>
+        ┌
+      </span>
+      <span aria-hidden="true" className={`${corner} right-0.5 top-0.5`}>
+        ┐
+      </span>
+      <span aria-hidden="true" className={`${corner} bottom-0.5 left-1`}>
+        └
+      </span>
+      <span aria-hidden="true" className={`${corner} bottom-0.5 right-0.5`}>
+        ┘
+      </span>
+    </>
+  );
+}
+
 // The two teams stacked on top of each other on the left (logo + name +
 // score per line) rather than split to opposite sides — a sports
 // broadcast's lower-third score bug, not a teletext vidiprinter row.
-function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
+function ScoreBug({
+  game,
+  showNames,
+  awayFlash,
+  homeFlash,
+}: {
+  game: GameDTO;
+  showNames: boolean;
+  awayFlash: boolean;
+  homeFlash: boolean;
+}) {
   const awayHighlight = rowHighlight(game.awayScore, game.status);
   const homeHighlight = rowHighlight(game.homeScore, game.status);
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
@@ -404,9 +439,10 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   return (
     <div
-      className="teletype-reveal mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
+      className="teletype-reveal relative mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
+      <CornerBrackets />
       <ScoreBugTeamLine
         team={game.awayTeam}
         score={game.awayScore}
@@ -414,6 +450,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         hasBall={awayHasBall}
         highlight={awayHighlight}
         showNames={showNames}
+        flash={awayFlash}
       />
       <ScoreBugTeamLine
         team={game.homeTeam}
@@ -422,6 +459,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         hasBall={homeHasBall}
         highlight={homeHighlight}
         showNames={showNames}
+        flash={homeFlash}
       />
       <AsciiDivider />
       <div className="px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
@@ -474,6 +512,18 @@ export default function ScoresPage() {
     gamesRef.current = games;
   }, [games]);
 
+  // Retro's score bug briefly flashes a score that just changed, so a
+  // live-poll update is noticeable without re-reading the whole row. Keyed
+  // by "<gameId>:home"/"<gameId>:away" rather than just the game id, since
+  // the two sides can update independently. prevScoresRef holds the last
+  // seen values across polls (a ref, not state — it's only ever read/written
+  // inside load(), never rendered directly), compared against each new
+  // fetch to find deltas; the first load populates it with nothing to
+  // compare against, so nothing flashes on initial mount.
+  const prevScoresRef = useRef<Map<string, { home: number; away: number }>>(new Map());
+  const [flashKeys, setFlashKeys] = useState<Set<string>>(new Set());
+  const FLASH_MS = 700;
+
   const load = useCallback(async (year?: number, week?: number) => {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -487,9 +537,23 @@ export default function ScoresPage() {
       });
       if (!res.ok) throw new Error("Failed to load scores");
       const data: ScoresResponse = await res.json();
+      const newGames = data.week?.games ?? [];
+      const nextFlash = new Set<string>();
+      for (const g of newGames) {
+        const prev = prevScoresRef.current.get(g.id);
+        if (prev) {
+          if (prev.away !== g.awayScore) nextFlash.add(`${g.id}:away`);
+          if (prev.home !== g.homeScore) nextFlash.add(`${g.id}:home`);
+        }
+        prevScoresRef.current.set(g.id, { home: g.homeScore, away: g.awayScore });
+      }
+      if (nextFlash.size > 0) {
+        setFlashKeys(nextFlash);
+        setTimeout(() => setFlashKeys(new Set()), FLASH_MS);
+      }
       setSeasonYear(data.seasonYear);
       setWeekNumber(data.weekNumber);
-      setGames(data.week?.games ?? []);
+      setGames(newGames);
       setLastUpdated(new Date());
       setError(
         data.synced
@@ -666,7 +730,13 @@ export default function ScoresPage() {
                   (retro ? (
                     <div className="flex flex-col">
                       {gamesForStatus.map((g) => (
-                        <ScoreBug key={g.id} game={g} showNames={showNames} />
+                        <ScoreBug
+                          key={g.id}
+                          game={g}
+                          showNames={showNames}
+                          awayFlash={flashKeys.has(`${g.id}:away`)}
+                          homeFlash={flashKeys.has(`${g.id}:home`)}
+                        />
                       ))}
                     </div>
                   ) : (
