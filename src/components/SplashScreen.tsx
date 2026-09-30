@@ -12,10 +12,10 @@ const SPLASH_BLACK = "#0a0a0a";
 
 // Retro splash — a black terminal screen with a blinking cursor typing out
 // "19 LEAGUE" then, after a pause simulating pressing Enter, "RETRO WEEK"
-// on a second line, in the same cyan as the retro app's own team-name text
-// (--color-venmo) — a completely different animation from the normal
+// on a second line, in the same green as the header's own "League" text
+// (--color-led) — a completely different animation from the normal
 // splash's fade/slide, not just a font swap.
-const RETRO_BLUE = "#00ffff";
+const RETRO_GREEN = "#00ff00";
 const RETRO_LINE_1 = "19 LEAGUE";
 const RETRO_LINE_2 = "RETRO WEEK";
 const RETRO_CHAR_MS = 190; // per-character typing speed
@@ -68,7 +68,7 @@ function shouldSkipSplash(): boolean {
 // counted on to include a cursor-shaped character, so this blinks via CSS
 // instead of relying on the font to render one.
 function RetroCursor() {
-  return <span aria-hidden className="retro-cursor ml-0.5 inline-block align-middle" style={{ backgroundColor: RETRO_BLUE }} />;
+  return <span aria-hidden className="retro-cursor ml-0.5 inline-block align-middle" style={{ backgroundColor: RETRO_GREEN }} />;
 }
 
 function charStyle(delay: number, visible: boolean): React.CSSProperties {
@@ -210,7 +210,7 @@ export default function SplashScreen() {
       >
         <div
           className={`${teletext.className} flex flex-col items-center gap-2 text-center text-4xl uppercase leading-none tracking-wide`}
-          style={{ color: RETRO_BLUE, fontWeight: 700 }}
+          style={{ color: RETRO_GREEN, fontWeight: 700 }}
         >
           <div>
             {RETRO_LINE_1.slice(0, line1Visible)}
