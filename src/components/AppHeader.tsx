@@ -19,18 +19,18 @@ import { leagueGothic } from "@/lib/fonts";
 function CultTitle() {
   const cellStyle = { backgroundColor: "#ffffff", color: "#000000" };
   return (
-    <div className="flex items-stretch text-2xl" style={{ fontWeight: 700 }}>
-      <span className="flex items-center justify-center border-2 border-black px-2" style={cellStyle}>
+    <div className="flex h-16 items-stretch text-4xl" style={{ fontWeight: 700 }}>
+      <span className="flex w-16 items-center justify-center border-4 border-black" style={cellStyle}>
         1
       </span>
       <span
-        className="flex items-center justify-center border-2 border-l-0 border-black px-2"
+        className="flex w-16 items-center justify-center border-4 border-l-0 border-black"
         style={cellStyle}
       >
         9
       </span>
       <span
-        className="flex flex-1 items-center px-3 uppercase"
+        className="flex flex-1 items-center pl-4 uppercase tracking-widest"
         style={{ backgroundColor: "#0000ff", color: "#00ff00" }}
       >
         League
@@ -51,9 +51,7 @@ export default function AppHeader() {
           <RefreshButton variant="tab" />
           <AnnouncementBell variant="tab" />
         </div>
-        <div className="py-3">
-          <CultTitle />
-        </div>
+        <CultTitle />
       </header>
     );
   }

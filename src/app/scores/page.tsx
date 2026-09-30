@@ -251,168 +251,23 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
 }
 
-/* ---------- Retro theme: broadcast-style stacked score bug ---------- */
+/* ---------- Retro theme: flat teletext vidiprinter row ---------- */
 
-// A single line of status text per game.
-function statusText(game: GameDTO): string {
-  if (game.status === "SCHEDULED" && game.startTime) {
-    const date = new Date(game.startTime);
-    const timeZone = "America/Chicago";
-    return date.toLocaleString(undefined, {
-      weekday: "short",
-      hour: "numeric",
-      minute: "2-digit",
-      timeZone,
-    });
-  }
-  if (game.status === "FINAL") return "Final";
-  return game.statusDetail || game.status;
-}
-
-function ScoreBugSkeleton() {
+function GameRowSkeleton() {
   return (
-    <div className="mb-2 flex flex-col gap-1.5 border-l-4 border-tan bg-panel-2 px-3 py-2 last:mb-0">
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
-        <Skeleton className="h-5 flex-1" />
-        <Skeleton className="h-6 w-8 shrink-0" />
-      </div>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-7 w-7 shrink-0" rounded="rounded-full" />
-        <Skeleton className="h-5 flex-1" />
-        <Skeleton className="h-6 w-8 shrink-0" />
-      </div>
+    <div className="flex items-center gap-2 border-b border-dotted border-chalk-faint py-3">
+      <Skeleton className="h-4 flex-1" />
+      <Skeleton className="h-4 w-10 shrink-0" />
+      <Skeleton className="h-4 flex-1" />
     </div>
   );
 }
 
-// A small pixel-art football — the possession marker. Built from a handful
-// of blocky <rect>s with crisp (non-antialiased) edges rather than a smooth
-// icon or emoji, since an emoji glyph can't be pixelated via CSS the way a
-// bitmap can.
-function PixelFootball() {
-  return (
-    <svg
-      viewBox="0 0 12 8"
-      shapeRendering="crispEdges"
-      className="ml-1 inline-block h-3 w-4 align-middle"
-    >
-      <rect x="3" y="1" width="6" height="1" fill="#c9a876" />
-      <rect x="2" y="2" width="8" height="1" fill="#c9a876" />
-      <rect x="1" y="3" width="10" height="2" fill="#c9a876" />
-      <rect x="2" y="5" width="8" height="1" fill="#c9a876" />
-      <rect x="3" y="6" width="6" height="1" fill="#c9a876" />
-      <rect x="5" y="3" width="2" height="2" fill="#ffffff" />
-    </svg>
-  );
-}
-
-// One team's logo/name/score line inside a ScoreBug — a broadcast lower-
-// third's bold italic condensed lettering, in the app's existing "caution"
-// (yellow) and "chalk" (white) tokens rather than the reference image's own
-// literal hex values, so it still tracks the light/dark toggle.
-function ScoreBugTeamLine({
-  team,
-  score,
-  showScore,
-  hasBall,
-  highlight,
-  showNames,
-  flash,
-}: {
-  team: TeamDTO;
-  score: number;
-  showScore: boolean;
-  hasBall: boolean;
-  highlight: "win" | "hit-live" | "watch" | null;
-  showNames: boolean;
-  flash: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5">
-      {team.logoUrl ? (
-        <Image
-          src={team.logoUrl}
-          alt=""
-          width={28}
-          height={28}
-          unoptimized
-          className="h-7 w-7 shrink-0 object-contain"
-          style={{ imageRendering: "pixelated" }}
-        />
-      ) : (
-        <div className="h-7 w-7 shrink-0 rounded-full bg-panel-3" />
-      )}
-      <div className="min-w-0 flex-1">
-        <span
-          className="block truncate text-xl uppercase leading-none tracking-wide text-tan"
-          style={{ fontStyle: "italic", fontWeight: 700 }}
-        >
-          {team.name.split(" ").at(-1)}
-          {hasBall && <PixelFootball />}
-        </span>
-        {showNames && (
-          <span className="block truncate text-[10px] leading-tight text-chalk-faint">
-            {team.player ? team.player.name : "Unassigned"}
-          </span>
-        )}
-      </div>
-      {showScore && (
-        <span
-          className={`shrink-0 text-2xl leading-none tabular-nums ${
-            highlight ? TEXT_COLOR[highlight] : "text-chalk"
-          } ${flash ? "score-flash" : ""}`}
-          style={{ fontStyle: "italic", fontWeight: 700 }}
-        >
-          {score}
-        </span>
-      )}
-    </div>
-  );
-}
-
-// A rule drawn from repeated block characters rather than a CSS border —
-// real teletext pages had no border-style property, only the character
-// grid itself. Repeated far past any realistic card width and clipped, so
-// it always fills the row regardless of viewport size.
-function AsciiDivider() {
-  return (
-    <div
-      aria-hidden="true"
-      className="overflow-hidden whitespace-nowrap px-3 text-[8px] leading-none text-chalk"
-    >
-      {"▓".repeat(120)}
-    </div>
-  );
-}
-
-// Small box-drawing corner marks at each edge of a ScoreBug — reinforces
-// the "terminal window" look with more character-grid drawing rather than
-// a shadow, gradient, or rounded corner.
-function CornerBrackets() {
-  const corner = "pointer-events-none absolute text-[10px] leading-none text-tan";
-  return (
-    <>
-      <span aria-hidden="true" className={`${corner} left-1 top-0.5`}>
-        ┌
-      </span>
-      <span aria-hidden="true" className={`${corner} right-0.5 top-0.5`}>
-        ┐
-      </span>
-      <span aria-hidden="true" className={`${corner} bottom-0.5 left-1`}>
-        └
-      </span>
-      <span aria-hidden="true" className={`${corner} bottom-0.5 right-0.5`}>
-        ┘
-      </span>
-    </>
-  );
-}
-
-// The two teams stacked on top of each other on the left (logo + name +
-// score per line) rather than split to opposite sides — a sports
-// broadcast's lower-third score bug, not a teletext vidiprinter row.
-function ScoreBug({
+// A plain "AWAY @ HOME" row — a real teletext vidiprinter table, not a
+// broadcast-style card. No logos, no box, no border accent: just the
+// character grid, a thin dotted rule underneath, and the score (or "@"
+// for a game that hasn't kicked off yet) in the middle.
+function GameRow({
   game,
   showNames,
   awayFlash,
@@ -431,31 +286,47 @@ function ScoreBug({
 
   return (
     <div
-      className="teletype-reveal relative mb-2 border-l-4 border-tan bg-panel-2 last:mb-0"
+      className="flex items-center gap-2 border-b border-dotted border-chalk-faint py-3 text-lg uppercase"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
-      <CornerBrackets />
-      <ScoreBugTeamLine
-        team={game.awayTeam}
-        score={game.awayScore}
-        showScore={showScore}
-        hasBall={awayHasBall}
-        highlight={awayHighlight}
-        showNames={showNames}
-        flash={awayFlash}
-      />
-      <ScoreBugTeamLine
-        team={game.homeTeam}
-        score={game.homeScore}
-        showScore={showScore}
-        hasBall={homeHasBall}
-        highlight={homeHighlight}
-        showNames={showNames}
-        flash={homeFlash}
-      />
-      <AsciiDivider />
-      <div className="px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
-        {statusText(game)}
+      <div className="min-w-0 flex-1">
+        <span className="block truncate text-venmo">
+          {awayHasBall && <span className="mr-1 not-italic text-chalk-faint">▸</span>}
+          {game.awayTeam.name.split(" ").at(-1)}
+        </span>
+        {showNames && (
+          <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
+            {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
+
+      <div className="flex shrink-0 items-center justify-center gap-1 tabular-nums">
+        {showScore ? (
+          <>
+            <span className={`${awayHighlight ? TEXT_COLOR[awayHighlight] : "text-chalk"} ${awayFlash ? "score-flash" : ""}`}>
+              {game.awayScore}
+            </span>
+            <span className="text-chalk-faint">-</span>
+            <span className={`${homeHighlight ? TEXT_COLOR[homeHighlight] : "text-chalk"} ${homeFlash ? "score-flash" : ""}`}>
+              {game.homeScore}
+            </span>
+          </>
+        ) : (
+          <span className="text-chalk">@</span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1 text-right">
+        <span className="block truncate text-venmo">
+          {game.homeTeam.name.split(" ").at(-1)}
+          {homeHasBall && <span className="ml-1 not-italic text-chalk-faint">◂</span>}
+        </span>
+        {showNames && (
+          <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
+            {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -637,7 +508,7 @@ export default function ScoresPage() {
               matching that count avoids the large layout shift a smaller
               placeholder count would cause once real data loads. */}
           {Array.from({ length: 16 }).map((_, i) =>
-            retro ? <ScoreBugSkeleton key={i} /> : <GameCardSkeleton key={i} />
+            retro ? <GameRowSkeleton key={i} /> : <GameCardSkeleton key={i} />
           )}
         </div>
       ) : filteredGames && filteredGames.length === 0 ? (
@@ -722,7 +593,7 @@ export default function ScoresPage() {
                   (retro ? (
                     <div className="flex flex-col">
                       {gamesForStatus.map((g) => (
-                        <ScoreBug
+                        <GameRow
                           key={g.id}
                           game={g}
                           showNames={showNames}
