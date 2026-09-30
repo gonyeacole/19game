@@ -3,8 +3,9 @@
 /*
   Dark "scoreboard" theme — the default. Plain @theme (not @theme inline)
   so utilities reference these as CSS variables rather than baking in
-  literal values — required for the light-mode override below to work at
-  runtime via the [data-theme] toggle instead of only at build time.
+  literal values — required for the light-mode override below (and the
+  retro-mode override further down) to work at runtime via attribute
+  toggles instead of only at build time.
 */
 @theme {
   --color-field: #0a0a0a;
@@ -28,6 +29,12 @@
   --color-search-bg: #1d1d1d;
   --color-pill-text: #08150e;
   --color-icon: #727270;
+  /*
+    Retro-only accent (the score bug's team-name color) — declared here so
+    Tailwind generates the text-tan/bg-tan/etc. utilities, but only
+    actually used under html[data-retro="true"].
+  */
+  --color-tan: #c9a876;
   --font-sans: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -56,10 +63,173 @@
   --color-icon: #85827c;
 }
 
+/*
+  Retro mode — Ceefax/teletext reskin, flipped on at runtime via RetroToggle
+  (see src/lib/retroMode.tsx) rather than being a separate deployment.
+
+  A deliberately narrow palette — black, white, and the normal theme's
+  own green (led/win/caution/live/venmo all share it) — rather than a
+  distinct color per status token the way the normal theme uses.
+  Structural outlines (--color-line, borders throughout the app) are
+  white; --color-tan is a separate, narrower accent reserved for the
+  score bug's own team-name text and left border. One consistent look
+  regardless of the light/dark toggle: real teletext has no actual
+  "light mode" to begin with, and switching hues between the two only
+  made the theme read as busier, not as two coherent looks.
+*/
+/*
+  Also matched with the extra [data-theme="light"] attribute, not just
+  [data-retro="true"] alone: :root[data-theme="light"] above has two
+  attribute/pseudo-class selectors to this rule's one attribute plus the
+  html element, so without this second selector CSS specificity would let
+  the light theme's own overrides win whenever both are active, and retro
+  would silently revert to the normal theme's light palette.
+*/
+html[data-retro="true"],
+html[data-retro="true"][data-theme="light"] {
+  --color-field: #000000;
+  --color-panel: #000000;
+  --color-panel-2: #0a0a0a;
+  --color-panel-3: #141414;
+  --color-line: #ffffff;
+  --color-chalk: #ffffff;
+  --color-chalk-dim: #ffffff;
+  --color-chalk-faint: #808080;
+  --color-placeholder: #5a5a5a;
+  --color-led: #00ff00;
+  --color-led-bg: #0d2a20;
+  --color-win: #00ff00;
+  --color-win-bg: #0d2a20;
+  --color-caution: #00ff00;
+  --color-caution-bg: #0d2a20;
+  --color-live: #00ff00;
+  --color-live-bg: #0d2a20;
+  --color-venmo: #00ffff;
+  --color-search-bg: #0a0a0a;
+  --color-pill-text: #000000;
+  --color-icon: #808080;
+  --font-sans: var(--font-teletext), var(--font-inter), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
 body {
   background: var(--color-field);
   color: var(--color-chalk);
   font-family: var(--font-sans);
+}
+
+html[data-retro="true"] body {
+  letter-spacing: 0.06em;
+}
+
+/*
+  Teletext graphics are built entirely from hard rectangular character
+  cells — there's no such thing as a rounded corner on a real teletext
+  page. Forcing every corner square (rather than editing each component's
+  rounded-* utility class individually) is what actually reads as
+  "teletext" rather than just "a recolored version of the normal app" —
+  it's the single biggest visual tell, more than the palette.
+*/
+html[data-retro="true"] * {
+  border-radius: 0 !important;
+}
+
+/*
+  Each score bug "types itself in" the first time it appears — a stepped
+  (not smooth) clip-path wipe reads as a teletype/wire-feed printing the
+  row, rather than a normal fade. Runs once on mount only: it's a CSS
+  animation on the element itself, not driven by React state, so a later
+  re-render of the same DOM node (a live-score poll, for instance) doesn't
+  replay it — only a genuinely new row does.
+*/
+@keyframes teletype-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.teletype-reveal {
+  animation: teletype-reveal 0.5s steps(20, end);
+}
+
+/*
+  A score bug's score briefly brightens when a live poll changes it, so an
+  update is noticeable without re-reading the whole row. A brightness pulse
+  rather than a color swap — it has to work on top of whichever color the
+  score already has (plain white, or the win/watch highlight colors), not
+  replace it.
+*/
+@keyframes score-flash {
+  0% {
+    filter: brightness(1);
+  }
+  25% {
+    filter: brightness(2.5);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+.score-flash {
+  animation: score-flash 0.7s ease-out;
+}
+
+/*
+  Blinking terminal cursor for the retro splash screen's typewriter reveal
+  (SplashScreen.tsx) — a plain block, not a font glyph, since Bedstead's
+  Unicode coverage can't be counted on to include a cursor character.
+*/
+@keyframes retro-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.retro-cursor {
+  width: 0.5em;
+  height: 1em;
+  animation: retro-cursor-blink 1s steps(1, end) infinite;
+}
+
+/*
+  A brief CRT power-on flicker (rapid brightness/opacity jumps) the instant
+  retro mode is switched on — RetroModeProvider adds this class to <html>
+  for ~450ms and removes it again. Only fires turning retro ON, not off,
+  matching "powering up" rather than a generic transition.
+*/
+@keyframes crt-boot-flicker {
+  0% {
+    opacity: 0;
+    filter: brightness(3);
+  }
+  8% {
+    opacity: 1;
+    filter: brightness(0.4);
+  }
+  14% {
+    opacity: 0.2;
+    filter: brightness(1);
+  }
+  20% {
+    opacity: 1;
+    filter: brightness(2.2);
+  }
+  32% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+html.crt-boot body {
+  animation: crt-boot-flicker 0.45s steps(2, end);
 }
 
 /*
@@ -219,4 +389,3 @@ html[data-standalone="true"] .chat-viewport {
 .shine-watch {
   background-image: linear-gradient(100deg, transparent 35%, var(--color-live) 50%, transparent 65%);
 }
-

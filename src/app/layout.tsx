@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import TabNav from "@/components/TabNav";
 import SplashScreen from "@/components/SplashScreen";
-import ThemeToggle from "@/components/ThemeToggle";
-import RefreshButton from "@/components/RefreshButton";
-import AddToHomeScreen from "@/components/AddToHomeScreen";
-import AnnouncementBell from "@/components/AnnouncementBell";
-import { inter, leagueGothic } from "@/lib/fonts";
+import AppHeader from "@/components/AppHeader";
+import { RetroModeProvider } from "@/lib/retroMode";
+import { inter, teletext } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,6 +35,26 @@ const THEME_INIT_SCRIPT = `
     var stored = localStorage.getItem("theme");
     var theme = stored || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     document.documentElement.dataset.theme = theme;
+  } catch (e) {}
+})();
+`;
+
+// Runs before paint so the right theme applies immediately — same reasoning
+// as THEME_INIT_SCRIPT above, just for the retro/normal axis instead of
+// light/dark. Without this, a viewer who left retro mode on would see a
+// flash of the normal theme (and briefly, normal-mode-only markup) on every
+// reload before RetroModeProvider's own layout effect caught up.
+//
+// Retro is the default this week: anyone with no saved preference
+// (localStorage has never seen "retroMode") lands in retro. Someone who
+// explicitly switches back to the old app writes "false" via RetroToggle,
+// and that stuck choice — not this default — wins on every later visit.
+const RETRO_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem("retroMode");
+    var retro = stored === null ? true : stored === "true";
+    document.documentElement.dataset.retro = String(retro);
   } catch (e) {}
 })();
 `;
@@ -88,50 +106,38 @@ const SPLASH_INIT_SCRIPT = `
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+    <html lang="en" className={`h-full antialiased ${inter.variable} ${teletext.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: RETRO_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: SPLASH_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
-        <header className="safe-top sticky top-0 z-10 grid grid-cols-[1fr_auto_1fr] items-center border-b border-line bg-field px-4 pb-3">
-          <div className="flex items-center justify-self-start gap-2">
-            <AddToHomeScreen />
-            <ThemeToggle />
-          </div>
-          <span
-            className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
-            style={{ fontWeight: 700 }}
-          >
-            19League
-          </span>
-          <div className="flex items-center justify-self-end gap-2">
-            <RefreshButton />
-            <AnnouncementBell />
-          </div>
-        </header>
-        {/*
-          min-h forces every page to be at least a little taller than the
-          viewport, even ones whose own content (Chat, a logged-out Admin)
-          doesn't naturally fill it. iOS WebKit has been observed
-          positioning position:fixed elements (TabNav) against a different
-          reference on a page that's exactly viewport height or shorter —
-          nothing to scroll — than on a genuinely scrollable one; comparing
-          screenshots pixel-for-pixel showed TabNav sitting measurably
-          higher specifically on the short pages. Guaranteeing real,
-          if invisible, scroll room on every page is the standard fix for
-          this class of bug.
-        */}
-        {/*
-          pb-40 (160px) clears TabNav's now-taller fixed area — the chat
-          preview bar plus the tab row, ~109px normally and up to ~143px in
-          standalone mode's extra safe-bottom inset — so scrolled content on
-          any page doesn't end up hidden behind it.
-        */}
-        <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
-        <TabNav />
-        <SplashScreen />
+        <RetroModeProvider>
+          <AppHeader />
+          {/*
+            min-h forces every page to be at least a little taller than the
+            viewport, even ones whose own content (Chat, a logged-out Admin)
+            doesn't naturally fill it. iOS WebKit has been observed
+            positioning position:fixed elements (TabNav) against a different
+            reference on a page that's exactly viewport height or shorter —
+            nothing to scroll — than on a genuinely scrollable one; comparing
+            screenshots pixel-for-pixel showed TabNav sitting measurably
+            higher specifically on the short pages. Guaranteeing real,
+            if invisible, scroll room on every page is the standard fix for
+            this class of bug.
+          */}
+          {/*
+            pb-40 (160px) clears TabNav's now-taller fixed area — the chat
+            preview bar plus the tab row, ~109px normally and up to ~143px in
+            standalone mode's extra safe-bottom inset — so scrolled content on
+            any page doesn't end up hidden behind it.
+          */}
+          <main className="min-h-[calc(100dvh+20px)] flex-1 pb-40">{children}</main>
+          <TabNav />
+          <SplashScreen />
+        </RetroModeProvider>
       </body>
     </html>
   );

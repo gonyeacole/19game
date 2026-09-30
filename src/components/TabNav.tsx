@@ -5,8 +5,9 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ChatContent from "@/components/ChatContent";
+import { useRetroMode } from "@/lib/retroMode";
 
-const TABS = [
+export const TABS = [
   {
     href: "/scores",
     label: "Scores",
@@ -67,6 +68,18 @@ const TABS = [
   },
 ] as const;
 
+// Classic teletext "Fastext" nav bar — four solid, edge-to-edge colored
+// blocks (red/green/yellow/blue), each with the dark/light text color that
+// keeps it readable. Teams' green matches the header's "League" text,
+// Admin's blue matches the header's "League" background, and Pot uses a
+// more vibrant yellow than the original reference photo's muted tone.
+const RETRO_TAB_STYLES = [
+  { bg: "#cc2200", fg: "#ffffff" },
+  { bg: "#00ff00", fg: "#000000" },
+  { bg: "#ffee00", fg: "#000000" },
+  { bg: "#0000ff", fg: "#ffffff" },
+] as const;
+
 interface MessageDTO {
   id: string;
   authorName: string;
@@ -98,6 +111,7 @@ function ChatSheet({
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const pathname = usePathname();
+  const retro = useRetroMode();
   const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -352,7 +366,9 @@ function ChatSheet({
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="flex shrink-0 touch-none select-none items-center gap-2.5 bg-led px-4 text-pill-text"
+          className={`flex shrink-0 touch-none select-none items-center gap-2.5 px-4 text-pill-text ${
+            retro ? "bg-chalk" : "bg-led"
+          }`}
           // Fixed at COLLAPSED_HEIGHT (flex-centered) in both states, not
           // just collapsed — otherwise the header's own height (previously
           // padding-driven while expanded) didn't match its collapsed size,
@@ -394,6 +410,7 @@ function ChatSheet({
 export default function TabNav() {
   const pathname = usePathname();
   const [chatExpanded, setChatExpanded] = useState(false);
+  const retro = useRetroMode();
 
   return (
     <nav
@@ -412,17 +429,29 @@ export default function TabNav() {
         no leftover gap for anything (real page or otherwise) to occupy.
       */}
       {!chatExpanded && (
-        <div className="safe-bottom border-t border-line bg-field">
+        <div className={`safe-bottom border-t border-line ${retro ? "" : "bg-field"}`}>
           <ul className="mx-auto grid max-w-lg grid-cols-4">
-            {TABS.map((tab) => {
+            {TABS.map((tab, i) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
-              const className = `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
-                active ? "text-led" : "text-icon"
-              }`;
+              // Retro drops the icons for a solid Fastext-style color block
+              // per tab (see RETRO_TAB_STYLES) instead of the main app's
+              // single dark background with one accent color picking out
+              // the active tab — every block stays at full, uniform
+              // brightness regardless of active state, matching the
+              // reference exactly rather than adding our own selected-tab
+              // indicator.
+              const className = retro
+                ? "flex flex-col items-center justify-center py-4 text-sm font-bold uppercase tracking-wide"
+                : `flex flex-col items-center gap-1 pb-1 pt-1 text-xs font-semibold transition-colors ${
+                    active ? "text-led" : "text-icon"
+                  }`;
+              const style = retro
+                ? { backgroundColor: RETRO_TAB_STYLES[i].bg, color: RETRO_TAB_STYLES[i].fg }
+                : undefined;
               return (
                 <li key={tab.href}>
-                  <Link href={tab.href} className={className}>
-                    <span className="h-6 w-6">{tab.icon}</span>
+                  <Link href={tab.href} className={className} style={style}>
+                    {!retro && <span className="h-6 w-6">{tab.icon}</span>}
                     {tab.label}
                   </Link>
                 </li>

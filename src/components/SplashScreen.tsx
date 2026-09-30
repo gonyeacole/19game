@@ -1,13 +1,28 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { leagueGothic } from "@/lib/fonts";
+import { leagueGothic, teletext } from "@/lib/fonts";
+import { useRetroMode } from "@/lib/retroMode";
 
 // Matches the app icon's green/near-black — literal hex rather than the
 // theme's --color-* tokens so the splash looks the same in light or dark
 // mode, like a fixed brand screen rather than themed UI.
 const SPLASH_GREEN = "#00dd94";
 const SPLASH_BLACK = "#0a0a0a";
+
+// Retro splash — a black terminal screen with a blinking cursor typing out
+// "19 LEAGUE" then, after a pause simulating pressing Enter, "RETRO WEEK"
+// on a second line, in the same cyan as the retro app's own team-name text
+// (--color-venmo) — a completely different animation from the normal
+// splash's fade/slide, not just a font swap.
+const RETRO_BLUE = "#00ffff";
+const RETRO_LINE_1 = "19 LEAGUE";
+const RETRO_LINE_2 = "RETRO WEEK";
+const RETRO_CHAR_MS = 190; // per-character typing speed
+const RETRO_ENTER_PAUSE_MS = 800; // extra pause simulating pressing Enter between lines
+const RETRO_TOTAL_CHARS = RETRO_LINE_1.length + RETRO_LINE_2.length;
+const RETRO_REVEAL_DONE_MS = RETRO_TOTAL_CHARS * RETRO_CHAR_MS + RETRO_ENTER_PAUSE_MS;
+const RETRO_HOLD_MS = 1500; // fully-typed text held on screen before fading out
 
 // Every character is laid out in its final position from the very first
 // frame (nothing ever reflows) and revealed purely via opacity/transform/
@@ -49,6 +64,13 @@ function shouldSkipSplash(): boolean {
   return document.documentElement.dataset.splash === "skip";
 }
 
+// A solid block, not a font glyph — Bedstead's Unicode coverage can't be
+// counted on to include a cursor-shaped character, so this blinks via CSS
+// instead of relying on the font to render one.
+function RetroCursor() {
+  return <span aria-hidden className="retro-cursor ml-0.5 inline-block align-middle" style={{ backgroundColor: RETRO_BLUE }} />;
+}
+
 function charStyle(delay: number, visible: boolean): React.CSSProperties {
   return {
     color: SPLASH_BLACK,
@@ -67,9 +89,11 @@ function charStyle(delay: number, visible: boolean): React.CSSProperties {
 // once per real page load — client-side tab navigation never remounts it,
 // so switching tabs never re-triggers it).
 export default function SplashScreen() {
+  const retro = useRetroMode();
   const [phase, setPhase] = useState<Phase>("pre");
   const leagueRef = useRef<HTMLSpanElement>(null);
   const nineteenRef = useRef<HTMLSpanElement>(null);
+  const [typedCount, setTypedCount] = useState(0);
   // Mirrors the skip decision outside of state: the RAF callback below fires
   // asynchronously (after this mount's layout effects, including the one
   // that decides to skip, have already run) and needs a same-tick-readable
@@ -126,11 +150,38 @@ export default function SplashScreen() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Retro's typewriter reveal — one character per tick, with an extra pause
+  // right after "19 LEAGUE" finishes to simulate hitting Enter before
+  // "RETRO WEEK" starts. A plain incrementing counter (not the fixed-layout,
+  // CSS-delay approach the normal animation above uses) since this is a
+  // handful of characters shown once, briefly — reflow cost doesn't matter
+  // here the way it would for a 60fps-critical animation.
+  useEffect(() => {
+    if (!retro || phase !== "visible") return;
+    let cancelled = false;
+    let count = 0;
+    const tick = () => {
+      if (cancelled) return;
+      count++;
+      setTypedCount(count);
+      if (count >= RETRO_TOTAL_CHARS) return;
+      const delay = count === RETRO_LINE_1.length ? RETRO_ENTER_PAUSE_MS : RETRO_CHAR_MS;
+      setTimeout(tick, delay);
+    };
+    const t = setTimeout(tick, RETRO_CHAR_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [retro, phase]);
+
   useEffect(() => {
     if (phase !== "visible") return;
-    const t = setTimeout(() => setPhase("out"), REVEAL_DONE_MS + HOLD_MS);
+    const revealDoneMs = retro ? RETRO_REVEAL_DONE_MS : REVEAL_DONE_MS;
+    const holdMs = retro ? RETRO_HOLD_MS : HOLD_MS;
+    const t = setTimeout(() => setPhase("out"), revealDoneMs + holdMs);
     return () => clearTimeout(t);
-  }, [phase]);
+  }, [phase, retro]);
 
   useEffect(() => {
     if (phase !== "out") return;
@@ -141,6 +192,38 @@ export default function SplashScreen() {
   if (phase === "done") return null;
 
   const visible = phase !== "pre";
+
+  if (retro) {
+    const line1Visible = Math.min(typedCount, RETRO_LINE_1.length);
+    const line2Visible = Math.max(0, typedCount - RETRO_LINE_1.length);
+    const line2Started = line2Visible > 0;
+
+    return (
+      <div
+        id="splash-root"
+        className="fixed inset-0 z-40 flex items-center justify-center"
+        style={{
+          backgroundColor: "#000000",
+          opacity: phase === "out" ? 0 : 1,
+          transition: `opacity ${FADE_MS}ms ${SMOOTH_EASE}`,
+        }}
+      >
+        <div
+          className={`${teletext.className} flex flex-col items-center gap-2 text-center text-4xl uppercase leading-none tracking-wide`}
+          style={{ color: RETRO_BLUE, fontWeight: 700 }}
+        >
+          <div>
+            {RETRO_LINE_1.slice(0, line1Visible)}
+            {!line2Started && <RetroCursor />}
+          </div>
+          <div>
+            {RETRO_LINE_2.slice(0, line2Visible)}
+            {line2Started && <RetroCursor />}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

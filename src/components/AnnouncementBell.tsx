@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { RETRO_TAB_CLASS } from "@/lib/retroMode";
 
 interface AnnouncementDTO {
   id: string;
@@ -14,7 +15,7 @@ interface AnnouncementDTO {
 const SEEN_KEY = "lastSeenAnnouncementId";
 const POLL_MS = 60_000;
 
-export default function AnnouncementBell() {
+export default function AnnouncementBell({ variant = "icon" }: { variant?: "icon" | "tab" }) {
   const [announcements, setAnnouncements] = useState<AnnouncementDTO[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -57,29 +58,40 @@ export default function AnnouncementBell() {
 
   return (
     <>
-      <button
-        onClick={openPanel}
-        aria-label="Announcements"
-        className="relative shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90"
-      >
-        <svg
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4"
+      {variant === "tab" ? (
+        <button onClick={openPanel} aria-label="Announcements" className={`relative ${RETRO_TAB_CLASS}`}>
+          Announcements
+          {unreadCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center bg-led text-[8px] font-bold text-pill-text">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </button>
+      ) : (
+        <button
+          onClick={openPanel}
+          aria-label="Announcements"
+          className="relative shrink-0 rounded-full border border-line bg-panel-3 p-1.5 text-chalk-dim transition-transform active:scale-90"
         >
-          <path d="M5.5 8.5a4.5 4.5 0 0 1 9 0c0 3.2 1 4.3 1.3 4.7a.5.5 0 0 1-.4.8H4.6a.5.5 0 0 1-.4-.8c.3-.4 1.3-1.5 1.3-4.7Z" />
-          <path d="M8.3 15.5a1.7 1.7 0 0 0 3.4 0" />
-        </svg>
-        {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-led text-[10px] font-bold text-pill-text">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <path d="M5.5 8.5a4.5 4.5 0 0 1 9 0c0 3.2 1 4.3 1.3 4.7a.5.5 0 0 1-.4.8H4.6a.5.5 0 0 1-.4-.8c.3-.4 1.3-1.5 1.3-4.7Z" />
+            <path d="M8.3 15.5a1.7 1.7 0 0 0 3.4 0" />
+          </svg>
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-led text-[10px] font-bold text-pill-text">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {open &&
         mounted &&

@@ -6,6 +6,7 @@ import WeekScroller from "@/components/WeekScroller";
 import Skeleton from "@/components/Skeleton";
 import SearchBar from "@/components/SearchBar";
 import { leagueGothic } from "@/lib/fonts";
+import { useRetroMode } from "@/lib/retroMode";
 
 const WINNING_SCORE = 19;
 const WATCH_SCORES = [12, 16];
@@ -67,6 +68,31 @@ const TEXT_COLOR: Record<"win" | "hit-live" | "watch", string> = {
   "hit-live": "text-led",
   watch: "text-live",
 };
+
+// The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
+// "at" for a middot to match the compact ticker style.
+function formatSituation(situation: string): string {
+  return situation.replace(/ at /i, " · ");
+}
+
+// Day + kickoff time for a scheduled game, condensed onto one line for
+// retro's flat row (normal mode's centerLines() below splits the same
+// info across two stacked lines instead).
+function scheduledLabel(game: GameDTO): string | null {
+  if (!game.startTime) return null;
+  const date = new Date(game.startTime);
+  const timeZone = "America/Chicago";
+  const weekday = date.toLocaleString(undefined, { weekday: "short", timeZone });
+  const time = date.toLocaleString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+    timeZone,
+  });
+  return `${weekday} ${time}`;
+}
+
+/* ---------- Normal theme: card-based layout ---------- */
 
 // If both teams somehow trigger a highlight at once, a win/hit-19 takes
 // priority over a watch score for which color the card's shine matches.
@@ -141,12 +167,6 @@ function TickerSide({
       )}
     </div>
   );
-}
-
-// The sheet's raw situation text reads "3rd & 9 at MIN 26" — swap the
-// "at" for a middot to match the compact two-part ticker style.
-function formatSituation(situation: string): string {
-  return situation.replace(/ at /i, " · ");
 }
 
 function centerLines(game: GameDTO): { line1: string; line2: string | null } {
@@ -248,7 +268,101 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
   return <div className={`rounded-xl p-px shine-border shine-${highlight}`}>{card}</div>;
 }
 
+/* ---------- Retro theme: flat teletext vidiprinter row ---------- */
+
+function GameRowSkeleton() {
+  return (
+    <div className="flex items-center gap-2 border-b border-dotted border-chalk-faint py-3">
+      <Skeleton className="h-4 flex-1" />
+      <Skeleton className="h-4 w-10 shrink-0" />
+      <Skeleton className="h-4 flex-1" />
+    </div>
+  );
+}
+
+// A plain "AWAY @ HOME" row — a real teletext vidiprinter table, not a
+// broadcast-style card. No logos, no box, no border accent: just the
+// character grid, a thin dotted rule underneath, and the score (or "@"
+// for a game that hasn't kicked off yet) in the middle.
+function GameRow({
+  game,
+  showNames,
+  awayFlash,
+  homeFlash,
+}: {
+  game: GameDTO;
+  showNames: boolean;
+  awayFlash: boolean;
+  homeFlash: boolean;
+}) {
+  const awayHighlight = rowHighlight(game.awayScore, game.status);
+  const homeHighlight = rowHighlight(game.homeScore, game.status);
+  const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
+  const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
+  const showScore = game.status !== "SCHEDULED";
+
+  return (
+    <div
+      className="flex items-center gap-2 border-b border-dotted border-chalk-faint py-3 text-lg uppercase"
+      title={game.situation ? formatSituation(game.situation) : undefined}
+    >
+      <div className="min-w-0 flex-1">
+        <span className="block truncate text-venmo">
+          {awayHasBall && <span className="mr-1 not-italic text-chalk-faint">▸</span>}
+          {game.awayTeam.name.split(" ").at(-1)}
+        </span>
+        {showNames && (
+          <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
+            {game.awayTeam.player ? game.awayTeam.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
+
+      <div className="flex shrink-0 flex-col items-center justify-center gap-0.5 tabular-nums">
+        <div className="flex items-center gap-1">
+          {showScore ? (
+            <>
+              <span className={`${awayHighlight ? TEXT_COLOR[awayHighlight] : "text-chalk"} ${awayFlash ? "score-flash" : ""}`}>
+                {game.awayScore}
+              </span>
+              <span className="text-chalk-faint">-</span>
+              <span className={`${homeHighlight ? TEXT_COLOR[homeHighlight] : "text-chalk"} ${homeFlash ? "score-flash" : ""}`}>
+                {game.homeScore}
+              </span>
+            </>
+          ) : (
+            <span className="text-chalk">@</span>
+          )}
+        </div>
+        {game.status === "IN_PROGRESS" && game.statusDetail && (
+          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-led">
+            {game.statusDetail}
+          </span>
+        )}
+        {game.status === "SCHEDULED" && scheduledLabel(game) && (
+          <span className="whitespace-nowrap text-[10px] normal-case leading-none text-led">
+            {scheduledLabel(game)}
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1 text-right">
+        <span className="block truncate text-venmo">
+          {game.homeTeam.name.split(" ").at(-1)}
+          {homeHasBall && <span className="ml-1 not-italic text-chalk-faint">◂</span>}
+        </span>
+        {showNames && (
+          <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
+            {game.homeTeam.player ? game.homeTeam.player.name : "Unassigned"}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ScoresPage() {
+  const retro = useRetroMode();
   const [seasonYear, setSeasonYear] = useState<number | null>(null);
   const [weekNumber, setWeekNumber] = useState<number | null>(null);
   const [games, setGames] = useState<GameDTO[] | null>(null);
@@ -290,6 +404,18 @@ export default function ScoresPage() {
     gamesRef.current = games;
   }, [games]);
 
+  // Retro's score bug briefly flashes a score that just changed, so a
+  // live-poll update is noticeable without re-reading the whole row. Keyed
+  // by "<gameId>:home"/"<gameId>:away" rather than just the game id, since
+  // the two sides can update independently. prevScoresRef holds the last
+  // seen values across polls (a ref, not state — it's only ever read/written
+  // inside load(), never rendered directly), compared against each new
+  // fetch to find deltas; the first load populates it with nothing to
+  // compare against, so nothing flashes on initial mount.
+  const prevScoresRef = useRef<Map<string, { home: number; away: number }>>(new Map());
+  const [flashKeys, setFlashKeys] = useState<Set<string>>(new Set());
+  const FLASH_MS = 700;
+
   const load = useCallback(async (year?: number, week?: number) => {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -303,9 +429,23 @@ export default function ScoresPage() {
       });
       if (!res.ok) throw new Error("Failed to load scores");
       const data: ScoresResponse = await res.json();
+      const newGames = data.week?.games ?? [];
+      const nextFlash = new Set<string>();
+      for (const g of newGames) {
+        const prev = prevScoresRef.current.get(g.id);
+        if (prev) {
+          if (prev.away !== g.awayScore) nextFlash.add(`${g.id}:away`);
+          if (prev.home !== g.homeScore) nextFlash.add(`${g.id}:home`);
+        }
+        prevScoresRef.current.set(g.id, { home: g.homeScore, away: g.awayScore });
+      }
+      if (nextFlash.size > 0) {
+        setFlashKeys(nextFlash);
+        setTimeout(() => setFlashKeys(new Set()), FLASH_MS);
+      }
       setSeasonYear(data.seasonYear);
       setWeekNumber(data.weekNumber);
-      setGames(data.week?.games ?? []);
+      setGames(newGames);
       setLastUpdated(new Date());
       setError(
         data.synced
@@ -392,13 +532,13 @@ export default function ScoresPage() {
       )}
 
       {loading && !games ? (
-        <div className="flex flex-col gap-3">
+        <div className={retro ? "flex flex-col" : "flex flex-col gap-3"}>
           {/* A full NFL week has 16 games (fewer once bye weeks start) —
               matching that count avoids the large layout shift a smaller
               placeholder count would cause once real data loads. */}
-          {Array.from({ length: 16 }).map((_, i) => (
-            <GameCardSkeleton key={i} />
-          ))}
+          {Array.from({ length: 16 }).map((_, i) =>
+            retro ? <GameRowSkeleton key={i} /> : <GameCardSkeleton key={i} />
+          )}
         </div>
       ) : filteredGames && filteredGames.length === 0 ? (
         <div className="py-10 text-center text-sm text-chalk-faint">
@@ -415,18 +555,31 @@ export default function ScoresPage() {
             if (!gamesForStatus || gamesForStatus.length === 0) return null;
             const expanded = expandedStatuses.has(status);
             return (
-              <div key={status} className="flex flex-col gap-3">
+              <div key={status} className={`flex flex-col ${retro ? "gap-1.5" : "gap-3"}`}>
                 <div
                   className={`flex items-center justify-between ${
-                    status === "IN_PROGRESS" ? "" : "mt-2"
+                    status === "IN_PROGRESS" ? "" : retro ? "mt-3" : "mt-2"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggleSection(status)}
-                    className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-chalk-faint"
+                    className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide ${
+                      retro ? "text-chalk" : "text-chalk-faint"
+                    }`}
                   >
-                    {STATUS_SECTION_LABEL[status]}
+                    {retro ? (
+                      // Reverse video, like a real teletext category box —
+                      // a solid block with cutout (background-colored)
+                      // text, instead of plain colored text on the page's
+                      // own black background. Green, matching the header's
+                      // own "League" green rather than white.
+                      <span className="bg-led px-1.5 py-0.5 text-pill-text">
+                        {STATUS_SECTION_LABEL[status]}
+                      </span>
+                    ) : (
+                      STATUS_SECTION_LABEL[status]
+                    )}
                     <svg
                       viewBox="0 0 20 20"
                       fill="none"
@@ -467,8 +620,22 @@ export default function ScoresPage() {
                   )}
                 </div>
                 {expanded &&
-                  gamesForStatus.map((g) => (
-                    <GameCard key={g.id} game={g} showNames={showNames} />
+                  (retro ? (
+                    <div className="flex flex-col">
+                      {gamesForStatus.map((g) => (
+                        <GameRow
+                          key={g.id}
+                          game={g}
+                          showNames={showNames}
+                          awayFlash={flashKeys.has(`${g.id}:away`)}
+                          homeFlash={flashKeys.has(`${g.id}:home`)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    gamesForStatus.map((g) => (
+                      <GameCard key={g.id} game={g} showNames={showNames} />
+                    ))
                   ))}
               </div>
             );
