@@ -67,7 +67,7 @@ function shouldSkipSplash(): boolean {
 // Soft green phosphor-glow shadow, shared by the typed text and the
 // cursor block — a real CRT's phosphor coating keeps glowing slightly
 // around a lit pixel, not just at it.
-const PHOSPHOR_GLOW = "0 0 6px rgba(0, 255, 0, 0.75), 0 0 14px rgba(0, 255, 0, 0.35)";
+const PHOSPHOR_GLOW = "0 0 3px rgba(0, 255, 0, 0.45)";
 
 // A solid block, not a font glyph — Bedstead's Unicode coverage can't be
 // counted on to include a cursor-shaped character, so this blinks via CSS
