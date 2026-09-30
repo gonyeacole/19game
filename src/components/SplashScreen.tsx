@@ -64,11 +64,22 @@ function shouldSkipSplash(): boolean {
   return document.documentElement.dataset.splash === "skip";
 }
 
+// Soft green phosphor-glow shadow, shared by the typed text and the
+// cursor block — a real CRT's phosphor coating keeps glowing slightly
+// around a lit pixel, not just at it.
+const PHOSPHOR_GLOW = "0 0 6px rgba(0, 255, 0, 0.75), 0 0 14px rgba(0, 255, 0, 0.35)";
+
 // A solid block, not a font glyph — Bedstead's Unicode coverage can't be
 // counted on to include a cursor-shaped character, so this blinks via CSS
 // instead of relying on the font to render one.
 function RetroCursor() {
-  return <span aria-hidden className="retro-cursor ml-0.5 inline-block align-middle" style={{ backgroundColor: RETRO_GREEN }} />;
+  return (
+    <span
+      aria-hidden
+      className="retro-cursor ml-0.5 inline-block align-middle"
+      style={{ backgroundColor: RETRO_GREEN, boxShadow: PHOSPHOR_GLOW }}
+    />
+  );
 }
 
 function charStyle(delay: number, visible: boolean): React.CSSProperties {
@@ -201,16 +212,17 @@ export default function SplashScreen() {
     return (
       <div
         id="splash-root"
-        className="fixed inset-0 z-40 flex items-center justify-center"
+        className="splash-crt-boot fixed inset-0 z-40 flex items-center justify-center"
         style={{
           backgroundColor: "#000000",
           opacity: phase === "out" ? 0 : 1,
           transition: `opacity ${FADE_MS}ms ${SMOOTH_EASE}`,
         }}
       >
+        <div className="splash-scanlines" />
         <div
           className={`${teletext.className} flex flex-col items-center gap-2 text-center text-4xl uppercase leading-none tracking-wide`}
-          style={{ color: RETRO_GREEN, fontWeight: 700 }}
+          style={{ color: RETRO_GREEN, fontWeight: 700, textShadow: PHOSPHOR_GLOW }}
         >
           <div>
             {RETRO_LINE_1.slice(0, line1Visible)}

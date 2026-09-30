@@ -233,6 +233,36 @@ html.crt-boot body {
 }
 
 /*
+  Retro splash CRT touches (SplashScreen.tsx, retro branch only): the
+  screen itself flickers on with the same power-on animation as above
+  (scoped to the splash overlay rather than <html>, since the splash
+  mounts on page load, not via the retro toggle), plus a faint scanline
+  texture over the whole thing — subtle on purpose, since phone screens
+  are small and the green text still needs to stay legible.
+*/
+.splash-crt-boot {
+  animation: crt-boot-flicker 0.45s steps(2, end);
+}
+/*
+  Faint green raster lines, not dark ones — the splash's own background is
+  already pure black, so a darkening stripe pattern would only ever show up
+  over the lit text itself. A lightening one (barely-there green) reads as
+  a CRT's scan raster across the whole screen instead.
+*/
+.splash-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 255, 0, 0.06) 0px,
+    rgba(0, 255, 0, 0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/*
   A normal Safari tab already reserves its own space around the home
   indicator, so env(safe-area-inset-*) padding on top of that just adds an
   oversized gap. Only add it when actually running standalone (added to the
