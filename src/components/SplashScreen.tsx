@@ -12,14 +12,14 @@ const SPLASH_BLACK = "#0a0a0a";
 
 // Retro splash — a black terminal screen with a blinking cursor typing out
 // "19 LEAGUE" then, after a pause simulating pressing Enter, "RETRO WEEK"
-// on a second line, in the same blue as the header's "League" banner
-// background — a completely different animation from the normal splash's
-// fade/slide, not just a font swap.
-const RETRO_BLUE = "#0000ff";
+// on a second line, in the same cyan as the retro app's own team-name text
+// (--color-venmo) — a completely different animation from the normal
+// splash's fade/slide, not just a font swap.
+const RETRO_BLUE = "#00ffff";
 const RETRO_LINE_1 = "19 LEAGUE";
 const RETRO_LINE_2 = "RETRO WEEK";
-const RETRO_CHAR_MS = 70; // per-character typing speed
-const RETRO_ENTER_PAUSE_MS = 350; // extra pause simulating pressing Enter between lines
+const RETRO_CHAR_MS = 120; // per-character typing speed
+const RETRO_ENTER_PAUSE_MS = 550; // extra pause simulating pressing Enter between lines
 const RETRO_TOTAL_CHARS = RETRO_LINE_1.length + RETRO_LINE_2.length;
 const RETRO_REVEAL_DONE_MS = RETRO_TOTAL_CHARS * RETRO_CHAR_MS + RETRO_ENTER_PAUSE_MS;
 
