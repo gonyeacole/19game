@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRetroMode } from "@/lib/retroMode";
 
 const MIN_WEEK = 1;
 const MAX_WEEK = 18;
@@ -18,6 +19,11 @@ export default function WeekScroller({
   const current = weekNumber ?? MIN_WEEK;
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const retro = useRetroMode();
+  // Retro's own --color-panel-3 (#141414) reads as a dark charcoal box
+  // against the page's pure black — swap in --color-field (true black) so
+  // these three controls disappear into the background instead.
+  const surfaceClass = retro ? "bg-field" : "bg-panel-3";
 
   // Close on an outside click/tap, like a native dropdown.
   useEffect(() => {
@@ -42,7 +48,7 @@ export default function WeekScroller({
         onClick={() => goTo(current - 1)}
         disabled={loading || current <= MIN_WEEK}
         aria-label="Previous week"
-        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
+        className={`shrink-0 rounded-full border border-line ${surfaceClass} p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100`}
       >
         <svg
           viewBox="0 0 20 20"
@@ -61,7 +67,7 @@ export default function WeekScroller({
         <button
           onClick={() => setOpen((o) => !o)}
           disabled={loading}
-          className="w-full rounded-full border border-line bg-panel-3 py-2.5 text-center text-sm font-semibold text-chalk-dim transition-opacity disabled:opacity-50"
+          className={`w-full rounded-full border border-line ${surfaceClass} py-2.5 text-center text-sm font-semibold text-chalk-dim transition-opacity disabled:opacity-50`}
         >
           <span className={loading ? "opacity-50" : ""}>Week {current}</span>
         </button>
@@ -90,7 +96,7 @@ export default function WeekScroller({
         onClick={() => goTo(current + 1)}
         disabled={loading || current >= MAX_WEEK}
         aria-label="Next week"
-        className="shrink-0 rounded-full border border-line bg-panel-3 p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100"
+        className={`shrink-0 rounded-full border border-line ${surfaceClass} p-2.5 text-chalk-dim transition-transform active:scale-90 disabled:opacity-30 disabled:active:scale-100`}
       >
         <svg
           viewBox="0 0 20 20"
