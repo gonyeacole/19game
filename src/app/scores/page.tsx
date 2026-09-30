@@ -543,8 +543,9 @@ export default function ScoresPage() {
                       // Reverse video, like a real teletext category box —
                       // a solid block with cutout (background-colored)
                       // text, instead of plain colored text on the page's
-                      // own black background.
-                      <span className="bg-chalk px-1.5 py-0.5 text-pill-text">
+                      // own black background. Green, matching the header's
+                      // own "League" green rather than white.
+                      <span className="bg-led px-1.5 py-0.5 text-pill-text">
                         {STATUS_SECTION_LABEL[status]}
                       </span>
                     ) : (
