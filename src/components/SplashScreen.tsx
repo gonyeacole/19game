@@ -22,6 +22,7 @@ const RETRO_CHAR_MS = 190; // per-character typing speed
 const RETRO_ENTER_PAUSE_MS = 800; // extra pause simulating pressing Enter between lines
 const RETRO_TOTAL_CHARS = RETRO_LINE_1.length + RETRO_LINE_2.length;
 const RETRO_REVEAL_DONE_MS = RETRO_TOTAL_CHARS * RETRO_CHAR_MS + RETRO_ENTER_PAUSE_MS;
+const RETRO_HOLD_MS = 1500; // fully-typed text held on screen before fading out
 
 // Every character is laid out in its final position from the very first
 // frame (nothing ever reflows) and revealed purely via opacity/transform/
@@ -177,7 +178,8 @@ export default function SplashScreen() {
   useEffect(() => {
     if (phase !== "visible") return;
     const revealDoneMs = retro ? RETRO_REVEAL_DONE_MS : REVEAL_DONE_MS;
-    const t = setTimeout(() => setPhase("out"), revealDoneMs + HOLD_MS);
+    const holdMs = retro ? RETRO_HOLD_MS : HOLD_MS;
+    const t = setTimeout(() => setPhase("out"), revealDoneMs + holdMs);
     return () => clearTimeout(t);
   }, [phase, retro]);
 
