@@ -429,7 +429,11 @@ export default function TabNav() {
         no leftover gap for anything (real page or otherwise) to occupy.
       */}
       {!chatExpanded && (
-        <div className={`safe-bottom border-t border-line ${retro ? "" : "bg-field"}`}>
+        // bg-field always, even in retro (where each tab paints its own
+        // color over the <ul> anyway) — without it, the safe-area padding
+        // strip below the tab row had no background of its own, letting
+        // the page's own content show through underneath the fixed nav.
+        <div className="safe-bottom border-t border-line bg-field">
           <ul className="mx-auto grid max-w-lg grid-cols-4">
             {TABS.map((tab, i) => {
               const active = pathname === tab.href || pathname?.startsWith(tab.href + "/");
