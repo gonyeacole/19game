@@ -98,28 +98,6 @@ const SPLASH_INIT_SCRIPT = `
 })();
 `;
 
-// Retro week — a teletext page header always carries a page number and a
-// live clock (e.g. Ceefax's "300 ... Wed 17 Sep 15:05:35"). Computed here in
-// the (server-only) root layout rather than a client component: it's the
-// same string in the initial server HTML and React's first client render
-// (nothing re-renders it with a ticking clock), so there's no hydration
-// mismatch to worry about — it's just whatever time the page happened to
-// render, like a real teletext page only updates when you turn to it.
-function pageDateStamp(): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "America/Chicago",
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  })
-    .format(new Date())
-    .toUpperCase();
-}
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`h-full antialiased ${inter.variable} ${teletext.variable}`}>
@@ -131,7 +109,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col bg-field text-chalk">
         <RetroModeProvider>
-          <AppHeader dateStamp={pageDateStamp()} />
+          <AppHeader />
           {/*
             min-h forces every page to be at least a little taller than the
             viewport, even ones whose own content (Chat, a logged-out Admin)

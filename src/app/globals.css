@@ -115,19 +115,6 @@ html[data-retro="true"] body {
 }
 
 /*
-  VT323 (the retro theme's font) has a much smaller x-height than the
-  fonts it replaces, so the same declared sizes read noticeably smaller
-  everywhere. Scaling the root font-size up ~12% rather than hunting down
-  every text-* utility in every component scales the whole UI together —
-  Tailwind's spacing and sizing utilities are rem-based by default, so
-  paddings/gaps/icon sizes grow right along with the text instead of the
-  text outgrowing its own boxes.
-*/
-html[data-retro="true"] {
-  font-size: 112.5%;
-}
-
-/*
   Teletext graphics are built entirely from hard rectangular character
   cells — there's no such thing as a rounded corner on a real teletext
   page. Forcing every corner square (rather than editing each component's

@@ -23,21 +23,12 @@ function RainbowTitle({ text }: { text: string }) {
   );
 }
 
-// dateStamp is computed server-side (RootLayout) and passed down rather
-// than computed here — this is a "use client" component, and recomputing a
-// timestamp during client hydration would render a different string than
-// the server did, a hydration mismatch. See RootLayout's pageDateStamp for
-// the full reasoning.
-export default function AppHeader({ dateStamp }: { dateStamp: string }) {
+export default function AppHeader() {
   const retro = useRetroMode();
 
   if (retro) {
     return (
       <header className="safe-top sticky top-0 z-10 bg-field">
-        <div className="flex items-center justify-between border-b border-line px-4 pb-1 text-xs text-chalk-dim">
-          <span>PAGE 301</span>
-          <span>{dateStamp}</span>
-        </div>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center border-b border-line px-4 pb-3 pt-2">
           <div className="flex items-center justify-self-start gap-2">
             <AddToHomeScreen />

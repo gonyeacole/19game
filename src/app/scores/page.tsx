@@ -369,7 +369,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
   return (
     <div
-      className="mb-2 bg-panel-2 last:mb-0"
+      className="mb-2 border-l-4 border-line bg-panel-2 last:mb-0"
       title={game.situation ? formatSituation(game.situation) : undefined}
     >
       <ScoreBugTeamLine
@@ -389,7 +389,7 @@ function ScoreBug({ game, showNames }: { game: GameDTO; showNames: boolean }) {
         highlight={homeHighlight}
         showNames={showNames}
       />
-      <div className="border-t border-line px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk-faint">
+      <div className="border-t border-chalk px-3 py-1 text-right text-[10px] uppercase tracking-wide text-chalk">
         {statusText(game)}
       </div>
     </div>
@@ -574,7 +574,7 @@ export default function ScoresPage() {
                     type="button"
                     onClick={() => toggleSection(status)}
                     className={`flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide ${
-                      retro ? "text-win" : "text-chalk-faint"
+                      retro ? "text-chalk" : "text-chalk-faint"
                     }`}
                   >
                     {STATUS_SECTION_LABEL[status]}
