@@ -270,6 +270,62 @@ function GameCard({ game, showNames }: { game: GameDTO; showNames: boolean }) {
 
 /* ---------- Retro theme: flat teletext vidiprinter row ---------- */
 
+// Hand-built from a small pixel grid (not an image asset) so it's a
+// transparent-background block that drops cleanly next to the team name's
+// text, rather than a photo with a white square around it.
+const FOOTBALL_OUTLINE_ROWS: [number, number, number][] = [
+  [0, 5, 8],
+  [1, 3, 10],
+  [2, 2, 11],
+  [3, 1, 12],
+  [4, 1, 12],
+  [5, 2, 11],
+  [6, 3, 10],
+  [7, 5, 8],
+];
+const FOOTBALL_BODY_ROWS: [number, number, number][] = [
+  [1, 4, 9],
+  [2, 3, 10],
+  [3, 2, 11],
+  [4, 2, 11],
+  [5, 3, 10],
+  [6, 4, 9],
+];
+const FOOTBALL_LACE_CELLS: [number, number][] = [
+  [2, 4],
+  [3, 4],
+  [4, 4],
+  [5, 4],
+  [2, 9],
+  [3, 9],
+  [4, 9],
+  [5, 9],
+  [3, 6],
+  [3, 7],
+  [4, 6],
+  [4, 7],
+];
+
+function footballRows(rows: [number, number, number][], fill: string) {
+  return rows.map(([row, start, end]) => (
+    <rect key={`${fill}-${row}`} x={start} y={row} width={end - start + 1} height={1} fill={fill} />
+  ));
+}
+
+// Possession indicator for the retro Scores row — a pixel-art football
+// (the normal theme's GameCard uses its own PossessionTriangle instead).
+function PossessionFootball({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 14 8" aria-hidden className={`inline-block h-[0.65em] w-[1.2em] align-middle ${className ?? ""}`}>
+      {footballRows(FOOTBALL_OUTLINE_ROWS, "#000000")}
+      {footballRows(FOOTBALL_BODY_ROWS, "#8a4b23")}
+      {FOOTBALL_LACE_CELLS.map(([row, col]) => (
+        <rect key={`lace-${row}-${col}`} x={col} y={row} width={1} height={1} fill="#ffffff" />
+      ))}
+    </svg>
+  );
+}
+
 function GameRowSkeleton() {
   return (
     <div className="flex items-center gap-2 border-b border-dotted border-chalk-faint py-3">
@@ -308,8 +364,8 @@ function GameRow({
     >
       <div className="min-w-0 flex-1">
         <span className="block truncate text-venmo">
-          {awayHasBall && <span className="mr-1 not-italic text-chalk-faint">▸</span>}
           {game.awayTeam.name.split(" ").at(-1)}
+          {awayHasBall && <PossessionFootball className="ml-1" />}
         </span>
         {showNames && (
           <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
@@ -348,8 +404,8 @@ function GameRow({
 
       <div className="min-w-0 flex-1 text-right">
         <span className="block truncate text-venmo">
+          {homeHasBall && <PossessionFootball className="mr-1" />}
           {game.homeTeam.name.split(" ").at(-1)}
-          {homeHasBall && <span className="ml-1 not-italic text-chalk-faint">◂</span>}
         </span>
         {showNames && (
           <span className="block truncate text-[10px] normal-case leading-tight text-chalk-faint">
