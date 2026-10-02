@@ -351,8 +351,13 @@ function GameRow({
   awayFlash: boolean;
   homeFlash: boolean;
 }) {
-  const awayHighlight = rowHighlight(game.awayScore, game.status);
-  const homeHighlight = rowHighlight(game.homeScore, game.status);
+  // Retro only highlights an actual 19 — "watch" (12/16, a normal-mode-only
+  // nod to scores that could become 19) is dropped back to plain chalk
+  // here, unlike GameCard below which still colors all three.
+  const rawAwayHighlight = rowHighlight(game.awayScore, game.status);
+  const rawHomeHighlight = rowHighlight(game.homeScore, game.status);
+  const awayHighlight = rawAwayHighlight === "watch" ? null : rawAwayHighlight;
+  const homeHighlight = rawHomeHighlight === "watch" ? null : rawHomeHighlight;
   const awayHasBall = game.possession != null && game.possession === game.awayTeam.abbreviation;
   const homeHasBall = game.possession != null && game.possession === game.homeTeam.abbreviation;
   const showScore = game.status !== "SCHEDULED";
