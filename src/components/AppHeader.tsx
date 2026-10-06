@@ -70,7 +70,6 @@ export default function AppHeader() {
       <div className="flex items-center justify-self-start gap-2">
         <AddToHomeScreen />
         <ThemeToggle />
-        <RetroToggle />
       </div>
       <span
         className={`${leagueGothic.className} justify-self-center text-3xl leading-none tracking-wide text-led`}
