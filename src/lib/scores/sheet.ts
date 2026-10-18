@@ -14,8 +14,10 @@ import type {
 // This is our own independent copy of the original template (a separate
 // Google account so its own refresh trigger draws from its own daily
 // UrlFetchApp quota) — swap this if that copy's quota ever runs dry and a
-// fresher copy takes over.
-const SHEET_ID = "1jXPHR9cN3CBlZg4MJjceqYx7USz4YfjQMF5xG5ENaPs";
+// fresher copy takes over. (Swapped 2026-10-18: the previous copy's quota
+// ran dry, surfacing as "403 Forbidden" sync errors in the app; verified
+// this fresh copy shares the same gid and column layout before swapping.)
+const SHEET_ID = "15a-0WlNe52Y0-NyL3rDymuSbwt7Qz4XZYRcaht-2Ox0";
 // This is the sheet's raw unfiltered data tab (all 18 weeks, ~330+ rows) —
 // not the "Week Filter" tab, which only shows whichever single week a
 // dropdown cell is currently set to (shared state we can't control per
